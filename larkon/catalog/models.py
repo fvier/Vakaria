@@ -410,7 +410,7 @@ class CarouselSlide(models.Model):
             return self.image.url
         if self.image_url:
             return self.image_url
-        return "/static/images/hero_feminina.jpg"
+        return "/static/images/atelie_olinda_frontal.png"
 
     @property
     def final_mobile_image_url(self):
@@ -429,7 +429,7 @@ class CustomerReview(models.Model):
         ("whatsapp", _("WhatsApp & Atendimento")),
         ("vip", _("Cliente VIP / Provador")),
         ("direct", _("Direct / Mensagem Privada")),
-        ("loja", _("Loja Física (Cajazeiras - PB)")),
+        ("loja", _("Espaço Físico (Sítio Histórico de Olinda)")),
         ("outro", _("Cliente Verificado / Indicação")),
     ]
 
@@ -662,7 +662,7 @@ class HomePageConfig(models.Model):
     def final_store_image(self):
         if self.store_image:
             return self.store_image.url
-        return self.store_image_url or "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80"
+        return self.store_image_url or "/static/images/atelie_olinda_frontal.png"
 
     @property
     def final_og_image(self):
@@ -670,7 +670,7 @@ class HomePageConfig(models.Model):
             return self.og_share_image.url
         if self.og_share_image_url:
             return self.og_share_image_url
-        return "/static/images/hero_feminina.jpg"
+        return "/static/images/atelie_olinda_frontal.png"
 
     @property
     def current_store_status(self):
