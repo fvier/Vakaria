@@ -1,7 +1,7 @@
 {% extends 'layout-vertical.html' %}
 {% load static i18n %}
 
-{% block title %}Gerenciador de Linktrees Oficiais | Grife HF & Luiza Fit{% endblock title %}
+{% block title %}Gerenciador de Linktrees Oficiais | Vakaria & Luiza Fit{% endblock title %}
 
 {% block page_content %}
 <div class="container-fluid">
@@ -12,11 +12,11 @@
       <div class="page-title-box d-flex flex-wrap align-items-center justify-content-between my-3 gap-2">
         <div>
           <h4 class="mb-0 text-dark fw-bold">Gerenciador de Linktrees & Links da Bio</h4>
-          <p class="text-muted fs-13 mb-0">Gerencie os botões e links de atendimento das páginas públicas <strong>/links</strong> (Grife HF) e <strong>/tree</strong> (Luiza Fit).</p>
+          <p class="text-muted fs-13 mb-0">Gerencie os botões e links de atendimento das páginas públicas <strong>/links</strong> (Vakaria) e <strong>/tree</strong> (Luiza Fit).</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
           <a href="/links" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 shadow-xs d-flex align-items-center gap-1.5 fw-semibold">
-            <i class="bx bx-link-external text-warning"></i> Ver /links (Grife HF)
+            <i class="bx bx-link-external text-warning"></i> Ver /links (Vakaria)
           </a>
           <a href="/tree" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-xs d-flex align-items-center gap-1.5 fw-semibold">
             <i class="bx bx-link-external text-danger"></i> Ver /tree (Luiza Fit)
@@ -41,12 +41,12 @@
     <div class="card-body p-2">
       <ul class="nav nav-pills nav-justified gap-2" role="tablist">
         <li class="nav-item">
-          <a class="nav-link rounded-3 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 {% if active_tab == 'grife_hf' %}active bg-dark text-white shadow-sm{% else %}text-muted bg-light{% endif %}" 
-             href="{% url 'pages:admin_linktree' %}?tab=grife_hf">
-            <i class="bx bx-store-alt fs-18 {% if active_tab == 'grife_hf' %}text-warning{% endif %}"></i>
-            <span>🌟 Grife HF Multimarcas</span>
-            <span class="badge {% if active_tab == 'grife_hf' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} rounded-pill fs-11">
-              {{ grife_links.count }} links (/links)
+          <a class="nav-link rounded-3 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 {% if active_tab == 'vakaria' %}active bg-dark text-white shadow-sm{% else %}text-muted bg-light{% endif %}" 
+             href="{% url 'pages:admin_linktree' %}?tab=vakaria">
+            <i class="bx bx-store-alt fs-18 {% if active_tab == 'vakaria' %}text-warning{% endif %}"></i>
+            <span>🌟 Vakaria Barbearia</span>
+            <span class="badge {% if active_tab == 'vakaria' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} rounded-pill fs-11">
+              {{ vakaria_links.count }} links (/links)
             </span>
           </a>
         </li>
@@ -134,10 +134,10 @@
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center gap-2">
             <i class="bx bx-plus-circle {% if active_tab == 'luiza_fit' %}text-danger{% else %}text-primary{% endif %} fs-20"></i>
-            Adicionar Botão para {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Grife HF (/links)</span>{% endif %}
+            Adicionar Botão para {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Vakaria (/links)</span>{% endif %}
           </h5>
           <span class="badge {% if active_tab == 'luiza_fit' %}bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25{% else %}bg-dark text-white{% endif %} rounded-pill px-2.5 py-1 fs-11">
-            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit{% else %}🌟 Grife HF{% endif %}
+            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit{% else %}🌟 Vakaria{% endif %}
           </span>
         </div>
         <div class="card-body p-4">
@@ -149,7 +149,7 @@
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold fs-13 text-dark">Página de Destino</label>
                 <select name="page_type" class="form-select fs-13 rounded-3" id="createPageType" onchange="onPageTypeChange(this.value)">
-                  <option value="grife_hf" {% if active_tab == 'grife_hf' %}selected{% endif %}>🌟 Grife HF Multimarcas (/links)</option>
+                  <option value="vakaria" {% if active_tab == 'vakaria' %}selected{% endif %}>🌟 Vakaria Barbearia (/links)</option>
                   <option value="luiza_fit" {% if active_tab == 'luiza_fit' %}selected{% endif %}>🌸 Luiza Fit Moda Fitness (/tree)</option>
                 </select>
               </div>
@@ -232,7 +232,7 @@
       <div class="card shadow-sm border-0 rounded-4 mb-4">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0 fw-bold text-dark">
-            Links Cadastrados em {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Grife HF (/links)</span>{% endif %}
+            Links Cadastrados em {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Vakaria (/links)</span>{% endif %}
           </h5>
           <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 fs-11">
             {{ current_links.count }} link(s)
@@ -334,7 +334,7 @@
             Pré-Visualização ao Vivo
           </h5>
           <span class="badge {% if active_tab == 'luiza_fit' %}bg-danger text-white{% else %}bg-dark text-white{% endif %} rounded-pill px-2.5 py-1 fs-11">
-            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit (/tree){% else %}🌟 Grife HF (/links){% endif %}
+            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit (/tree){% else %}🌟 Vakaria (/links){% endif %}
           </span>
         </div>
         <div class="card-body p-4 text-center bg-light">
@@ -360,7 +360,7 @@
               </div>
             {% else %}
               <div class="mb-2 text-center">
-                <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Grife HF" style="max-height: 70px; max-width: 190px; object-fit: contain;">
+                <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Vakaria" style="max-height: 70px; max-width: 190px; object-fit: contain;">
               </div>
               <p class="text-dark fw-bold fs-12 mb-0.5">Moda masculina & Moda feminina fitness</p>
               <small class="text-muted fs-11 d-block mb-2">Cajazeiras - PB</small>
@@ -401,7 +401,7 @@
 
             <!-- Footer Preview -->
             <div class="mt-4 pt-2 border-top border-secondary border-opacity-10 text-center">
-              <small class="text-muted fs-10 d-block">&copy; {% now "Y" %} {% if active_tab == 'luiza_fit' %}Luiza Fit{% else %}Grife HF Multimarcas{% endif %}</small>
+              <small class="text-muted fs-10 d-block">&copy; {% now "Y" %} {% if active_tab == 'luiza_fit' %}Luiza Fit{% else %}Vakaria Barbearia{% endif %}</small>
             </div>
 
           </div>
@@ -434,7 +434,7 @@
             <div class="col-md-6 mb-3">
               <label class="form-label fw-semibold fs-13 text-dark">Página do Linktree</label>
               <select name="page_type" class="form-select fs-13 rounded-3" id="editPageType">
-                <option value="grife_hf">🌟 Grife HF Multimarcas (/links)</option>
+                <option value="vakaria">🌟 Vakaria Barbearia (/links)</option>
                 <option value="luiza_fit">🌸 Luiza Fit Moda Fitness (/tree)</option>
               </select>
             </div>

@@ -1,7 +1,7 @@
 {% extends 'layout-store.html' %}
 {% load static i18n %}
 
-{% block title %}{{ product.title }} — {{ product.brand.name }} | Grife HF{% endblock %}
+{% block title %}{{ product.title }} — {{ product.brand.name }} | Vakaria{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -174,7 +174,7 @@
                             <i class="bx bx-cart-add fs-20"></i> Adicionar à Sacola
                         </button>
 
-                        <a id="detailWhatsAppBtn" href="https://wa.me/558391650137?text=Olá!%20Gostaria%20de%20tirar%20dúvidas%20sobre%20a%20peça%20{{ product.title|urlencode }}%20da%20Grife%20HF." target="_blank" class="btn btn-success btn-lg px-4 d-flex align-items-center gap-2">
+                        <a id="detailWhatsAppBtn" href="https://wa.me/558391650137?text=Olá!%20Gostaria%20de%20tirar%20dúvidas%20sobre%20a%20peça%20{{ product.title|urlencode }}%20da%20Vakaria." target="_blank" class="btn btn-success btn-lg px-4 d-flex align-items-center gap-2">
                             <i class="bx bxl-whatsapp fs-20"></i> Atendimento VIP WhatsApp
                         </a>
                     </div>
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let msg = `Olá! Gostei da peça *${productTitle}* (${brandName})`;
         if (selectedColor) msg += ` na cor *${selectedColor}*`;
         if (selectedSize) msg += ` no tamanho *${selectedSize}*`;
-        msg += ` (${productPrice}) que vi na Grife HF: ${productUrl}`;
+        msg += ` (${productPrice}) que vi na Vakaria: ${productUrl}`;
         whatsappBtn.href = `https://wa.me/558391650137?text=${encodeURIComponent(msg)}`;
     }
 

@@ -1,1 +1,1 @@
-# Larkon Catalog App for Grife HF
+# Larkon Catalog App for Vakaria

@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='carouselslide',
             name='button_style',
-            field=models.CharField(choices=[('gold', 'Dourado Luxo (Padrão Grife HF)'), ('dark', 'Preto Minimalista'), ('whatsapp', 'Verde WhatsApp'), ('outline', 'Borda Branca')], default='gold', max_length=20, verbose_name='Estilo Visual do Botão'),
+            field=models.CharField(choices=[('gold', 'Dourado Luxo (Padrão Vakaria)'), ('dark', 'Preto Minimalista'), ('whatsapp', 'Verde WhatsApp'), ('outline', 'Borda Branca')], default='gold', max_length=20, verbose_name='Estilo Visual do Botão'),
         ),
         migrations.AddField(
             model_name='carouselslide',
@@ -83,12 +83,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='homepageconfig',
             name='og_share_title',
-            field=models.CharField(blank=True, default='Grife HF Multimarcas | Alta Moda Feminina & Masculina', max_length=200, verbose_name='Título no Compartilhamento'),
+            field=models.CharField(blank=True, default='Vakaria Barbearia | Alta Moda Feminina & Masculina', max_length=200, verbose_name='Título no Compartilhamento'),
         ),
         migrations.AddField(
             model_name='homepageconfig',
             name='reviews_subtitle',
-            field=models.CharField(blank=True, default='Experiência comprovada por quem veste e confia na curadoria multimarcas da Grife HF.', max_length=200, verbose_name='Subtítulo da Seção de Depoimentos'),
+            field=models.CharField(blank=True, default='Experiência comprovada por quem veste e confia na curadoria multimarcas da Vakaria.', max_length=200, verbose_name='Subtítulo da Seção de Depoimentos'),
         ),
         migrations.AddField(
             model_name='homepageconfig',
@@ -183,7 +183,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='linktreeitem',
             name='page_type',
-            field=models.CharField(choices=[('grife_hf', 'Grife HF Multimarcas (/links)'), ('luiza_fit', 'Luiza Fit Moda Fitness (/tree)')], default='grife_hf', max_length=20, verbose_name='Página de Destino'),
+            field=models.CharField(choices=[('vakaria', 'Vakaria Barbearia (/links)'), ('luiza_fit', 'Luiza Fit Moda Fitness (/tree)')], default='vakaria', max_length=20, verbose_name='Página de Destino'),
         ),
         migrations.AlterField(
             model_name='linktreeitem',

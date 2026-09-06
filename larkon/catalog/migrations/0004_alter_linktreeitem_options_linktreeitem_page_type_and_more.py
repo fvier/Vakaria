@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='linktreeitem',
             name='page_type',
-            field=models.CharField(choices=[('grife_hf', 'Grife HF Multimarcas (/links)'), ('luiza_fit', 'Luiza Fit Moda Fitness (/tree)')], default='grife_hf', max_length=20, verbose_name='Página do Linktree'),
+            field=models.CharField(choices=[('vakaria', 'Vakaria Barbearia (/links)'), ('luiza_fit', 'Luiza Fit Moda Fitness (/tree)')], default='vakaria', max_length=20, verbose_name='Página do Linktree'),
         ),
         migrations.AlterField(
             model_name='linktreeitem',

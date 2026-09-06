@@ -69,8 +69,8 @@ USE_X_FORWARDED_HOST = True
 CSRF_TRUSTED_ORIGINS = env.list(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     default=[
-        "https://grifehf.com.br",
-        "https://www.grifehf.com.br",
+        "https://vakaria.com.br",
+        "https://www.vakaria.com.br",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ],
@@ -310,13 +310,13 @@ SOCIALACCOUNT_ADAPTER = "larkon.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {"signup": "larkon.users.forms.UserSocialSignupForm"}
 
 
-# Grife HF Store Settings
+# Vakaria Store Settings
 # ------------------------------------------------------------------------------
-GRIFE_HF_INFO = {
-    "NAME": "Grife HF Multimarcas",
+VAKARIA_INFO = {
+    "NAME": "Vakaria Barbearia",
     "ADDRESS": "Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil",
     "PHONE": "+55 83 9165-0137",
     "WHATSAPP_NUMBER": "558391650137",
-    "INSTAGRAM_URL": "https://www.instagram.com/grifehfmultimarcascz/",
-    "INSTAGRAM_HANDLE": "@grifehfmultimarcascz",
+    "INSTAGRAM_URL": "https://www.instagram.com/vakariabarbearia/",
+    "INSTAGRAM_HANDLE": "@vakariabarbearia",
 }

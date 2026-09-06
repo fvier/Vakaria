@@ -8,12 +8,12 @@ from larkon.orders.models import ProductReservation
 
 
 @pytest.mark.django_db
-class TestGrifeHFFlow:
+class TestVakariaFlow:
     def test_landing_page_loads(self, client: Client):
         response = client.get(reverse("catalog:home"))
         assert response.status_code == 200
         content = response.content.decode("utf-8")
-        assert "Grife HF" in content
+        assert "Vakaria" in content
         assert "558391650137" in content
 
     def test_catalog_and_brands_load(self, client: Client):
@@ -31,19 +31,19 @@ class TestGrifeHFFlow:
         response = client.get(reverse("account_login"))
         assert response.status_code == 200
         content = response.content.decode("utf-8")
-        assert "Grife HF" in content
+        assert "Vakaria" in content
         assert "toggle-password" in content
         assert "Cockpit Comercial" in content
 
     def test_direct_email_password_login(self, client: Client):
         user = User.objects.create_user(
-            email="testuser@grifehf.com.br",
+            email="testuser@vakaria.com.br",
             password="testpassword123",
             name="Test User",
         )
         response = client.post(
             reverse("account_login"),
-            {"login": "testuser@grifehf.com.br", "password": "testpassword123"},
+            {"login": "testuser@vakaria.com.br", "password": "testpassword123"},
             follow=True,
         )
         assert response.status_code == 200
@@ -51,7 +51,7 @@ class TestGrifeHFFlow:
 
     def test_dashboard_welcome_arena_loads(self, client: Client):
         user = User.objects.create_user(
-            email="admin_test@grifehf.com.br",
+            email="admin_test@vakaria.com.br",
             password="password123",
             name="Admin User",
             is_staff=True,
@@ -62,7 +62,7 @@ class TestGrifeHFFlow:
         content = response.content.decode("utf-8")
         assert "Arena de Vendas & Performance" in content
         assert "Faturamento da Equipe" in content
-        assert "Grife HF ERP" in content
+        assert "Vakaria ERP" in content
 
     def test_linktree_public_page_and_click_tracking(self, client: Client):
         item = LinktreeItem.objects.create(
@@ -76,7 +76,7 @@ class TestGrifeHFFlow:
         response = client.get("/links/")
         assert response.status_code == 200
         content = response.content.decode("utf-8")
-        assert "Grife HF Multimarcas" in content
+        assert "Vakaria Barbearia" in content
         assert "WhatsApp VIP Teste" in content
 
         # Test click tracking redirect
@@ -145,7 +145,7 @@ class TestGrifeHFFlow:
         )
 
         admin = User.objects.create_user(
-            email="staff_editor@grifehf.com.br",
+            email="staff_editor@vakaria.com.br",
             password="password123",
             name="Staff Editor",
             is_staff=True,
@@ -208,7 +208,7 @@ class TestGrifeHFFlow:
 
     def test_admin_carousel_and_linktree_management(self, client: Client):
         user = User.objects.create_user(
-            email="gestor@grifehf.com.br",
+            email="gestor@vakaria.com.br",
             password="password123",
             name="Gestor Loja",
             is_staff=True,
@@ -237,12 +237,12 @@ class TestGrifeHFFlow:
         assert post_slide.status_code == 200
         assert CarouselSlide.objects.filter(title="Drop Verão Exclusivo").exists()
 
-        # Test Linktree Admin default (Grife HF tab)
-        link_res = client.get(reverse("pages:admin_linktree") + "?tab=grife_hf")
+        # Test Linktree Admin default (Vakaria tab)
+        link_res = client.get(reverse("pages:admin_linktree") + "?tab=vakaria")
         assert link_res.status_code == 200
         content_ghf = link_res.content.decode("utf-8")
         assert "Gerenciador de Linktree" in content_ghf
-        assert "Grife HF Multimarcas" in content_ghf
+        assert "Vakaria Barbearia" in content_ghf
         assert "Luiza Fit" in content_ghf
 
         # Create link for Luiza Fit via POST
@@ -339,7 +339,7 @@ class TestGrifeHFFlow:
         content_parent = res_parent.content.decode("utf-8")
         assert "Camisa Pima Premium Black" in content_parent
         assert "Camisa Oversized Street" in content_parent
-        assert "accordionGrifeHF" in content_parent
+        assert "accordionVakaria" in content_parent
         assert "CAMISAS" in content_parent
 
         # 2. Filter by specific subcategory (MALHA PIMA) should only return p1
@@ -351,7 +351,7 @@ class TestGrifeHFFlow:
 
     def test_quick_create_product_and_ajax_cart(self, client: Client):
         admin = User.objects.create_user(
-            email="staff_tester@grifehf.com.br",
+            email="staff_tester@vakaria.com.br",
             password="password123",
             name="Staff Tester",
             is_staff=True,
@@ -427,7 +427,7 @@ class TestGrifeHFFlow:
 
     def test_staff_can_delete_and_archive_product(self, client: Client):
         admin = User.objects.create_user(
-            email="admin_del@grifehf.com.br",
+            email="admin_del@vakaria.com.br",
             password="password123",
             name="Admin Del",
             is_staff=True,
@@ -464,7 +464,7 @@ class TestGrifeHFFlow:
         cat, _ = Category.objects.get_or_create(name="Camisas Pima", slug="camisas-pima", is_active=True)
         
         admin = User.objects.create_user(
-            email="matrix_admin@grifehf.com.br",
+            email="matrix_admin@vakaria.com.br",
             password="password123",
             name="Matrix Admin",
             is_staff=True,
@@ -582,7 +582,7 @@ class TestGrifeHFFlow:
 
         # 4. Staff acessa painel de reservas (/reservas/)
         staff = User.objects.create_user(
-            email="staff_crm@grifehf.com.br",
+            email="staff_crm@vakaria.com.br",
             password="password123",
             name="Staff CRM",
             is_staff=True,
@@ -656,7 +656,7 @@ class TestGrifeHFFlow:
 
         # 2. Staff acessa tela de PDV
         staff = User.objects.create_user(
-            email="staff_pos@grifehf.com.br",
+            email="staff_pos@vakaria.com.br",
             password="password123",
             name="Staff POS",
             is_staff=True,
@@ -765,7 +765,7 @@ class TestGrifeHFFlow:
         )
 
         staff = User.objects.create_user(
-            email="staff_advanced@grifehf.com.br",
+            email="staff_advanced@vakaria.com.br",
             password="password123",
             name="Staff Advanced",
             is_staff=True,
@@ -850,7 +850,7 @@ class TestGrifeHFFlow:
         label_res = client.get(reverse("orders:order_label_print", kwargs={"order_number": new_order.order_number}))
         assert label_res.status_code == 200
         label_html = label_res.content.decode("utf-8")
-        assert "GRIFE HF" in label_html
+        assert "VAKARIA" in label_html
         assert "Destinatário" in label_html
         assert "Mariana Souza" in label_html
         assert "Rua Padre Rolim, 150" in label_html
@@ -874,7 +874,7 @@ class TestGrifeHFFlow:
 
     def test_per_color_size_matrix_creation_and_filtering(self, client: Client):
         admin = User.objects.create_user(
-            email="matrix_admin@grifehf.com.br",
+            email="matrix_admin@vakaria.com.br",
             password="password123",
             name="Matrix Admin",
             is_staff=True,
@@ -948,7 +948,7 @@ class TestGrifeHFFlow:
 
     def test_admin_manual_reservation_creation(self, client):
         user = User.objects.create_user(
-            email="admin_res@grifehf.com.br",
+            email="admin_res@vakaria.com.br",
             password="pass123",
             name="Admin Res",
             is_staff=True,
@@ -995,7 +995,7 @@ class TestGrifeHFFlow:
 
     def test_admin_home_cms_flow(self, client):
         admin = User.objects.create_user(
-            email="home_cms_admin@grifehf.com.br",
+            email="home_cms_admin@vakaria.com.br",
             password="pass12345",
             name="Home CMS Admin",
             is_staff=True,
@@ -1036,19 +1036,19 @@ class TestGrifeHFFlow:
         store_post_data = {
             "action": "save_store",
             "store_badge": "📍 Centro de Cajazeiras - PB",
-            "store_title": "Conheça a Loja Conceito Grife HF",
+            "store_title": "Conheça a Loja Conceito Vakaria",
             "store_description": "Venha tomar um café expresso conosco e conhecer nosso provador VIP.",
             "store_address": "Rua José Pires Braga 120, Centro, Cajazeiras - PB",
             "store_phone": "+55 83 9165-0137",
-            "store_instagram_handle": "@grifehfmultimarcascz",
-            "store_maps_url": "https://maps.google.com/?q=Grife+HF",
+            "store_instagram_handle": "@vakariabarbearia",
+            "store_maps_url": "https://maps.google.com/?q=Vakaria",
             "store_status_badge": "Aberto até 18h",
         }
         res_store = client.post(reverse("pages:admin_home_cms"), store_post_data, follow=True)
         assert res_store.status_code == 200
 
         config.refresh_from_db()
-        assert config.store_title == "Conheça a Loja Conceito Grife HF"
+        assert config.store_title == "Conheça a Loja Conceito Vakaria"
         assert config.store_status_badge == "Aberto até 18h"
 
         # POST create banner with new style fields
@@ -1138,7 +1138,7 @@ class TestGrifeHFFlow:
         public_html = public_res.content.decode("utf-8")
         assert "Coleção Feminina Primavera" in public_html
         assert "Coleção Masculina Linho" in public_html
-        assert "Conheça a Loja Conceito Grife HF" in public_html
+        assert "Conheça a Loja Conceito Vakaria" in public_html
         assert "Drop Exclusivo Linho &amp; Seda" in public_html or "Drop Exclusivo Linho & Seda" in public_html
         assert "Dra. Beatriz Sales" in public_html
         assert "overlay-dark" in public_html
@@ -1147,14 +1147,14 @@ class TestGrifeHFFlow:
         from larkon.catalog.models import Product, ProductVariant, Brand, Category, StockMovement
 
         admin_user = User.objects.create_user(
-            email="estoquista@grifehf.com.br",
+            email="estoquista@vakaria.com.br",
             password="password123",
             name="Gerente de Estoque",
             is_staff=True,
         )
         client.force_login(admin_user)
 
-        brand = Brand.objects.create(name="Grife HF Premium", slug="grife-hf-premium", is_active=True)
+        brand = Brand.objects.create(name="Vakaria Premium", slug="vakaria-premium", is_active=True)
         cat = Category.objects.create(name="Camisas Sociais", slug="camisas-sociais", is_active=True)
         product = Product.objects.create(
             title="Camisa Linho Nobre Reserva Especial",
@@ -1284,7 +1284,7 @@ class TestGrifeHFFlow:
         from larkon.catalog.models import HomePageConfig
 
         admin_user = User.objects.create_user(
-            email="gerentecms@grifehf.com.br",
+            email="gerentecms@vakaria.com.br",
             password="password123",
             name="Gerente de Marketing",
             is_staff=True,

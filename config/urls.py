@@ -17,13 +17,13 @@ urlpatterns = [
     # User management & Allauth
     path("users/", include("larkon.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
-    # E-commerce Grife HF: Catálogo e Pedidos
+    # E-commerce Vakaria: Catálogo e Pedidos
     path("", include("larkon.catalog.urls", namespace="catalog")),
     path("pedidos/", include("larkon.orders.urls", namespace="orders")),
     # Módulo de Reservas & Fila de Espera (CRM)
     path("reservas/", larkon.orders.views.AdminReservationsView.as_view(), name="reservas_direct"),
     path("reservas/<int:pk>/status/", larkon.orders.views.UpdateReservationStatusView.as_view(), name="reservas_status_direct"),
-    # Linktree Público Grife HF
+    # Linktree Público Vakaria
     path("links/", larkon.pages.views.linktree_public_view, name="linktree_public"),
     path("links", larkon.pages.views.linktree_public_view),
     # Linktree Exclusivo Luiza Fit (/tree)

@@ -1,5 +1,5 @@
 # ==============================================================================
-# INFRAESTRUTURA COMO CÓDIGO (IaC) - GRIFE HF MULTIMARCAS
+# INFRAESTRUTURA COMO CÓDIGO (IaC) - VAKARIA BARBEARIA
 # ==============================================================================
 
 # Volumes Persistentes Docker
@@ -44,7 +44,7 @@ resource "docker_container" "postgres" {
   }
 }
 
-# Container Django Grife HF
+# Container Django Vakaria
 resource "docker_container" "app" {
   name    = "${var.app_name}-app"
   image   = "source-app:latest"

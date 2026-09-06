@@ -1,19 +1,19 @@
 <div align="center">
 
-# ✨ Grife HF — Moda Multimarcas (Feminino & Masculino)
+# ✨ Vakaria — Moda Multimarcas (Feminino & Masculino)
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white)](#)
 [![Django](https://img.shields.io/badge/Django-5.1%2B-092E20?logo=django&logoColor=white)](#)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap&logoColor=white)](#)
 [![Status](https://img.shields.io/badge/Status-Produ%C3%A7%C3%A3o%20%2F%20Ativo-brightgreen)](#)
-[![Instagram](https://img.shields.io/badge/Instagram-@grifehfmultimarcascz-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/grifehfmultimarcascz/)
+[![Instagram](https://img.shields.io/badge/Instagram-@vakariabarbearia-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/vakariabarbearia/)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-+55%2083%209165--0137-25D366?logo=whatsapp&logoColor=white)](https://wa.me/558391650137)
 
-*A **Grife HF** é uma loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Com curadoria apurada de marcas parceiras renomadas, seu catálogo é renovado duas vezes por semana, garantindo novidades frequentes e uma experiência de compra sofisticada e atualizada.*
+*A **Vakaria** é uma loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Com curadoria apurada de marcas parceiras renomadas, seu catálogo é renovado duas vezes por semana, garantindo novidades frequentes e uma experiência de compra sofisticada e atualizada.*
 
 📍 **Endereço Físico:** Rua José Pires Braga 120, Cajazeiras - PB, 58900-000, Brasil  
 📱 **Atendimento VIP WhatsApp:** [+55 83 9165-0137](https://wa.me/558391650137)  
-📸 **Instagram Oficial:** [@grifehfmultimarcascz](https://www.instagram.com/grifehfmultimarcascz/)
+📸 **Instagram Oficial:** [@vakariabarbearia](https://www.instagram.com/vakariabarbearia/)
 
 </div>
 
@@ -23,7 +23,7 @@
 
 ```mermaid
 flowchart TD
-    subgraph Core["🚀 Grife HF Core (Django)"]
+    subgraph Core["🚀 Vakaria Core (Django)"]
         MANAGE["manage.py"]
         CONFIG["config/ (settings & URLs)"]
     end
@@ -65,7 +65,7 @@ flowchart TD
 3. **Sacola de Compras & Checkout Humanizado VIP**:
    - Carrinho persistente (via sessão ou cliente logado).
    - Checkout com cadastro de dados de entrega.
-   - **Gerador de Pedido VIP para WhatsApp**: Transforma o pedido em uma mensagem formatada e codificada pronta para envio direto para a equipe de atendimento da Grife HF.
+   - **Gerador de Pedido VIP para WhatsApp**: Transforma o pedido em uma mensagem formatada e codificada pronta para envio direto para a equipe de atendimento da Vakaria.
 
 4. **Landing Page Oficial Light & Boutique**:
    - Design minimalista luxuoso em tom claro (*Light Luxury Fashion*).
@@ -106,12 +106,12 @@ pip install -r requirements.txt
 python manage.py migrate
 
 # Popular o catálogo com marcas, drops, peças femininas/masculinas e superuser
-python manage.py seed_grife_data
+python manage.py seed_vakaria_data
 ```
 
 > [!NOTE]
-> O comando `seed_grife_data` cria automaticamente um superusuário administrativo:
-> - **E-mail:** `admin@grifehf.com.br`
+> O comando `seed_vakaria_data` cria automaticamente um superusuário administrativo:
+> - **E-mail:** `admin@vakaria.com.br`
 > - **Senha:** `admin123`
 
 ### 4. Iniciar o Servidor de Desenvolvimento
@@ -131,7 +131,7 @@ Acesse no navegador:
 ## 📂 Estrutura de Diretórios
 
 ```text
-Grife HF/
+Vakaria/
 ├── manage.py                          # Utilitário de gestão Django
 ├── requirements.txt                   # Dependências do projeto (Django 5, Pillow, Allauth, etc.)
 ├── config/                            # Configurações raiz do Django

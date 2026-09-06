@@ -54,7 +54,7 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
-    """Pedido registrado na Grife HF."""
+    """Pedido registrado na Vakaria."""
     STATUS_CHOICES = [
         ("pending", _("Aguardando Pagamento / Atendimento")),
         ("confirmed", _("Confirmado / Pago")),
@@ -124,14 +124,14 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
     def generate_whatsapp_link(self, whatsapp_number="558391650137"):
-        """Gera o link de checkout VIP humanizado para o WhatsApp da Grife HF."""
+        """Gera o link de checkout VIP humanizado para o WhatsApp da Vakaria."""
         items_list = []
         for item in self.items.all():
             items_list.append(f"• {item.quantity}x *{item.product_title}* (Tam: {item.size}, Cor: {item.color}) - R$ {item.total_price:.2f}")
 
         items_str = "\n".join(items_list)
         msg = (
-            f"✨ *Novo Pedido VIP — Grife HF* ✨\n\n"
+            f"✨ *Novo Pedido VIP — Vakaria* ✨\n\n"
             f"📋 *Pedido:* #{self.order_number}\n"
             f"👤 *Cliente:* {self.customer_name}\n"
             f"📱 *Contato:* {self.customer_phone}\n\n"
@@ -160,10 +160,10 @@ class Order(models.Model):
 
         pix_block = ""
         if self.payment_method == "pix":
-            pix_block = "\n🔑 *Chave Pix Oficial (WhatsApp):* 8391650137\n🏦 *Favorecido:* Grife HF Multimarcas\n"
+            pix_block = "\n🔑 *Chave Pix Oficial (WhatsApp):* 8391650137\n🏦 *Favorecido:* Vakaria Barbearia\n"
 
         msg = (
-            f"✨ *Comprovante de Pedido — Grife HF Multimarcas* ✨\n\n"
+            f"✨ *Comprovante de Pedido — Vakaria Barbearia* ✨\n\n"
             f"Olá *{self.customer_name}*, seu pedido foi registrado com sucesso! 🎉\n\n"
             f"📋 *Código do Pedido:* #{self.order_number}\n"
             f"📅 *Data:* {self.created_at.strftime('%d/%m/%Y às %H:%M')}\n\n"
@@ -172,7 +172,7 @@ class Order(models.Model):
             f"🛵 *Entrega / Retirada:* {delivery_display}\n"
             f"💰 *Total do Pedido:* R$ {self.total:.2f}\n\n"
             f"📦 *Status Atual:* {self.get_status_display()}\n\n"
-            f"Muito obrigado pela preferência e confiança na Grife HF! Qualquer dúvida estamos 100% à sua disposição por aqui. ✨"
+            f"Muito obrigado pela preferência e confiança na Vakaria! Qualquer dúvida estamos 100% à sua disposição por aqui. ✨"
         )
         encoded_msg = urllib.parse.quote(msg)
         return f"https://wa.me/{clean_phone}?text={encoded_msg}"
@@ -186,20 +186,20 @@ class Order(models.Model):
         if status_type == "preparing":
             msg = (
                 f"✨ Olá *{self.customer_name}*! Tudo bem?\n\n"
-                f"Seu pedido *#{self.order_number}* já está sendo separado e embalado com todo carinho pela equipe da *Grife HF*! 📦✨\n\n"
+                f"Seu pedido *#{self.order_number}* já está sendo separado e embalado com todo carinho pela equipe da *Vakaria*! 📦✨\n\n"
                 f"Assim que sair para entrega ou ficar pronto para retirada, avisaremos você imediatamente por aqui!"
             )
         elif status_type == "motoboy":
             addr = f" no endereço: *{self.shipping_address}, {self.city}*" if self.shipping_address else ""
             msg = (
                 f"🛵 Olá *{self.customer_name}*! Ótima notícia!\n\n"
-                f"O motoboy da *Grife HF* acabou de sair para realizar a entrega do seu pedido *#{self.order_number}*{addr}! 📦\n\n"
+                f"O motoboy da *Vakaria* acabou de sair para realizar a entrega do seu pedido *#{self.order_number}*{addr}! 📦\n\n"
                 f"Por favor, fique atento(a) para receber sua encomenda hoje mesmo. Muito obrigado!"
             )
         elif status_type == "pickup_ready":
             msg = (
                 f"🏪 Olá *{self.customer_name}*! Sua sacola está pronta!\n\n"
-                f"Seu pedido *#{self.order_number}* já está 100% separado e prontinho para retirada na loja física da *Grife HF*.\n"
+                f"Seu pedido *#{self.order_number}* já está 100% separado e prontinho para retirada na loja física da *Vakaria*.\n"
                 f"📍 *Endereço:* Rua José Pires Braga 120, Centro - Cajazeiras PB.\n"
                 f"⏰ *Horário:* Segunda a Sábado das 09h às 19h.\n\n"
                 f"Aguardamos sua visita!"
@@ -208,11 +208,11 @@ class Order(models.Model):
             track_str = f"\n📦 *Código de Rastreio:* {tracking_code}" if tracking_code else ""
             msg = (
                 f"✈️ Olá *{self.customer_name}*! Seu pedido foi despachado!\n\n"
-                f"Sua encomenda da *Grife HF* (Pedido *#{self.order_number}*) foi postada com sucesso nos Correios/Transportadora!{track_str}\n\n"
+                f"Sua encomenda da *Vakaria* (Pedido *#{self.order_number}*) foi postada com sucesso nos Correios/Transportadora!{track_str}\n\n"
                 f"Agradecemos muito pela confiança e desejamos uma excelente experiência com suas novas peças!"
             )
         else:
-            msg = f"Olá *{self.customer_name}*! Atualização sobre seu pedido *#{self.order_number}* da Grife HF: {self.get_status_display()}."
+            msg = f"Olá *{self.customer_name}*! Atualização sobre seu pedido *#{self.order_number}* da Vakaria: {self.get_status_display()}."
 
         encoded_msg = urllib.parse.quote(msg)
         return f"https://wa.me/{clean_phone}?text={encoded_msg}"
@@ -281,7 +281,7 @@ class ProductReservation(models.Model):
 
         msg = (
             f"Olá *{self.customer_name}*, tudo bem? ✨\n\n"
-            f"Temos uma ótima notícia da *Grife HF*! A peça *{self.product.title}*{brand_str}{color_str}{size_str} que você estava aguardando *acabou de chegar no estoque*! 🎉\n\n"
+            f"Temos uma ótima notícia da *Vakaria*! A peça *{self.product.title}*{brand_str}{color_str}{size_str} que você estava aguardando *acabou de chegar no estoque*! 🎉\n\n"
             f"Sua reserva está garantida com exclusividade pelas próximas *24 horas*.\n"
             f"Podemos separar para você retirar ou enviar para entrega hoje mesmo?"
         )

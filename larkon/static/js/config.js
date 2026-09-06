@@ -11,7 +11,7 @@
 
      var html = document.getElementsByTagName("html")[0];
 
-     var isPinned = localStorage.getItem("__GRIFE_HF_SIDEBAR_PINNED__") === "true";
+     var isPinned = localStorage.getItem("__VAKARIA_SIDEBAR_PINNED__") === "true";
 
      var defaultConfig = {
           theme: "light",             // ['light', 'dark']

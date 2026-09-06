@@ -207,7 +207,7 @@ def quick_create_product_view(request):
     elif brand_name:
         brand, _ = Brand.objects.get_or_create(name=brand_name)
     if not brand:
-        brand = Brand.objects.first() or Brand.objects.create(name="Grife HF")
+        brand = Brand.objects.first() or Brand.objects.create(name="Vakaria")
 
     category_id = request.POST.get("category")
     category = Category.objects.filter(id=category_id).first() if category_id else None
@@ -364,12 +364,12 @@ def get_product_edit_data_view(request, pk):
         images_urls = [cover_url]
         images_data = [{"url": cover_url, "color": ""}]
 
-    brand_name = product.brand.name if product.brand else "Grife HF"
-    brand_slug = product.brand.slug if product.brand else "grife-hf"
+    brand_name = product.brand.name if product.brand else "Vakaria"
+    brand_slug = product.brand.slug if product.brand else "vakaria"
     category_name = product.category.name if product.category else "Sem Categoria"
 
     whatsapp_text = urllib.parse.quote(
-        f"Olá! Gostei da peça '{product.title}' da {brand_name} (R$ {product.price:.2f}) na Grife HF. Gostaria de garantir a minha!"
+        f"Olá! Gostei da peça '{product.title}' da {brand_name} (R$ {product.price:.2f}) na Vakaria. Gostaria de garantir a minha!"
     )
 
     return JsonResponse({
@@ -395,7 +395,7 @@ def get_product_edit_data_view(request, pk):
         "variants_matrix": product.variants_matrix,
         "total_stock": product.total_stock,
         "product_url": product.get_absolute_url(),
-        "description": product.description or "Peça autêntica e exclusiva com corte e acabamento premium da Grife HF.",
+        "description": product.description or "Peça autêntica e exclusiva com corte e acabamento premium da Vakaria.",
         "whatsapp_url": f"https://wa.me/558391650137?text={whatsapp_text}",
     })
 
@@ -653,7 +653,7 @@ class BrandListView(ListView):
 
     def get_queryset(self):
         # Prioriza as 6 marcas principais + marcas próprias
-        order_slugs = ["lacoste", "nike", "adidas", "puma", "jordan", "oakley", "luiza-fit", "grife-hf"]
+        order_slugs = ["lacoste", "nike", "adidas", "puma", "jordan", "oakley", "luiza-fit", "vakaria"]
         qs = list(Brand.objects.filter(is_active=True).prefetch_related("products"))
         return sorted(qs, key=lambda b: order_slugs.index(b.slug) if b.slug in order_slugs else 99)
 

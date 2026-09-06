@@ -1,5 +1,5 @@
-# Configuração Caddy com SSL Automático Let's Encrypt para Grife HF
-grifehf.com.br, www.grifehf.com.br {
+# Configuração Caddy com SSL Automático Let's Encrypt para Vakaria
+vakaria.com.br, www.vakaria.com.br {
     encode zstd gzip
 
     # Proxy reverso para a aplicação Django

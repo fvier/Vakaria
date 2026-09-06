@@ -8,7 +8,7 @@ from larkon.orders.models import Order
 
 @login_required
 def root_page_view(request):
-    """Página de Boas-Vindas e Arena Comercial da Grife HF pós-login."""
+    """Página de Boas-Vindas e Arena Comercial da Vakaria pós-login."""
     try:
         total_products = Product.objects.count()
         total_brands = Brand.objects.count()
@@ -144,11 +144,11 @@ from larkon.catalog.models import CarouselSlide, LinktreeItem, HomePageConfig
 
 
 def linktree_public_view(request):
-    """Página pública oficial de links (Linktree) da Grife HF."""
-    links = LinktreeItem.objects.filter(page_type="grife_hf", is_active=True).order_by("order", "id")
+    """Página pública oficial de links (Linktree) da Vakaria."""
+    links = LinktreeItem.objects.filter(page_type="vakaria", is_active=True).order_by("order", "id")
     featured_drops = Drop.objects.filter(is_active=True).order_by("-launch_date")[:2]
     context = {
-        "title": "Grife HF Multimarcas | Links Oficiais & Atendimento",
+        "title": "Vakaria Barbearia | Links Oficiais & Atendimento",
         "links": links,
         "featured_drops": featured_drops,
     }
@@ -261,7 +261,7 @@ def admin_home_cms_view(request):
                 "location": "Sousa - PB",
                 "rating": 5,
                 "source": "google",
-                "comment": "Melhor loja multimarcas da região! Camisas em linho puro e polos da Reserva com caimento perfeito. Peças 100% originais com nota e embalagem refinada. Virei cliente fiel da Grife HF.",
+                "comment": "Melhor loja multimarcas da região! Camisas em linho puro e polos da Reserva com caimento perfeito. Peças 100% originais com nota e embalagem refinada. Virei cliente fiel da Vakaria.",
                 "order": 2,
                 "is_active": True,
             },
@@ -688,7 +688,7 @@ def admin_carousel_delete_view(request, pk):
 
 @login_required
 def admin_linktree_view(request):
-    """Painel Unificado de Gerenciamento dos Linktrees da Grife HF (/links) e Luiza Fit (/tree)."""
+    """Painel Unificado de Gerenciamento dos Linktrees da Vakaria (/links) e Luiza Fit (/tree)."""
     # Garante que a Luiza Fit também tenha os links padrão cadastrados
     if not LinktreeItem.objects.filter(page_type="luiza_fit").exists():
         initial_luiza_links = [
@@ -746,9 +746,9 @@ def admin_linktree_view(request):
         for item_data in initial_luiza_links:
             LinktreeItem.objects.create(**item_data, is_active=True)
 
-    tab = request.GET.get("tab", "grife_hf")
-    if tab not in ("grife_hf", "luiza_fit"):
-        tab = "grife_hf"
+    tab = request.GET.get("tab", "vakaria")
+    if tab not in ("vakaria", "luiza_fit"):
+        tab = "vakaria"
 
     if request.method == "POST":
         action = request.POST.get("action", "create")
@@ -787,30 +787,30 @@ def admin_linktree_view(request):
                     is_highlighted=is_highlighted,
                     is_active=True,
                 )
-                brand_label = "Grife HF (/links)" if page_type == "grife_hf" else "Luiza Fit (/tree)"
+                brand_label = "Vakaria (/links)" if page_type == "vakaria" else "Luiza Fit (/tree)"
                 messages.success(request, f"Link '{title}' adicionado ao Linktree ({brand_label})!")
 
         return redirect(f"{reverse('pages:admin_linktree')}?tab={page_type}")
 
-    grife_links = LinktreeItem.objects.filter(page_type="grife_hf").order_by("order", "id")
+    vakaria_links = LinktreeItem.objects.filter(page_type="vakaria").order_by("order", "id")
     luiza_links = LinktreeItem.objects.filter(page_type="luiza_fit").order_by("order", "id")
 
-    current_links = grife_links if tab == "grife_hf" else luiza_links
+    current_links = vakaria_links if tab == "vakaria" else luiza_links
 
-    total_clicks_grife = sum(link.clicks_count for link in grife_links)
+    total_clicks_vakaria = sum(link.clicks_count for link in vakaria_links)
     total_clicks_luiza = sum(link.clicks_count for link in luiza_links)
     total_clicks_tab = sum(link.clicks_count for link in current_links)
 
     context = {
-        "title": "Gerenciador de Linktree (Grife HF & Luiza Fit)",
+        "title": "Gerenciador de Linktree (Vakaria & Luiza Fit)",
         "active_tab": tab,
         "current_links": current_links,
-        "grife_links": grife_links,
+        "vakaria_links": vakaria_links,
         "luiza_links": luiza_links,
         "total_clicks_tab": total_clicks_tab,
-        "total_clicks_grife": total_clicks_grife,
+        "total_clicks_vakaria": total_clicks_vakaria,
         "total_clicks_luiza": total_clicks_luiza,
-        "total_clicks_all": total_clicks_grife + total_clicks_luiza,
+        "total_clicks_all": total_clicks_vakaria + total_clicks_luiza,
     }
     return render(request, "pages/admin-linktree.html", context)
 

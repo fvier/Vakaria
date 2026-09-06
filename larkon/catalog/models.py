@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Brand(models.Model):
-    """Marca multimarcas parceira da Grife HF."""
+    """Marca multimarcas parceira da Vakaria."""
     name = models.CharField(_("Nome da Marca"), max_length=150, unique=True)
     slug = models.SlugField(_("Slug"), max_length=160, unique=True, blank=True)
     logo = models.ImageField(_("Logo"), upload_to="brands/", blank=True, null=True)
@@ -72,7 +72,7 @@ class Category(models.Model):
 
 
 class Drop(models.Model):
-    """Lançamentos de Coleções e Novidades Bi-semanais da Grife HF."""
+    """Lançamentos de Coleções e Novidades Bi-semanais da Vakaria."""
     title = models.CharField(_("Título do Drop"), max_length=150)
     slug = models.SlugField(_("Slug"), max_length=160, unique=True, blank=True)
     edition = models.CharField(_("Edição / Código"), max_length=50, blank=True, help_text=_("Ex: DROP-2026-W36-01"))
@@ -98,7 +98,7 @@ class Drop(models.Model):
 
 
 class Product(models.Model):
-    """Peça de moda do catálogo Grife HF."""
+    """Peça de moda do catálogo Vakaria."""
     GENDER_CHOICES = [
         ("F", _("Feminino")),
         ("M", _("Masculino")),
@@ -339,7 +339,7 @@ class StockMovement(models.Model):
 
 
 class CarouselSlide(models.Model):
-    """Banners e slides de carrossel dinâmicos da Grife HF."""
+    """Banners e slides de carrossel dinâmicos da Vakaria."""
     SLIDE_TYPES = [
         ("hero", _("Hero Principal (Topo da Home)")),
         ("drops", _("Drops & Novidades da Semana")),
@@ -382,7 +382,7 @@ class CarouselSlide(models.Model):
         _("Estilo Visual do Botão"),
         max_length=20,
         choices=[
-            ("gold", _("Dourado Luxo (Padrão Grife HF)")),
+            ("gold", _("Dourado Luxo (Padrão Vakaria)")),
             ("dark", _("Preto Minimalista")),
             ("whatsapp", _("Verde WhatsApp")),
             ("outline", _("Borda Branca")),
@@ -468,13 +468,13 @@ class CustomerReview(models.Model):
 
 
 class LinktreeItem(models.Model):
-    """Links rápidos das páginas públicas do Linktree oficial (Grife HF /links e Luiza Fit /tree)."""
+    """Links rápidos das páginas públicas do Linktree oficial (Vakaria /links e Luiza Fit /tree)."""
     PAGE_CHOICES = [
-        ("grife_hf", _("Grife HF Multimarcas (/links)")),
+        ("vakaria", _("Vakaria Barbearia (/links)")),
         ("luiza_fit", _("Luiza Fit Moda Fitness (/tree)")),
     ]
 
-    page_type = models.CharField(_("Página de Destino"), max_length=20, choices=PAGE_CHOICES, default="grife_hf")
+    page_type = models.CharField(_("Página de Destino"), max_length=20, choices=PAGE_CHOICES, default="vakaria")
     title = models.CharField(_("Título do Botão"), max_length=120)
     subtitle = models.CharField(_("Subtítulo / Descrição Rápida"), max_length=200, blank=True)
     url = models.CharField(_("Link de Redirecionamento"), max_length=500)
@@ -496,7 +496,7 @@ class LinktreeItem(models.Model):
 
 
 class HomePageConfig(models.Model):
-    """Configurações centralizadas de conteúdo e elementos visuais da Página Inicial da Grife HF."""
+    """Configurações centralizadas de conteúdo e elementos visuais da Página Inicial da Vakaria."""
     # 1. Barra de Aviso Superior (Top Announcement Bar)
     announcement_active = models.BooleanField(_("Exibir Barra Superior"), default=True)
     announcement_badge = models.CharField(_("Tag da Barra"), max_length=50, default="✨ NOVIDADE", blank=True)
@@ -525,11 +525,11 @@ class HomePageConfig(models.Model):
     store_image = models.ImageField(_("Foto da Loja Física"), upload_to="home/store/", blank=True, null=True)
     store_image_url = models.URLField(_("URL da Foto da Loja (Fallback/CDN)"), blank=True, default="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80")
     store_badge = models.CharField(_("Badge Seção Loja"), max_length=100, default="📍 Loja Física em Cajazeiras - PB")
-    store_title = models.CharField(_("Título Seção Loja"), max_length=150, default="Experiência Presencial na Grife HF")
+    store_title = models.CharField(_("Título Seção Loja"), max_length=150, default="Experiência Presencial na Vakaria")
     store_description = models.TextField(_("Descrição Seção Loja"), default="Localizada no centro de Cajazeiras, nossa loja física foi criada para proporcionar conforto, sofisticação e uma experiência de compra personalizada. Venha conhecer de perto as peças, experimentar as composições e tomar um café com a nossa equipe.")
     store_address = models.CharField(_("Endereço Completo"), max_length=255, default="Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil")
     store_phone = models.CharField(_("WhatsApp & Telefone de Vendas"), max_length=50, default="+55 83 9165-0137")
-    store_instagram_handle = models.CharField(_("Instagram Handle"), max_length=60, default="@grifehfmultimarcascz")
+    store_instagram_handle = models.CharField(_("Instagram Handle"), max_length=60, default="@vakariabarbearia")
     store_maps_url = models.CharField(_("Link do Google Maps"), max_length=500, default="https://maps.google.com/?q=Rua+Jose+Pires+Braga+120+Cajazeiras+PB")
     
     STORE_STATUS_MODE_CHOICES = [
@@ -567,7 +567,7 @@ class HomePageConfig(models.Model):
 
     benefit2_icon = models.CharField(_("Ícone Vantagem 2"), max_length=60, default="solar:tag-bold-duotone")
     benefit2_title = models.CharField(_("Título Vantagem 2"), max_length=80, default="Curadoria Multimarcas")
-    benefit2_subtitle = models.CharField(_("Subtítulo Vantagem 2"), max_length=120, default="As melhores grifes do país")
+    benefit2_subtitle = models.CharField(_("Subtítulo Vantagem 2"), max_length=120, default="Os melhores produtos e atendimento da região")
 
     benefit3_icon = models.CharField(_("Ícone Vantagem 3"), max_length=60, default="solar:chat-round-dots-bold-duotone")
     benefit3_title = models.CharField(_("Título Vantagem 3"), max_length=80, default="Personal Stylist VIP")
@@ -580,7 +580,7 @@ class HomePageConfig(models.Model):
     # 7. Seção de Avaliações
     reviews_active = models.BooleanField(_("Exibir Seção de Avaliações"), default=True)
     reviews_title = models.CharField(_("Título da Seção de Depoimentos"), max_length=120, default="O que Nossos Clientes Dizem", blank=True)
-    reviews_subtitle = models.CharField(_("Subtítulo da Seção de Depoimentos"), max_length=200, default="Experiência comprovada por quem veste e confia na curadoria multimarcas da Grife HF.", blank=True)
+    reviews_subtitle = models.CharField(_("Subtítulo da Seção de Depoimentos"), max_length=200, default="Experiência comprovada por quem veste e confia na curadoria multimarcas da Vakaria.", blank=True)
 
     # 8. Promoções Relâmpago & Contador Regressivo (Timer)
     promo_active = models.BooleanField(_("Ativar Bloco de Promoções & Timer"), default=True)
@@ -609,7 +609,7 @@ class HomePageConfig(models.Model):
     # 11. Compartilhamento Social & OpenGraph
     og_share_image = models.ImageField(_("Foto de Prévia no WhatsApp (OpenGraph)"), upload_to="cms/og/", blank=True, null=True)
     og_share_image_url = models.URLField(_("URL da Foto de Prévia"), blank=True)
-    og_share_title = models.CharField(_("Título no Compartilhamento"), max_length=200, blank=True, default="Grife HF Multimarcas | Alta Moda Feminina & Masculina")
+    og_share_title = models.CharField(_("Título no Compartilhamento"), max_length=200, blank=True, default="Vakaria Barbearia | Alta Moda Feminina & Masculina")
     og_share_description = models.TextField(_("Descrição no Compartilhamento"), blank=True, default="Curadoria exclusiva das marcas mais desejadas do Brasil em Cajazeiras - PB.")
 
     updated_at = models.DateTimeField(auto_now=True)

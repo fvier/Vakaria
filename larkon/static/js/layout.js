@@ -208,10 +208,10 @@ class ThemeLayout {
                          var currentSize = self.html.getAttribute('data-menu-size');
                          if (currentSize === 'default') {
                               self.changeMenuSize('sm-hover', true);
-                              localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "false");
+                              localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "false");
                          } else {
                               self.changeMenuSize('default', true);
-                              localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "true");
+                              localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "true");
                          }
                     } else {
                          self.toggleMobileSidebar();
@@ -236,10 +236,10 @@ class ThemeLayout {
                     var currentSize = self.html.getAttribute('data-menu-size');
                     if (currentSize === 'default') {
                          self.changeMenuSize('sm-hover', true);
-                         localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "false");
+                         localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "false");
                     } else {
                          self.changeMenuSize('default', true);
-                         localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "true");
+                         localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "true");
                     }
                     var mainNav = document.querySelector('.main-nav');
                     if (mainNav) mainNav.classList.remove('hover-expanded');
@@ -354,10 +354,10 @@ class ThemeLayout {
                          var currentSize = self.html.getAttribute('data-menu-size');
                          if (currentSize === 'default') {
                               self.changeMenuSize('sm-hover', true);
-                              localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "false");
+                              localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "false");
                          } else {
                               self.changeMenuSize('default', true);
-                              localStorage.setItem("__GRIFE_HF_SIDEBAR_PINNED__", "true");
+                              localStorage.setItem("__VAKARIA_SIDEBAR_PINNED__", "true");
                          }
                          var mainNav = document.querySelector('.main-nav');
                          if (mainNav) mainNav.classList.remove('hover-expanded');
@@ -381,7 +381,7 @@ class ThemeLayout {
           if (window.innerWidth < 992) {
                self.changeMenuSize('hidden', false);
           } else {
-               var isPinned = localStorage.getItem("__GRIFE_HF_SIDEBAR_PINNED__") === "true";
+               var isPinned = localStorage.getItem("__VAKARIA_SIDEBAR_PINNED__") === "true";
                self.changeMenuSize(isPinned ? 'default' : 'sm-hover', false);
           }
      }

@@ -19,25 +19,25 @@ variable "docker_host" {
 variable "domain_name" {
   description = "Domínio principal da loja"
   type        = string
-  default     = "grifehf.com.br"
+  default     = "vakaria.com.br"
 }
 
 variable "app_name" {
   description = "Nome do projeto / aplicação"
   type        = string
-  default     = "grifehf"
+  default     = "vakaria"
 }
 
 variable "postgres_db" {
   description = "Nome do banco de dados PostgreSQL"
   type        = string
-  default     = "grifehf"
+  default     = "vakaria"
 }
 
 variable "postgres_user" {
   description = "Usuário do banco de dados PostgreSQL"
   type        = string
-  default     = "grifehf"
+  default     = "vakaria"
 }
 
 variable "postgres_password" {

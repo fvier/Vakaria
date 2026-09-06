@@ -1,7 +1,7 @@
 {% extends 'layout-store.html' %}
 {% load static i18n %}
 
-{% block title %}Vitrine & Catálogo Exclusivo | Grife HF{% endblock %}
+{% block title %}Vitrine & Catálogo Exclusivo | Vakaria{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -245,7 +245,7 @@
 
 {% block store_content %}
 {% if request.user.is_authenticated and request.user.is_staff %}
-<!-- Barra de Gestão Rápida para o Administrador da Grife HF -->
+<!-- Barra de Gestão Rápida para o Administrador da Vakaria -->
 <div class="alert bg-dark text-white border-0 shadow-sm rounded-3 py-2 px-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
     <div class="d-flex align-items-center gap-2 fs-12">
         <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="bx bxs-shield me-1"></i>Modo Administrador</span>
@@ -304,11 +304,11 @@
             </div>
         </div>
 
-        <!-- MENU DE CATEGORIAS: GRIFE HF (MASCULINO & GERAL) -->
+        <!-- MENU DE CATEGORIAS: VAKARIA (MASCULINO & GERAL) -->
         {% if not is_luiza_fit %}
         <div class="card mb-3 shadow-sm border-0">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
-                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Grife HF • Departamentos</span>
+                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Vakaria • Departamentos</span>
             </div>
             <div class="card-body p-2">
                 <!-- Botão Ver Todas as Peças -->
@@ -317,7 +317,7 @@
                     <i class="bx bx-chevron-right fs-14"></i>
                 </a>
 
-                <div class="accordion accordion-flush" id="accordionGrifeHF">
+                <div class="accordion accordion-flush" id="accordionVakaria">
                     {% for parent in men_categories %}
                     <div class="accordion-item border-0 mb-1">
                         <h2 class="accordion-header" id="heading-{{ parent.id }}">
@@ -336,7 +336,7 @@
                         <div id="collapse-{{ parent.id }}" 
                              class="accordion-collapse collapse {% if selected_parent.id == parent.id %}show{% endif %}" 
                              aria-labelledby="heading-{{ parent.id }}" 
-                             data-bs-parent="#accordionGrifeHF">
+                             data-bs-parent="#accordionVakaria">
                             <div class="accordion-body p-1 ps-3 bg-light-subtle rounded-2 my-1">
                                 <!-- Opção TODAS da Categoria Pai -->
                                 <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
@@ -456,7 +456,7 @@
                                     {% elif selected_category %}
                                         {{ selected_category.name }}
                                     {% elif active_gender == 'F' %}👗 Coleção Feminina — Luiza Fit
-                                    {% elif active_gender == 'M' %}👔 Coleção Masculina — Grife HF
+                                    {% elif active_gender == 'M' %}👔 Coleção Masculina — Vakaria
                                     {% elif active_brand %}🏷️ Marca: {{ active_brand|title }}
                                     {% else %}✨ Todas as Peças &amp; Lançamentos
                                     {% endif %}
@@ -764,7 +764,7 @@
 
 {% if request.user.is_authenticated and request.user.is_staff %}
 <!-- ============================================================== -->
-<!-- MODAL DE CADASTRO RÁPIDO DE PEÇAS (GRIFE HF ADMIN)             -->
+<!-- MODAL DE CADASTRO RÁPIDO DE PEÇAS (VAKARIA ADMIN)             -->
 <!-- ============================================================== -->
 <div class="modal fade" id="quickProductModal" tabindex="-1" aria-labelledby="quickProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -830,7 +830,7 @@
                                 </div>
                                 <!-- Marca -->
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Grife *</label>
+                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Linha *</label>
                                     <select name="brand" class="form-select fs-13">
                                         {% for b in brands %}
                                         <option value="{{ b.id }}">{{ b.name }}</option>
@@ -960,7 +960,7 @@
 </div>
 
 <!-- ============================================================== -->
-<!-- MODAL DE EDIÇÃO RÁPIDA DE PEÇA POSTADA (GRIFE HF ADMIN)        -->
+<!-- MODAL DE EDIÇÃO RÁPIDA DE PEÇA POSTADA (VAKARIA ADMIN)        -->
 <!-- ============================================================== -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1026,7 +1026,7 @@
                                 </div>
                                 <!-- Marca -->
                                 <div class="col-sm-6">
-                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Grife *</label>
+                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Linha *</label>
                                     <select id="editBrandSelect" name="brand" class="form-select fs-13">
                                         {% for b in brands %}
                                         <option value="{{ b.id }}">{{ b.name }}</option>
@@ -1307,7 +1307,7 @@
 
                         <!-- Descrição Curta -->
                         <p id="qvDescription" class="text-muted fs-13 mb-4">
-                            Peça autêntica com corte e acabamento impecável da Grife HF.
+                            Peça autêntica com corte e acabamento impecável da Vakaria.
                         </p>
 
                         <!-- Seção VIP de Reserva / Fila de Espera (Quando Esgotado) -->
@@ -1391,7 +1391,7 @@
         <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header bg-dark text-white px-4 py-3">
                 <h5 class="modal-title fs-16 fw-bold d-flex align-items-center gap-2 mb-0" id="fitGuideModalLabel">
-                    <i class="bx bx-ruler fs-20 text-warning"></i> 📏 Guia de Medidas &amp; Caimento — Grife HF
+                    <i class="bx bx-ruler fs-20 text-warning"></i> 📏 Guia de Medidas &amp; Caimento — Vakaria
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -1599,7 +1599,7 @@
             let msg = `Olá! Gostei da peça *${currentProductData.title}* (${currentProductData.brand_name})`;
             if (selectedColorName) msg += ` na cor *${selectedColorName}*`;
             if (selectedSizeName) msg += ` no tamanho *${selectedSizeName}*`;
-            msg += ` (R$ ${parseFloat(currentProductData.price).toFixed(2).replace('.', ',')}) que vi na Grife HF: ${currentProductData.product_url}`;
+            msg += ` (R$ ${parseFloat(currentProductData.price).toFixed(2).replace('.', ',')}) que vi na Vakaria: ${currentProductData.product_url}`;
             
             qvWhatsAppBtn.href = `https://wa.me/558391650137?text=${encodeURIComponent(msg)}`;
             const colInput = document.getElementById('qvSelectedColorInput');

@@ -1,6 +1,6 @@
-# 🏗️ Infraestrutura como Código (Terraform) — Grife HF Multimarcas
+# 🏗️ Infraestrutura como Código (Terraform) — Vakaria Barbearia
 
-Este diretório contém a especificação declarativa de infraestrutura como código (IaC) para provisionar, gerenciar e monitorar os containers e recursos da **Grife HF** na VPS (`147.79.110.132`).
+Este diretório contém a especificação declarativa de infraestrutura como código (IaC) para provisionar, gerenciar e monitorar os containers e recursos da **Vakaria** na VPS (`147.79.110.132`).
 
 ---
 
@@ -18,7 +18,7 @@ Este diretório contém a especificação declarativa de infraestrutura como có
 
 ### 1. Inicializar os Providers do Terraform
 ```bash
-cd infra/grifehf
+cd infra/vakaria
 terraform init
 ```
 

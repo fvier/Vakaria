@@ -1,7 +1,7 @@
 {% extends 'layout-store.html' %}
 {% load static i18n %}
 
-{% block title %}Marcas & Curadorias Oficiais | Grife HF{% endblock %}
+{% block title %}Marcas & Curadorias Oficiais | Vakaria{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -56,7 +56,7 @@
     <div class="row align-items-center">
       <div class="col-md-8">
         <span class="badge bg-warning text-dark px-2.5 py-1 fs-11 fw-bold text-uppercase mb-2">Curadoria Multimarcas Premium</span>
-        <h2 class="fs-22 fs-md-26 fw-bold mb-1 text-white">Marcas Oficiais da Grife HF</h2>
+        <h2 class="fs-22 fs-md-26 fw-bold mb-1 text-white">Marcas Oficiais da Vakaria</h2>
         <p class="text-white-50 fs-13 fs-md-14 mb-0">
           Trabalhamos exclusivamente com peças 100% autênticas das marcas mais desejadas da moda masculina, streetwear e feminina fitness.
         </p>
@@ -98,8 +98,8 @@
         <img src="{% static 'images/brands/caunt-jeans.png' %}" alt="Caunt Jeans" class="brand-logo-img">
         {% elif brand.slug == 'luiza-fit' %}
         <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" class="brand-logo-img">
-        {% elif brand.slug == 'grife-hf' %}
-        <img src="{% static 'images/logo-dark.png' %}" alt="Grife HF" class="brand-logo-img">
+        {% elif brand.slug == 'vakaria' %}
+        <img src="{% static 'images/logo-dark.png' %}" alt="Vakaria" class="brand-logo-img">
         {% elif brand.logo %}
         <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="brand-logo-img">
         {% else %}

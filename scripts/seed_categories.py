@@ -14,7 +14,7 @@ from larkon.catalog.models import Category
 
 TAXONOMY = [
     # -------------------------------------------------------------
-    # 1. GRIFE HF - MASCULINO & GERAL
+    # 1. VAKARIA - MASCULINO & GERAL
     # -------------------------------------------------------------
     {
         "name": "CAMISAS",

@@ -3,16 +3,16 @@
 <head>
   {% load static i18n %}
   <meta charset="utf-8"/>
-  <title>Grife HF | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB</title>
+  <title>Vakaria | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Grife HF — Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Drops e catálogo renovado 2x por semana em Cajazeiras-PB."/>
-  <meta name="author" content="Grife HF"/>
+  <meta name="description" content="Vakaria — Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Drops e catálogo renovado 2x por semana em Cajazeiras-PB."/>
+  <meta name="author" content="Vakaria"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- Open Graph / Social Sharing -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
-  <meta property="og:title" content="{{ home_config.og_share_title|default:'Grife HF | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB' }}">
+  <meta property="og:title" content="{{ home_config.og_share_title|default:'Vakaria | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB' }}">
   <meta property="og:description" content="{{ home_config.og_share_description|default:'Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Drops e catálogo renovado 2x por semana em Cajazeiras-PB.' }}">
   {% if home_config.og_share_image or home_config.og_share_image_url %}
   <meta property="og:image" content="{{ home_config.final_og_image_url }}">
@@ -438,7 +438,7 @@
   <nav class="navbar navbar-expand-lg navbar-light navbar-light-custom sticky-top py-2">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-2 py-1" href="{% url 'catalog:home' %}">
-        <img src="{% static 'images/logo-dark.png' %}?v=4" alt="Grife HF" style="height: 52px; width: auto; object-fit: contain;">
+        <img src="{% static 'images/logo-dark.png' %}?v=4" alt="Vakaria" style="height: 52px; width: auto; object-fit: contain;">
       </a>
 
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLanding" aria-controls="navbarLanding" aria-expanded="false" aria-label="Menu">
@@ -467,7 +467,7 @@
         <!-- Minimalist Action Buttons -->
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
           <!-- Instagram Minimalist -->
-          <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/grifehfmultimarcascz/' }}" target="_blank" class="btn btn-sm btn-ghost-dark d-flex align-items-center justify-content-center p-2 rounded-circle" title="Instagram @grifehfmultimarcascz" aria-label="Instagram">
+          <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/vakariabarbearia/' }}" target="_blank" class="btn btn-sm btn-ghost-dark d-flex align-items-center justify-content-center p-2 rounded-circle" title="Instagram @vakariabarbearia" aria-label="Instagram">
             <i class="bx bxl-instagram fs-20"></i>
           </a>
 
@@ -526,7 +526,7 @@
               <div class="hero-glass-card p-4 rounded-4 text-white">
                 <div class="d-flex align-items-center {% if slide.text_alignment == 'center' %}justify-content-center{% elif slide.text_alignment == 'right' %}justify-content-end{% else %}justify-content-start{% endif %} gap-2 mb-2 text-warning fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 1.2px;">
                   <i class="bx bxs-map-pin text-warning fs-15"></i>
-                  <span>{{ slide.badge_text|default:"Grife HF Multimarcas • Cajazeiras - PB" }}</span>
+                  <span>{{ slide.badge_text|default:"Vakaria Barbearia • Cajazeiras - PB" }}</span>
                 </div>
                 <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.5px; font-size: calc(1.3rem + 1.2vw);">
                   {{ slide.title }}
@@ -571,7 +571,7 @@
         {% empty %}
         <!-- Slide 1: Moda Feminina Luxury -->
         <div class="carousel-item active h-100 position-relative">
-          <img src="{% static 'images/hero_feminina.jpg' %}" alt="Grife HF Alta Moda Feminina" class="hero-slide-img">
+          <img src="{% static 'images/hero_feminina.jpg' %}" alt="Vakaria Alta Moda Feminina" class="hero-slide-img">
           <div class="hero-slide-overlay overlay-medium"></div>
 
           <div class="container h-100 position-relative">
@@ -579,10 +579,10 @@
               <div class="hero-glass-card p-4 rounded-4 text-white">
                 <div class="d-flex align-items-center gap-2 mb-2 text-warning fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 1.2px;">
                   <i class="bx bxs-map-pin text-warning fs-15"></i>
-                  <span>Grife HF Multimarcas • Cajazeiras - PB</span>
+                  <span>Vakaria Barbearia • Cajazeiras - PB</span>
                 </div>
                 <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.5px; font-size: calc(1.3rem + 1.2vw);">
-                  As Grifes Mais Desejadas do Brasil em Uma Só Experiência
+                  O Melhor em Barbearia e Estilo em Uma Só Experiência
                 </h1>
                 <p class="text-white-50 fs-14 mb-3 leading-relaxed">
                   Curadoria exclusiva de alta moda feminina. Vestidos fluidos, sedas nobres, alfaiataria impecável e peças autorais das marcas mais consagradas do país.
@@ -650,7 +650,7 @@
             </div>
             <div>
               <h6 class="fw-bold mb-1 fs-15 text-dark">{{ home_config.benefit2_title|default:"Curadoria Multimarcas" }}</h6>
-              <p class="text-muted fs-13 mb-0">{{ home_config.benefit2_subtitle|default:"As melhores grifes do país" }}</p>
+              <p class="text-muted fs-13 mb-0">{{ home_config.benefit2_subtitle|default:"Os melhores produtos e atendimento da região" }}</p>
             </div>
           </div>
         </div>
@@ -850,7 +850,7 @@
                           <img src="{% static 'images/product/p-1.png' %}" alt="{{ prod.title }}" loading="lazy">
                           {% endif %}
                         </div>
-                        <span class="fs-11 text-uppercase text-muted fw-bold d-block">{{ prod.brand.name|default:'Grife HF' }}</span>
+                        <span class="fs-11 text-uppercase text-muted fw-bold d-block">{{ prod.brand.name|default:'Vakaria' }}</span>
                         <h5 class="fw-bold text-dark fs-14 mb-1 text-truncate" title="{{ prod.title }}">
                           <a href="{{ prod.get_absolute_url }}" class="text-dark text-decoration-none hover-primary">{{ prod.title }}</a>
                         </h5>
@@ -873,7 +873,7 @@
                         </div>
                       </div>
 
-                      <a href="https://api.whatsapp.com/send?phone=558391650137&text=Ol%C3%A1!%20Vi%20a%20promo%C3%A7%C3%A3o%20da%20pe%C3%A7a%20*{{ prod.title|urlencode }}*%20no%20site%20da%20Grife%20HF%20e%20quero%20aproveitar%20o%20desconto!" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill w-100 fw-semibold d-flex align-items-center justify-content-center gap-1.5 py-1.5 fs-12">
+                      <a href="https://api.whatsapp.com/send?phone=558391650137&text=Ol%C3%A1!%20Vi%20a%20promo%C3%A7%C3%A3o%20da%20pe%C3%A7a%20*{{ prod.title|urlencode }}*%20no%20site%20da%20Vakaria%20e%20quero%20aproveitar%20o%20desconto!" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill w-100 fw-semibold d-flex align-items-center justify-content-center gap-1.5 py-1.5 fs-12">
                         <i class="bx bxl-whatsapp text-success fs-15"></i> Pedir no WhatsApp
                       </a>
 
@@ -1073,7 +1073,7 @@
       <div class="row align-items-center gy-5">
         <div class="col-lg-6">
           <span class="badge badge-gold px-3 py-1 fs-11 text-uppercase mb-3 rounded-pill">{{ home_config.store_badge|default:'📍 Loja Física em Cajazeiras - PB' }}</span>
-          <h2 class="fw-bold fs-32 text-dark mb-4">{{ home_config.store_title|default:'Experiência Presencial na Grife HF' }}</h2>
+          <h2 class="fw-bold fs-32 text-dark mb-4">{{ home_config.store_title|default:'Experiência Presencial na Vakaria' }}</h2>
           <p class="text-muted fs-16 mb-4 leading-relaxed">
             {{ home_config.store_description|default:'Localizada no centro de Cajazeiras, nossa loja física foi criada para proporcionar conforto, sofisticação e uma experiência de compra personalizada. Venha conhecer de perto as peças, experimentar as composições e tomar um café com a nossa equipe.' }}
           </p>
@@ -1105,7 +1105,7 @@
               </div>
               <div>
                 <strong class="text-dark d-block fs-14">Instagram Oficial:</strong>
-                <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="text-danger fw-semibold fs-14 text-decoration-none">{{ home_config.store_instagram_handle|default:'@grifehfmultimarcascz' }}</a>
+                <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="text-danger fw-semibold fs-14 text-decoration-none">{{ home_config.store_instagram_handle|default:'@vakariabarbearia' }}</a>
               </div>
             </div>
 
@@ -1138,7 +1138,7 @@
             <div class="card-body p-4 bg-light border-top">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 class="text-dark mb-1 fw-bold">Grife HF Multimarcas</h5>
+                  <h5 class="text-dark mb-1 fw-bold">Vakaria Barbearia</h5>
                   <p class="text-muted fs-13 mb-0">Cajazeiras - PB • Moda Feminina & Masculina</p>
                 </div>
                 <span class="badge {{ home_config.current_store_status.badge_class }} px-3 py-2 rounded-pill d-inline-flex align-items-center gap-1.5 shadow-xs fs-12 fw-bold">
@@ -1175,7 +1175,7 @@
 
         <h2 class="display-6 fw-bold text-dark mb-2" style="letter-spacing: -0.5px;">{{ home_config.reviews_title|default:"O que Nossos Clientes Dizem" }}</h2>
         <p class="text-muted fs-16 max-w-600 mx-auto mb-0">
-          {{ home_config.reviews_subtitle|default:"Experiência comprovada por quem veste e confia na curadoria multimarcas da Grife HF." }}
+          {{ home_config.reviews_subtitle|default:"Experiência comprovada por quem veste e confia na curadoria multimarcas da Vakaria." }}
         </p>
       </div>
 
@@ -1340,13 +1340,13 @@
       <div class="row gy-4 justify-content-between">
         <div class="col-lg-4">
           <a href="{% url 'catalog:home' %}" class="d-inline-block mb-3 text-decoration-none">
-            <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Grife HF Multimarcas" style="height: 56px; width: auto; object-fit: contain;">
+            <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Vakaria Barbearia" style="height: 56px; width: auto; object-fit: contain;">
           </a>
           <p class="text-muted fs-14 mb-3">
             Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino com curadoria apurada e novidades duas vezes por semana.
           </p>
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Instagram @grifehfmultimarcascz">
+            <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Instagram @vakariabarbearia">
               <i class="bx bxl-instagram fs-18"></i>
             </a>
             <a href="{{ STORE_WHATSAPP_URL }}" target="_blank" class="btn btn-outline-success btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="Atendimento WhatsApp: (83) 9165-0137">
@@ -1379,13 +1379,13 @@
             <i class="bx bxl-whatsapp me-1 text-success"></i> {{ STORE_PHONE|default:"+55 83 9165-0137" }}
           </p>
           <p class="text-muted fs-14 mb-0">
-            <i class="bx bxl-instagram me-1 text-danger"></i> {{ STORE_INSTAGRAM_HANDLE|default:"@grifehfmultimarcascz" }}
+            <i class="bx bxl-instagram me-1 text-danger"></i> {{ STORE_INSTAGRAM_HANDLE|default:"@vakariabarbearia" }}
           </p>
         </div>
       </div>
 
       <div class="border-top mt-4 pt-4 text-center text-muted fs-13" style="border-color: var(--hf-border) !important;">
-        <p class="mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Grife HF Multimarcas. Todos os direitos reservados. Cajazeiras - PB.</p>
+        <p class="mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Vakaria Barbearia. Todos os direitos reservados. Cajazeiras - PB.</p>
       </div>
     </div>
   </footer>

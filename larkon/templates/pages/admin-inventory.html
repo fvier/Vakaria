@@ -1,7 +1,7 @@
 {% extends 'layout-vertical.html' %}
 {% load static i18n %}
 
-{% block title %}Controle de Estoque (Entradas & Saídas) | Grife HF{% endblock title %}
+{% block title %}Controle de Estoque (Entradas & Saídas) | Vakaria{% endblock title %}
 
 {% block extra_css %}
 <style>
@@ -338,7 +338,7 @@
 
                       <!-- Categoria / Marca -->
                       <td>
-                        <div class="fw-semibold text-dark">{{ item.product.brand.name|default:"Grife HF" }}</div>
+                        <div class="fw-semibold text-dark">{{ item.product.brand.name|default:"Vakaria" }}</div>
                         <div class="text-muted fs-12">{{ item.product.category.name|default:"Sem categoria" }}</div>
                       </td>
 
@@ -637,7 +637,7 @@
             <select name="product_id" id="batchProductSelect" class="form-select" required onchange="renderBatchGridInputs()">
               <option value="">Selecione o produto...</option>
               {% for item in products_list %}
-                <option value="{{ item.product.id }}">{{ item.product.title }} ({{ item.product.brand.name|default:'Grife HF' }})</option>
+                <option value="{{ item.product.id }}">{{ item.product.title }} ({{ item.product.brand.name|default:'Vakaria' }})</option>
               {% endfor %}
             </select>
           </div>

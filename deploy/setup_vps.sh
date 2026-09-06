@@ -1,11 +1,11 @@
 #!/bin/bash
 # ==============================================================================
-# SCRIPT DE DEPLOY AUTOMATIZADO - GRIFE HF (VPS 147.79.110.132)
+# SCRIPT DE DEPLOY AUTOMATIZADO - VAKARIA (VPS 147.79.110.132)
 # ==============================================================================
 
 set -e
 
-echo "🚀 Iniciando deploy da Grife HF Multimarcas no servidor 147.79.110.132..."
+echo "🚀 Iniciando deploy da Vakaria Barbearia no servidor 147.79.110.132..."
 
 # 1. Cria .env.vps a partir do exemplo se não existir
 if [ ! -f .env.vps ]; then
@@ -33,7 +33,7 @@ from larkon.users.models import User
 from larkon.catalog.models import CarouselSlide, LinktreeItem
 
 # Cria ou atualiza usuário administrador inicial
-admin_email = os.environ.get("INITIAL_ADMIN_EMAIL", "herivelton@grifehf.com.br")
+admin_email = os.environ.get("INITIAL_ADMIN_EMAIL", "herivelton@vakaria.com.br")
 admin_pass = os.environ.get("INITIAL_ADMIN_PASSWORD", "")
 
 user, created = User.objects.get_or_create(
@@ -50,9 +50,9 @@ print(f"✓ Usuário {admin_email} pronto!")
 # Seed de slides
 if not CarouselSlide.objects.exists():
     CarouselSlide.objects.create(
-        title="As Grifes Mais Desejadas do Brasil em Uma Só Experiência",
+        title="O Melhor em Barbearia e Estilo em Uma Só Experiência",
         subtitle="Curadoria exclusiva de alta moda feminina. Vestidos fluidos, sedas nobres, alfaiataria impecável e peças autorais das marcas mais consagradas do país.",
-        badge_text="✨ GRIFE HF MULTIMARCAS • CAJAZEIRAS - PB",
+        badge_text="✨ VAKARIA BARBEARIA • CAJAZEIRAS - PB",
         image_url="/static/images/hero_feminina.jpg",
         button_text="Coleção Feminina",
         button_url="/produtos/?gender=F",
@@ -108,7 +108,7 @@ if not LinktreeItem.objects.exists():
 
 echo "=================================================================="
 echo "🎉 DEPLOY CONCLUÍDO COM SUCESSO!"
-echo "🌐 Acesse: https://grifehf.com.br"
-echo "🔐 Login: https://grifehf.com.br/login/"
-echo "🔗 Linktree: https://grifehf.com.br/links"
+echo "🌐 Acesse: https://vakaria.com.br"
+echo "🔐 Login: https://vakaria.com.br/login/"
+echo "🔗 Linktree: https://vakaria.com.br/links"
 echo "=================================================================="

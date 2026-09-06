@@ -1,7 +1,7 @@
 {% extends 'layout-vertical.html' %}
 {% load static i18n %}
 
-{% block title %}PDV WhatsApp & Balcão — Lançar Pedido | Grife HF{% endblock title %}
+{% block title %}PDV WhatsApp & Balcão — Lançar Pedido | Vakaria{% endblock title %}
 
 {% block extra_css %}
 <style>
@@ -203,7 +203,7 @@
               <div class="col-sm-6">
                 <label class="form-label fs-12 fw-semibold text-dark mb-1">Forma de Entrega</label>
                 <select class="form-select form-select-sm" id="posDeliveryMethod" name="delivery_method" onchange="toggleDeliveryFields()">
-                  <option value="pickup" selected>🏪 Retirada na Loja (Grife HF)</option>
+                  <option value="pickup" selected>🏪 Retirada na Loja (Vakaria)</option>
                   <option value="motoboy">🛵 Entrega Rápida (Motoboy Cajazeiras)</option>
                   <option value="shipping">✈️ Envio Correios / Sedex / PAC</option>
                 </select>
@@ -450,7 +450,7 @@
           ${imgHtml}
           <div class="mt-1.5">
             <span class="fw-bold text-dark fs-11 text-truncate d-block" title="${p.title}">${p.title}</span>
-            <small class="text-muted fs-10 d-block text-truncate">${p.brand_name || 'Grife HF'}</small>
+            <small class="text-muted fs-10 d-block text-truncate">${p.brand_name || 'Vakaria'}</small>
             <div class="d-flex justify-content-between align-items-center mt-1">
               <span class="fw-bold text-dark fs-12">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
               <span class="badge ${p.in_stock ? 'bg-dark' : 'bg-danger'} px-1.5 py-0.5 fs-9">${p.in_stock ? '+ Adicionar' : 'Esgotado'}</span>
@@ -646,7 +646,7 @@
             ${imgTag}
             <div class="overflow-hidden">
               <span class="fw-bold text-dark fs-12 text-truncate d-block">${item.title}</span>
-              <small class="text-muted fs-10">${item.brand_name || 'Grife HF'}</small>
+              <small class="text-muted fs-10">${item.brand_name || 'Vakaria'}</small>
             </div>
           </div>
         </td>
