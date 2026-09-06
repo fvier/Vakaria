@@ -396,7 +396,7 @@ def get_product_edit_data_view(request, pk):
         "total_stock": product.total_stock,
         "product_url": product.get_absolute_url(),
         "description": product.description or "Peça autêntica e exclusiva com corte e acabamento premium da Vakaria.",
-        "whatsapp_url": f"https://wa.me/558391650137?text={whatsapp_text}",
+        "whatsapp_url": f"https://wa.me/558183983355?text={whatsapp_text}",
     })
 
 

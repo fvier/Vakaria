@@ -306,7 +306,7 @@ class Command(BaseCommand):
         conf.announcement_active = True
         conf.announcement_badge = "📍 OLINDA • PE"
         conf.announcement_text = "Sua identidade cuidada com arte, respeito e alma olindense • Agende seu horário no WhatsApp"
-        conf.announcement_link = "https://wa.me/5581991650137"
+        conf.announcement_link = "https://wa.me/558183983355"
 
         # Cards de Destaque
         conf.women_card_badge = "✂️ Todas as Gerações"
@@ -331,8 +331,8 @@ class Command(BaseCommand):
             "Aqui, a arte do cuidado pessoal se encontra com a riqueza da cultura popular pernambucana."
         )
         conf.store_address = "Sítio Histórico de Olinda, Olinda - PE, Brasil"
-        conf.store_phone = "+55 81 99165-0137"
-        conf.store_instagram_handle = "@eduardocardosocabelo"
+        conf.store_phone = "+55 81 8398-3355"
+        conf.store_instagram_handle = "@eduardo_vaka_"
         conf.store_maps_url = "https://maps.google.com/?q=Sitio+Historico+de+Olinda+PE"
         conf.store_hours_text = "Terça a Sábado: 09h às 19h • Agendamentos pelo WhatsApp"
 

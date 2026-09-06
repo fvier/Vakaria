@@ -14,7 +14,7 @@ class TestVakariaFlow:
         assert response.status_code == 200
         content = response.content.decode("utf-8")
         assert "Vakaria" in content
-        assert "558391650137" in content
+        assert "558183983355" in content
 
     def test_catalog_and_brands_load(self, client: Client):
         res_prod = client.get(reverse("catalog:product_grid"))
@@ -67,7 +67,7 @@ class TestVakariaFlow:
     def test_linktree_public_page_and_click_tracking(self, client: Client):
         item = LinktreeItem.objects.create(
             title="WhatsApp VIP Teste",
-            url="https://wa.me/558391650137",
+            url="https://wa.me/558183983355",
             style="success",
             is_active=True,
             order=1,
@@ -82,7 +82,7 @@ class TestVakariaFlow:
         # Test click tracking redirect
         click_res = client.get(reverse("pages:linktree_click", kwargs={"pk": item.pk}))
         assert click_res.status_code == 302
-        assert click_res.url == "https://wa.me/558391650137"
+        assert click_res.url == "https://wa.me/558183983355"
         item.refresh_from_db()
         assert item.clicks_count == 1
 
@@ -738,7 +738,7 @@ class TestVakariaFlow:
         assert "wa.me/5583988887777" in receipt_link
         assert "Comprovante%20de%20Pedido" in receipt_link
         assert "Lucas%20Alencar" in receipt_link
-        assert "8391650137" in receipt_link
+        assert "8183983355" in receipt_link
 
     def test_crm_search_and_labels_and_reservation_conversion(self, client: Client):
         import json
@@ -1039,8 +1039,8 @@ class TestVakariaFlow:
             "store_title": "Conheça a Loja Conceito Vakaria",
             "store_description": "Venha tomar um café expresso conosco e conhecer nosso provador VIP.",
             "store_address": "Rua José Pires Braga 120, Centro, Cajazeiras - PB",
-            "store_phone": "+55 83 9165-0137",
-            "store_instagram_handle": "@vakariabarbearia",
+            "store_phone": "+55 81 8398-3355",
+            "store_instagram_handle": "@eduardo_vaka_",
             "store_maps_url": "https://maps.google.com/?q=Vakaria",
             "store_status_badge": "Aberto até 18h",
         }

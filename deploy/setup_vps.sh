@@ -78,7 +78,7 @@ if not LinktreeItem.objects.exists():
     LinktreeItem.objects.create(
         title="📲 Consultoria & Vendas no WhatsApp",
         subtitle="Fale agora com nossa equipe de consultoras VIP",
-        url="https://wa.me/558391650137",
+        url="https://wa.me/558183983355",
         icon="bx bxl-whatsapp",
         style="success",
         is_highlighted=True,

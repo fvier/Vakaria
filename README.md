@@ -6,14 +6,14 @@
 [![Django](https://img.shields.io/badge/Django-5.1%2B-092E20?logo=django&logoColor=white)](#)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap&logoColor=white)](#)
 [![Status](https://img.shields.io/badge/Status-Produ%C3%A7%C3%A3o%20%2F%20Ativo-brightgreen)](#)
-[![Instagram](https://img.shields.io/badge/Instagram-@vakariabarbearia-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/vakariabarbearia/)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-+55%2083%209165--0137-25D366?logo=whatsapp&logoColor=white)](https://wa.me/558391650137)
+[![Instagram](https://img.shields.io/badge/Instagram-@eduardo_vaka_-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/eduardo_vaka_/)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-+55%2083%209165--0137-25D366?logo=whatsapp&logoColor=white)](https://wa.me/558183983355)
 
 *A **Vakaria** é uma loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Com curadoria apurada de marcas parceiras renomadas, seu catálogo é renovado duas vezes por semana, garantindo novidades frequentes e uma experiência de compra sofisticada e atualizada.*
 
 📍 **Endereço Físico:** Rua José Pires Braga 120, Cajazeiras - PB, 58900-000, Brasil  
-📱 **Atendimento VIP WhatsApp:** [+55 83 9165-0137](https://wa.me/558391650137)  
-📸 **Instagram Oficial:** [@vakariabarbearia](https://www.instagram.com/vakariabarbearia/)
+📱 **Atendimento VIP WhatsApp:** [+55 81 8398-3355](https://wa.me/558183983355)  
+📸 **Instagram Oficial:** [@eduardo_vaka_](https://www.instagram.com/eduardo_vaka_/)
 
 </div>
 

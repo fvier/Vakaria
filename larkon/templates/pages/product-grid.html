@@ -711,7 +711,7 @@
                                     </button>
                                 </form>
                                 {% else %}
-                                <a href="https://wa.me/558391650137?text=Ol%C3%A1!%20Tenho%20interesse%20na%20pe%C3%A7a%20'{{ product.title|urlencode }}'%20que%20est%C3%A1%20esgotada.%20Quando%20chegar%C3%A1%20novamente%3F" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Encomendar no WhatsApp">
+                                <a href="https://wa.me/558183983355?text=Ol%C3%A1!%20Tenho%20interesse%20na%20pe%C3%A7a%20'{{ product.title|urlencode }}'%20que%20est%C3%A1%20esgotada.%20Quando%20chegar%C3%A1%20novamente%3F" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Encomendar no WhatsApp">
                                     <i class="bx bxl-whatsapp fs-14"></i> <span class="d-none d-md-inline fs-11">Encomendar</span>
                                 </a>
                                 {% endif %}
@@ -1601,7 +1601,7 @@
             if (selectedSizeName) msg += ` no tamanho *${selectedSizeName}*`;
             msg += ` (R$ ${parseFloat(currentProductData.price).toFixed(2).replace('.', ',')}) que vi na Vakaria: ${currentProductData.product_url}`;
             
-            qvWhatsAppBtn.href = `https://wa.me/558391650137?text=${encodeURIComponent(msg)}`;
+            qvWhatsAppBtn.href = `https://wa.me/558183983355?text=${encodeURIComponent(msg)}`;
             const colInput = document.getElementById('qvSelectedColorInput');
             const sizeInput = document.getElementById('qvSelectedSizeInput');
             if (colInput) colInput.value = selectedColorName;

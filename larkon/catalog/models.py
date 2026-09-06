@@ -528,8 +528,8 @@ class HomePageConfig(models.Model):
     store_title = models.CharField(_("Título Seção Loja"), max_length=150, default="Experiência Presencial na Vakaria")
     store_description = models.TextField(_("Descrição Seção Loja"), default="Localizada no centro de Cajazeiras, nossa loja física foi criada para proporcionar conforto, sofisticação e uma experiência de compra personalizada. Venha conhecer de perto as peças, experimentar as composições e tomar um café com a nossa equipe.")
     store_address = models.CharField(_("Endereço Completo"), max_length=255, default="Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil")
-    store_phone = models.CharField(_("WhatsApp & Telefone de Vendas"), max_length=50, default="+55 83 9165-0137")
-    store_instagram_handle = models.CharField(_("Instagram Handle"), max_length=60, default="@vakariabarbearia")
+    store_phone = models.CharField(_("WhatsApp & Telefone de Vendas"), max_length=50, default="+55 81 8398-3355")
+    store_instagram_handle = models.CharField(_("Instagram Handle"), max_length=60, default="@eduardo_vaka_")
     store_maps_url = models.CharField(_("Link do Google Maps"), max_length=500, default="https://maps.google.com/?q=Rua+Jose+Pires+Braga+120+Cajazeiras+PB")
     
     STORE_STATUS_MODE_CHOICES = [

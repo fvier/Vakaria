@@ -123,7 +123,7 @@ class Order(models.Model):
             self.order_number = f"GHF-{uuid.uuid4().hex[:8].upper()}"
         super().save(*args, **kwargs)
 
-    def generate_whatsapp_link(self, whatsapp_number="558391650137"):
+    def generate_whatsapp_link(self, whatsapp_number="558183983355"):
         """Gera o link de checkout VIP humanizado para o WhatsApp da Vakaria."""
         items_list = []
         for item in self.items.all():
@@ -160,7 +160,7 @@ class Order(models.Model):
 
         pix_block = ""
         if self.payment_method == "pix":
-            pix_block = "\n🔑 *Chave Pix Oficial (WhatsApp):* 8391650137\n🏦 *Favorecido:* Vakaria Barbearia\n"
+            pix_block = "\n🔑 *Chave Pix Oficial (WhatsApp):* 8183983355\n🏦 *Favorecido:* Vakaria Barbearia\n"
 
         msg = (
             f"✨ *Comprovante de Pedido — Vakaria Barbearia* ✨\n\n"
