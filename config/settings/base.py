@@ -310,13 +310,16 @@ SOCIALACCOUNT_ADAPTER = "larkon.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {"signup": "larkon.users.forms.UserSocialSignupForm"}
 
 
-# Vakaria Store Settings
+# Vakaria Store Settings - Cabeleireiro Eduardo Cardoso
 # ------------------------------------------------------------------------------
 VAKARIA_INFO = {
-    "NAME": "Vakaria Barbearia",
-    "ADDRESS": "Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil",
-    "PHONE": "+55 83 9165-0137",
-    "WHATSAPP_NUMBER": "558391650137",
-    "INSTAGRAM_URL": "https://www.instagram.com/vakariabarbearia/",
-    "INSTAGRAM_HANDLE": "@vakariabarbearia",
+    "NAME": env("STORE_NAME", default="Cabeleireiro Eduardo Cardoso"),
+    "ADDRESS": env("STORE_ADDRESS", default="Sítio Histórico de Olinda, Olinda - PE, Brasil"),
+    "CITY": env("STORE_CITY", default="Olinda - PE"),
+    "PHONE": env("STORE_PHONE", default="+55 81 99165-0137"),
+    "WHATSAPP_NUMBER": "5581991650137",
+    "WHATSAPP_URL": env("STORE_WHATSAPP_URL", default="https://wa.me/5581991650137"),
+    "WHATSAPP_GROUP_URL": env("STORE_WHATSAPP_GROUP_URL", default="https://chat.whatsapp.com/EoQm1858BrK36Uvjs6dYRG"),
+    "INSTAGRAM_URL": env("STORE_INSTAGRAM_URL", default="https://www.instagram.com/eduardocardosocabelo/"),
+    "INSTAGRAM_HANDLE": env("STORE_INSTAGRAM_HANDLE", default="@eduardocardosocabelo"),
 }

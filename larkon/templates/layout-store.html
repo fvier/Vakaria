@@ -3,9 +3,9 @@
 <head>
   {% load static i18n %}
   <meta charset="utf-8"/>
-  <title>{% block title %}Vitrine de Peças Exclusivas | Vakaria{% endblock %}</title>
+  <title>{% block title %}Ecossistema de Beleza & Cortes Autorais | Cabeleireiro Eduardo Cardoso{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Vakaria — Loja de moda multimarcas com peças exclusivas femininas e masculinas em Cajazeiras-PB."/>
+  <meta name="description" content="Cabeleireiro Eduardo Cardoso — Laboratório Artístico e Ecossistema de Beleza no Sítio Histórico de Olinda - PE."/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- Favicons -->
@@ -242,7 +242,7 @@
 
   <!-- Top Notification Bar -->
   <div class="bg-dark text-white text-center py-1.5 fs-12 fw-medium letter-spacing-1">
-    ✨ VAKARIA BARBEARIA • NOVIDADES TODA SEMANA • CAJAZEIRAS - PB • ENVIAMOS PARA TODO O BRASIL ✈️
+    ✨ CABELEIREIRO EDUARDO CARDOSO • SÍTIO HISTÓRICO DE OLINDA • ARTE, RESPEITO & ALMA OLINDENSE ✂️
   </div>
 
   <!-- Store Header Navbar -->
@@ -398,13 +398,13 @@
         <div class="col-lg-4 col-md-6">
           <img src="{% static 'images/logo-dark.png' %}" alt="Vakaria" height="36" class="mb-3" style="filter: brightness(0) invert(1);">
           <p class="mb-3 text-light opacity-90">
-            Sua loja de moda multimarcas premium em Cajazeiras - PB. Peças selecionadas das melhores marcas e produtos com atendimento exclusivo.
+            Laboratório Artístico e Ecossistema de Beleza no Sítio Histórico de Olinda - PE. Sua identidade cuidada com arte, respeito e alma olindense.
           </p>
           <div class="d-flex gap-2 pt-1">
-            <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/vakariabarbearia/' }}" target="_blank" class="store-social-btn" title="Instagram Oficial">
+            <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/eduardocardosocabelo/' }}" target="_blank" class="store-social-btn" title="Instagram Oficial">
               <i class="bx bxl-instagram text-danger fs-18"></i>
             </a>
-            <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558391650137' }}" target="_blank" class="store-social-btn" title="Atendimento WhatsApp">
+            <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/5581991650137' }}" target="_blank" class="store-social-btn" title="Atendimento WhatsApp">
               <i class="bx bxl-whatsapp text-success fs-18"></i>
             </a>
           </div>
@@ -415,40 +415,40 @@
           <h6 class="text-uppercase fs-13">📍 Atendimento &amp; Localização</h6>
           <p class="mb-2 d-flex align-items-start text-light">
             <i class="bx bx-map me-2 text-warning fs-18 mt-0.5"></i>
-            <span>{{ STORE_ADDRESS|default:"Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil" }}</span>
+            <span>{{ STORE_ADDRESS|default:"Sítio Histórico de Olinda, Olinda - PE, Brasil" }}</span>
           </p>
           <p class="mb-2 d-flex align-items-center text-light">
             <i class="bx bx-phone me-2 text-warning fs-18"></i>
-            <span>{{ STORE_PHONE|default:"+55 83 9165-0137" }}</span>
+            <span>{{ STORE_PHONE|default:"+55 81 99165-0137" }}</span>
           </p>
           <p class="mb-0 d-flex align-items-center text-light">
             <i class="bx bx-time-five me-2 text-warning fs-18"></i>
-            <span>Segunda a Sábado: 09h às 19h</span>
+            <span>Terça a Sábado: 09h às 19h</span>
           </p>
         </div>
 
         <!-- Coluna 3: Navegação Rápida -->
         <div class="col-lg-4 col-md-12">
-          <h6 class="text-uppercase fs-13">⚡ Navegação Rápida</h6>
+          <h6 class="text-uppercase fs-13">⚡ Serviços &amp; Ecossistema</h6>
           <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
             <li>
               <a href="{% url 'catalog:product_grid' %}" class="store-footer-link">
-                <i class="bx bx-chevron-right text-warning me-1"></i> Catálogo de Peças &amp; Novidades
+                <i class="bx bx-chevron-right text-warning me-1"></i> Catálogo Completo de Serviços
               </a>
             </li>
             <li>
-              <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" class="store-footer-link">
-                <i class="bx bx-chevron-right text-warning me-1"></i> Linha Feminina Luiza Fit
+              <a href="{% url 'catalog:product_grid' %}?category=cortes-personalizados" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Cortes para Todas as Gerações
               </a>
             </li>
             <li>
-              <a href="{% url 'catalog:brand_list' %}" class="store-footer-link">
-                <i class="bx bx-chevron-right text-warning me-1"></i> Marcas &amp; Curadorias Parceiras
+              <a href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Barba na Toalha Quente &amp; Spa Facial
               </a>
             </li>
             <li>
-              <a href="/links" target="_blank" class="store-footer-link">
-                <i class="bx bx-chevron-right text-warning me-1"></i> Linktree &amp; Redes Oficiais
+              <a href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Alquimia Capilar &amp; Nevou Olindense
               </a>
             </li>
           </ul>
@@ -458,7 +458,7 @@
 
       <!-- Linha de Copyright -->
       <div class="border-top border-secondary border-opacity-25 mt-4 pt-3 text-center text-light opacity-75 fs-12">
-        &copy; {% now "Y" %} Vakaria Barbearia — Todos os direitos reservados. Cajazeiras - PB.
+        &copy; {% now "Y" %} Cabeleireiro Eduardo Cardoso — Todos os direitos reservados. Sítio Histórico de Olinda - PE.
       </div>
     </div>
   </footer>

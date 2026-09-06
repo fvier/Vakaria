@@ -3,17 +3,17 @@
 <head>
   {% load static i18n %}
   <meta charset="utf-8"/>
-  <title>Vakaria | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB</title>
+  <title>{{ home_config.og_share_title|default:'Cabeleireiro Eduardo Cardoso | Laboratório Artístico e Ecossistema de Beleza (Olinda - PE)' }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Vakaria — Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Drops e catálogo renovado 2x por semana em Cajazeiras-PB."/>
-  <meta name="author" content="Vakaria"/>
+  <meta name="description" content="Cabeleireiro Eduardo Cardoso — Laboratório Artístico e Ecossistema de Beleza no Sítio Histórico de Olinda. Cortes personalizados, ritual da barba com toalha quente e alquimia capilar."/>
+  <meta name="author" content="Cabeleireiro Eduardo Cardoso"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
   <!-- Open Graph / Social Sharing -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
-  <meta property="og:title" content="{{ home_config.og_share_title|default:'Vakaria | Moda Multimarcas Feminina & Masculina em Cajazeiras - PB' }}">
-  <meta property="og:description" content="{{ home_config.og_share_description|default:'Loja de moda multimarcas que oferece peças exclusivas para os públicos feminino e masculino. Drops e catálogo renovado 2x por semana em Cajazeiras-PB.' }}">
+  <meta property="og:title" content="{{ home_config.og_share_title|default:'Cabeleireiro Eduardo Cardoso | Laboratório Artístico e Ecossistema de Beleza (Olinda - PE)' }}">
+  <meta property="og:description" content="{{ home_config.og_share_description|default:'Laboratório Artístico no Sítio Histórico de Olinda. Um refúgio seguro, humano e radicalmente inclusivo. Sua identidade cuidada com arte, respeito e alma olindense.' }}">
   {% if home_config.og_share_image or home_config.og_share_image_url %}
   <meta property="og:image" content="{{ home_config.final_og_image_url }}">
   {% endif %}
@@ -579,20 +579,20 @@
               <div class="hero-glass-card p-4 rounded-4 text-white">
                 <div class="d-flex align-items-center gap-2 mb-2 text-warning fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 1.2px;">
                   <i class="bx bxs-map-pin text-warning fs-15"></i>
-                  <span>Vakaria Barbearia • Cajazeiras - PB</span>
+                  <span>Cabeleireiro Eduardo Cardoso • Sítio Histórico de Olinda</span>
                 </div>
                 <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.5px; font-size: calc(1.3rem + 1.2vw);">
-                  O Melhor em Barbearia e Estilo em Uma Só Experiência
+                  Laboratório Artístico &amp; Ecossistema de Beleza
                 </h1>
                 <p class="text-white-50 fs-14 mb-3 leading-relaxed">
-                  Curadoria exclusiva de alta moda feminina. Vestidos fluidos, sedas nobres, alfaiataria impecável e peças autorais das marcas mais consagradas do país.
+                  Fincado nas ladeiras de Olinda. Um refúgio seguro, humano e radicalmente inclusivo, onde a arte do cuidado pessoal se encontra com a cultura popular pernambucana.
                 </p>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                  <a href="{% url 'catalog:product_grid' %}?gender=F" class="btn btn-warning btn-sm rounded-pill px-3.5 py-2 fw-bold text-dark d-inline-flex align-items-center gap-1.5 shadow-sm">
-                    <i class="bx bx-shopping-bag fs-16"></i> <span>Coleção Feminina</span>
+                  <a href="{% url 'catalog:product_grid' %}" class="btn btn-warning btn-sm rounded-pill px-3.5 py-2 fw-bold text-dark d-inline-flex align-items-center gap-1.5 shadow-sm">
+                    <i class="bx bx-calendar-check fs-16"></i> <span>Ver Serviços &amp; Agendar</span>
                   </a>
                   <a href="{{ STORE_WHATSAPP_URL }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5">
-                    <i class="bx bxl-whatsapp fs-16 text-success"></i> <span>Consultoria VIP</span>
+                    <i class="bx bxl-whatsapp fs-16 text-success"></i> <span>Atendimento no WhatsApp</span>
                   </a>
                 </div>
               </div>
@@ -1072,10 +1072,10 @@
     <div class="container py-3">
       <div class="row align-items-center gy-5">
         <div class="col-lg-6">
-          <span class="badge badge-gold px-3 py-1 fs-11 text-uppercase mb-3 rounded-pill">{{ home_config.store_badge|default:'📍 Loja Física em Cajazeiras - PB' }}</span>
-          <h2 class="fw-bold fs-32 text-dark mb-4">{{ home_config.store_title|default:'Experiência Presencial na Vakaria' }}</h2>
+          <span class="badge badge-gold px-3 py-1 fs-11 text-uppercase mb-3 rounded-pill">{{ home_config.store_badge|default:'📍 Sítio Histórico de Olinda - PE' }}</span>
+          <h2 class="fw-bold fs-32 text-dark mb-4">{{ home_config.store_title|default:'Cabeleireiro Eduardo Cardoso: Laboratório Artístico' }}</h2>
           <p class="text-muted fs-16 mb-4 leading-relaxed">
-            {{ home_config.store_description|default:'Localizada no centro de Cajazeiras, nossa loja física foi criada para proporcionar conforto, sofisticação e uma experiência de compra personalizada. Venha conhecer de perto as peças, experimentar as composições e tomar um café com a nossa equipe.' }}
+            {{ home_config.store_description|default:'Muito mais que um salão ou uma barbearia tradicional, o espaço do Cabeleireiro Eduardo Cardoso é um autêntico laboratório artístico fincado nas ladeiras de Olinda. Um refúgio seguro, humano e radicalmente inclusivo, onde a arte do cuidado pessoal se encontra com a riqueza da cultura popular pernambucana.' }}
           </p>
 
           <div class="d-flex flex-column gap-3 mb-4">
@@ -1085,7 +1085,7 @@
               </div>
               <div>
                 <strong class="text-dark d-block fs-14">Endereço:</strong>
-                <span class="text-muted fs-14">{{ home_config.store_address|default:'Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil' }}</span>
+                <span class="text-muted fs-14">{{ home_config.store_address|default:'Sítio Histórico de Olinda, Olinda - PE, Brasil' }}</span>
               </div>
             </div>
 
@@ -1094,8 +1094,8 @@
                 <i class="bx bxl-whatsapp"></i>
               </div>
               <div>
-                <strong class="text-dark d-block fs-14">WhatsApp & Vendas:</strong>
-                <span class="text-muted fs-14">{{ home_config.store_phone|default:'+55 83 9165-0137' }}</span>
+                <strong class="text-dark d-block fs-14">WhatsApp &amp; Agendamentos:</strong>
+                <span class="text-muted fs-14">{{ home_config.store_phone|default:'+55 81 99165-0137' }}</span>
               </div>
             </div>
 
@@ -1105,7 +1105,7 @@
               </div>
               <div>
                 <strong class="text-dark d-block fs-14">Instagram Oficial:</strong>
-                <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="text-danger fw-semibold fs-14 text-decoration-none">{{ home_config.store_instagram_handle|default:'@vakariabarbearia' }}</a>
+                <a href="{{ STORE_INSTAGRAM_URL }}" target="_blank" class="text-danger fw-semibold fs-14 text-decoration-none">{{ home_config.store_instagram_handle|default:'@eduardocardosocabelo' }}</a>
               </div>
             </div>
 

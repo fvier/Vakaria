@@ -1,223 +1,365 @@
-from datetime import date
+from datetime import date, time
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from larkon.catalog.models import Brand, Category, Drop, Product, ProductVariant, ProductImage
+from larkon.catalog.models import (
+    Brand,
+    Category,
+    Drop,
+    Product,
+    ProductVariant,
+    CarouselSlide,
+    CustomerReview,
+    HomePageConfig,
+)
 
 User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Popula o banco de dados com marcas, categorias, drops e peças de moda da Vakaria"
+    help = "Popula o banco de dados com a identidade, serviços e ambiente do Cabeleireiro Eduardo Cardoso em Olinda"
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE("🌱 Iniciando o Seed de Moda da Vakaria..."))
+        self.stdout.write(self.style.NOTICE("💈 Iniciando o Seed do Cabeleireiro Eduardo Cardoso (Olinda - PE)..."))
 
         # 1. Superuser
         if not User.objects.filter(email="admin@vakaria.com.br").exists():
-            User.objects.create_superuser("admin@vakaria.com.br", "admin123", name="Administrador Vakaria")
+            User.objects.create_superuser("admin@vakaria.com.br", "admin123", name="Eduardo Cardoso")
             self.stdout.write(self.style.SUCCESS("✅ Superusuário criado: admin@vakaria.com.br / admin123"))
 
-        # 2. Marcas Multimarcas
+        # 2. Linhas de Cuidado / Assinaturas
         brands_data = [
-            {"name": "Animale", "description": "Sofisticação, estampas marcantes e alfaiataria premium feminina."},
-            {"name": "Osklen", "description": "Moda sustentável, design contemporâneo e estilo casual chic."},
-            {"name": "Farm Rio", "description": "Cores vivas, estampas tropicais exclusivas e alma carioca."},
-            {"name": "Reserva", "description": "Autenticidade, alta qualidade em camisaria e básicos masculinos premium."},
-            {"name": "Ricardo Almeida", "description": "O ápice da alfaiataria e alta costura masculina contemporânea."},
-            {"name": "John John", "description": "Denimwear de luxo, moda jovem sofisticada e atitude urbana."},
-            {"name": "Schutz", "description": "Calçados, bolsas e acessórios de design inovador e exclusivo."},
+            {"name": "Eduardo Cardoso Atelier", "description": "Atendimento autoral com corte e visagismo personalizado no Sítio Histórico de Olinda."},
+            {"name": "Ritual Barber & Spa", "description": "Alinhamento preciso, toalha quente e cuidados faciais para relaxamento pleno."},
+            {"name": "Alquimia Capilar Olinda", "description": "Cor, mechas, relaxamento seguro e a autêntica arte do 'nevou' olindense."},
         ]
 
         brand_objs = {}
         for b_data in brands_data:
-            brand, _ = Brand.objects.get_or_create(name=b_data["name"], defaults={"description": b_data["description"]})
+            brand, _ = Brand.objects.get_or_create(name=b_data["name"], defaults={"description": b_data["description"], "is_active": True})
             brand_objs[b_data["name"]] = brand
-        self.stdout.write(self.style.SUCCESS(f"✅ {len(brand_objs)} Marcas cadastradas"))
+        self.stdout.write(self.style.SUCCESS(f"✅ {len(brand_objs)} Linhas de Serviços cadastradas"))
 
-        # 3. Categorias Principais
-        cat_fem, _ = Category.objects.get_or_create(name="Moda Feminina", gender_target="F", defaults={"order": 1})
-        cat_masc, _ = Category.objects.get_or_create(name="Moda Masculina", gender_target="M", defaults={"order": 2})
-        cat_acess, _ = Category.objects.get_or_create(name="Acessórios & Bolsas", gender_target="U", defaults={"order": 3})
+        # 3. Categorias Principais do Ecossistema
+        cat_cortes, _ = Category.objects.get_or_create(
+            name="Cortes Personalizados",
+            defaults={"gender_target": "U", "order": 1, "icon": "solar:scissors-square-bold-duotone"}
+        )
+        cat_barba, _ = Category.objects.get_or_create(
+            name="Barba, Bigode & Cuidados Faciais",
+            defaults={"gender_target": "M", "order": 2, "icon": "solar:shield-user-bold-duotone"}
+        )
+        cat_quimica, _ = Category.objects.get_or_create(
+            name="Alquimia Capilar, Cor & Química",
+            defaults={"gender_target": "U", "order": 3, "icon": "solar:fire-bold-duotone"}
+        )
 
         subcats = [
-            ("Vestidos & Macacões", "F", cat_fem),
-            ("Alfaiataria Feminina", "F", cat_fem),
-            ("Camisas & Tops", "F", cat_fem),
-            ("Camisaria & Polos", "M", cat_masc),
-            ("Alfaiataria Masculina", "M", cat_masc),
-            ("Calças & Bermudas", "M", cat_masc),
-            ("Bolsas & Calçados", "U", cat_acess),
+            ("Cortes Masculinos Autorais", "M", cat_cortes),
+            ("Cortes Femininos Personalizados", "F", cat_cortes),
+            ("Cortes Infantis & Juvenis", "U", cat_cortes),
+            ("Ritual da Barba com Toalha Quente", "M", cat_barba),
+            ("Alinhamento & Barboterapia", "M", cat_barba),
+            ("Nevou & Descoloração Global", "U", cat_quimica),
+            ("Coloração Artística & Mechas", "U", cat_quimica),
+            ("Tratamentos & Cronograma Capilar", "U", cat_quimica),
         ]
 
         cat_objs = {}
         for name, gender, parent in subcats:
-            cat, _ = Category.objects.get_or_create(name=name, gender_target=gender, defaults={"parent": parent})
+            cat, _ = Category.objects.get_or_create(name=name, defaults={"gender_target": gender, "parent": parent})
             cat_objs[name] = cat
-        self.stdout.write(self.style.SUCCESS("✅ Categorias Feminina, Masculina e Acessórios configuradas"))
+        self.stdout.write(self.style.SUCCESS("✅ Categorias do Ecossistema de Beleza configuradas"))
 
-        # 4. Drops Bi-Semanais
-        drop_terca, _ = Drop.objects.get_or_create(
-            title="Drop Terça #01 — Exclusividades Primavera & Resort",
+        # 4. Drops / Sessões de Atendimento
+        drop_olinda, _ = Drop.objects.get_or_create(
+            title="Temporada Olinda — Identidade, Arte & Acolhimento",
             defaults={
-                "edition": "DROP-2026-W36-TUE",
-                "launch_date": date(2026, 9, 1),
-                "description": "Seleção especial com linho puro, sedas e cores vibrantes para elevar sua estação.",
+                "edition": "OLINDA-2026",
+                "launch_date": date.today(),
+                "description": "Experiência completa de cuidado e estética nas ladeiras do Sítio Histórico de Olinda.",
                 "is_featured": True,
+                "is_active": True,
             }
         )
 
-        drop_quinta, _ = Drop.objects.get_or_create(
-            title="Drop Quinta #02 — Alfaiataria Noturna & Eventos",
-            defaults={
-                "edition": "DROP-2026-W36-THU",
-                "launch_date": date(2026, 9, 3),
-                "description": "Cortes precisos, blazers estruturados e vestidos de gala exclusivos.",
-                "is_featured": True,
-            }
-        )
-        self.stdout.write(self.style.SUCCESS("✅ Drops Bi-semanais criados"))
-
-        # 5. Peças de Moda (Produtos)
-        products_data = [
+        # 5. Serviços / Procedimentos
+        services_data = [
             {
-                "title": "Vestido Midi Seda Estampa Jardim Tropical",
-                "brand": brand_objs["Farm Rio"],
-                "category": cat_objs["Vestidos & Macacões"],
-                "drop": drop_terca,
-                "gender": "F",
-                "price": 898.00,
-                "compare_at_price": 1050.00,
-                "description": "Vestido midi em seda pura com decote transpassado e estampa autoral exclusiva Farm Rio. Caimento fluido impecável.",
-                "fabric_composition": "100% Seda Pura",
-                "is_featured": True,
-                "is_exclusive": True,
-                "image_url": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80",
-                "variants": [
-                    {"size": "P", "color": "Estampado", "sku": "FRM-VEST-P", "stock": 2},
-                    {"size": "M", "color": "Estampado", "sku": "FRM-VEST-M", "stock": 3},
-                    {"size": "G", "color": "Estampado", "sku": "FRM-VEST-G", "stock": 1},
-                ]
-            },
-            {
-                "title": "Blazer Alfaiataria Slim Fit Linho Areia",
-                "brand": brand_objs["Ricardo Almeida"],
-                "category": cat_objs["Alfaiataria Masculina"],
-                "drop": drop_quinta,
-                "gender": "M",
-                "price": 2490.00,
-                "compare_at_price": 2890.00,
-                "description": "Blazer clássico desestruturado em puro linho italiano. Lapela notch, dois botões em madrepérola e forro interno em cetim maquinetado.",
-                "fabric_composition": "100% Linho Italiano",
-                "is_featured": True,
-                "is_exclusive": True,
-                "image_url": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80",
-                "variants": [
-                    {"size": "48 (M)", "color": "Areia Natural", "sku": "RA-BLAZ-48", "stock": 2},
-                    {"size": "50 (G)", "color": "Areia Natural", "sku": "RA-BLAZ-50", "stock": 2},
-                    {"size": "52 (GG)", "color": "Areia Natural", "sku": "RA-BLAZ-52", "stock": 1},
-                ]
-            },
-            {
-                "title": "Camisa Linho Puro Gola Padre Manga Longa",
-                "brand": brand_objs["Osklen"],
-                "category": cat_objs["Camisaria & Polos"],
-                "drop": drop_terca,
-                "gender": "M",
-                "price": 647.00,
-                "compare_at_price": 720.00,
-                "description": "Camisa masculina de linho nobre com gola padre. Toque suave e modelagem comfort contemporânea.",
-                "fabric_composition": "100% Linho Europeu Certificado",
-                "is_featured": True,
-                "is_exclusive": False,
-                "image_url": "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=800&q=80",
-                "variants": [
-                    {"size": "P", "color": "Branco Off", "sku": "OSK-CAM-P", "stock": 4},
-                    {"size": "M", "color": "Branco Off", "sku": "OSK-CAM-M", "stock": 5},
-                    {"size": "G", "color": "Branco Off", "sku": "OSK-CAM-G", "stock": 3},
-                ]
-            },
-            {
-                "title": "Conjunto Alfaiataria Blazer Cropped & Calça Wide Leg",
-                "brand": brand_objs["Animale"],
-                "category": cat_objs["Alfaiataria Feminina"],
-                "drop": drop_quinta,
-                "gender": "F",
-                "price": 1890.00,
-                "compare_at_price": 2190.00,
-                "description": "Conjunto sofisticado em crepe acetinado. Blazer cropped com ombreiras estruturadas e calça wide leg de cintura alta com pregas frontais.",
-                "fabric_composition": "78% Acetato, 22% Viscose",
-                "is_featured": True,
-                "is_exclusive": True,
-                "image_url": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80",
-                "variants": [
-                    {"size": "36 (PP)", "color": "Preto Noite", "sku": "ANM-CONJ-36", "stock": 1},
-                    {"size": "38 (P)", "color": "Preto Noite", "sku": "ANM-CONJ-38", "stock": 2},
-                    {"size": "40 (M)", "color": "Preto Noite", "sku": "ANM-CONJ-40", "stock": 2},
-                ]
-            },
-            {
-                "title": "Bolsa Couro Legítimo Estruturada com Alça Corrente",
-                "brand": brand_objs["Schutz"],
-                "category": cat_objs["Bolsas & Calçados"],
-                "drop": drop_terca,
+                "title": "Corte Autoral Eduardo Cardoso (Todas as Gerações)",
+                "brand": brand_objs["Eduardo Cardoso Atelier"],
+                "category": cat_objs["Cortes Masculinos Autorais"],
                 "gender": "U",
-                "price": 1250.00,
-                "compare_at_price": 1390.00,
-                "description": "Bolsa tiracolo em couro nobre trabalhado com fecho banhado a ouro e acabamento impecável.",
-                "fabric_composition": "100% Couro Bovino Premium",
+                "price": 60.00,
+                "compare_at_price": 70.00,
+                "description": (
+                    "A tesoura não tem gênero. Atendimento focado na escuta atenta para traduzir a sua "
+                    "personalidade e estilo de vida. Inclui lavagem com produtos de alta performance, "
+                    "corte milimétrico e finalização personalizada."
+                ),
+                "fabric_composition": "Tesoura, Navalha & Visagismo Humanizado",
+                "care_instructions": "Recomendada manutenção a cada 20 a 30 dias para preservar as linhas do corte.",
                 "is_featured": True,
-                "is_exclusive": True,
-                "image_url": "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=800&q=80",
                 "variants": [
-                    {"size": "Único", "color": "Caramelo", "sku": "STZ-BAG-CAR", "stock": 3},
-                    {"size": "Único", "color": "Preto", "sku": "STZ-BAG-BLK", "stock": 2},
-                ]
+                    {"size": "Tradicional", "color": "Atelier", "stock": 99},
+                    {"size": "Moderno / Fade", "color": "Atelier", "stock": 99},
+                ],
             },
             {
-                "title": "Polo Pima Cotton Touch Super Soft",
-                "brand": brand_objs["Reserva"],
-                "category": cat_objs["Camisaria & Polos"],
-                "drop": drop_terca,
-                "gender": "M",
-                "price": 389.00,
-                "compare_at_price": 420.00,
-                "description": "Camisa polo confeccionada em algodão Pima peruano com toque extra macio e logo minimalista bordado no peito.",
-                "fabric_composition": "100% Algodão Pima Peruano",
-                "is_featured": False,
-                "is_exclusive": False,
-                "image_url": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=800&q=80",
+                "title": "Corte Feminino Personalizado & Visagismo",
+                "brand": brand_objs["Eduardo Cardoso Atelier"],
+                "category": cat_objs["Cortes Femininos Personalizados"],
+                "gender": "F",
+                "price": 80.00,
+                "compare_at_price": 95.00,
+                "description": (
+                    "Corte feito sob medida para realçar os traços, textura natural dos fios e identidade. "
+                    "Seja curto, médio, longo ou desfiado, a proposta é leveza, movimento e harmonia."
+                ),
+                "fabric_composition": "Corte a Seco ou Molhado com Finalização Especial",
+                "care_instructions": "Finalizado com leave-in botânico e secagem respeitando a curvatura do fio.",
+                "is_featured": True,
                 "variants": [
-                    {"size": "P", "color": "Azul Marinho", "sku": "RSV-POL-P", "stock": 4},
-                    {"size": "M", "color": "Azul Marinho", "sku": "RSV-POL-M", "stock": 6},
-                    {"size": "G", "color": "Azul Marinho", "sku": "RSV-POL-G", "stock": 5},
-                    {"size": "GG", "color": "Azul Marinho", "sku": "RSV-POL-GG", "stock": 2},
-                ]
+                    {"size": "Curto / Pixie", "color": "Atelier", "stock": 99},
+                    {"size": "Médio / Long Bob", "color": "Atelier", "stock": 99},
+                    {"size": "Longo em Camadas", "color": "Atelier", "stock": 99},
+                ],
+            },
+            {
+                "title": "Ritual da Barba com Toalha Quente & Óleos Essenciais",
+                "brand": brand_objs["Ritual Barber & Spa"],
+                "category": cat_objs["Ritual da Barba com Toalha Quente"],
+                "gender": "M",
+                "price": 45.00,
+                "compare_at_price": 50.00,
+                "description": (
+                    "O ritual clássico elevado a outro nível. Aplicação de toalha quente com vapor aromático, "
+                    "massagem facial, alinhamento milimétrico com navalhete descartável e hidratação profunda da pele."
+                ),
+                "fabric_composition": "Toalha Quente, Balm Artesanal & Navalha de Precisão",
+                "care_instructions": "Finalizado com pós-barba calmante e óleo para barba com fragrância amadeirada sutil.",
+                "is_featured": True,
+                "variants": [
+                    {"size": "Barba Completa", "color": "Barber Spa", "stock": 99},
+                    {"size": "Apenas Desenho", "color": "Barber Spa", "stock": 99},
+                ],
+            },
+            {
+                "title": "Combo Completo: Corte Autoral + Ritual da Barba",
+                "brand": brand_objs["Eduardo Cardoso Atelier"],
+                "category": cat_objs["Ritual da Barba com Toalha Quente"],
+                "gender": "M",
+                "price": 95.00,
+                "compare_at_price": 105.00,
+                "description": (
+                    "A experiência definitiva do laboratório. Uma pausa de puro relaxamento e renovação no Sítio "
+                    "Histórico de Olinda: corte completo alinhado ao seu perfil + ritual da barba com toalha quente."
+                ),
+                "fabric_composition": "Visagismo Completo + Barboterapia Relaxante",
+                "care_instructions": "Duração média: 60 minutos de acolhimento e cuidado impecável.",
+                "is_featured": True,
+                "variants": [
+                    {"size": "Sessão Completa", "color": "Olinda VIP", "stock": 99},
+                ],
+            },
+            {
+                "title": "Nevou Olindense — Descoloração Global de Alto Padrão",
+                "brand": brand_objs["Alquimia Capilar Olinda"],
+                "category": cat_objs["Nevou & Descoloração Global"],
+                "gender": "U",
+                "price": 130.00,
+                "compare_at_price": 150.00,
+                "description": (
+                    "Celebrando o autêntico estilo 'nevou' como uma marca vibrante da nossa cultura urbana. "
+                    "Processo de descoloração seguro, com proteção prévia do couro cabeludo (Plex) e matização "
+                    "perolada ou platinada impecável."
+                ),
+                "fabric_composition": "Descolorante Premium com Proteção Plex Anti-Danos",
+                "care_instructions": "Acompanha orientação para manutenção em casa e máscara de nutrição.",
+                "is_featured": True,
+                "variants": [
+                    {"size": "Cabelo Curto", "color": "Platinado Gelo", "stock": 99},
+                    {"size": "Cabelo Médio", "color": "Platinado Gelo", "stock": 99},
+                ],
+            },
+            {
+                "title": "Corte Infantil & Juvenil com Acolhimento",
+                "brand": brand_objs["Eduardo Cardoso Atelier"],
+                "category": cat_objs["Cortes Infantis & Juvenis"],
+                "gender": "U",
+                "price": 45.00,
+                "compare_at_price": 50.00,
+                "description": (
+                    "Paciência, respeito ao tempo da criança e muita leveza. O momento do corte transformado "
+                    "em uma experiência divertida e agradável nas ladeiras de Olinda."
+                ),
+                "fabric_composition": "Ambiente Seguro e Lúdico",
+                "care_instructions": "Sem pressa, com diálogo e total cuidado com os pequenos.",
+                "is_featured": False,
+                "variants": [
+                    {"size": "Infantil (até 12 anos)", "color": "Kids", "stock": 99},
+                ],
+            },
+            {
+                "title": "Cronograma de Tratamento: Nutrição & Reconstrução",
+                "brand": brand_objs["Alquimia Capilar Olinda"],
+                "category": cat_objs["Tratamentos & Cronograma Capilar"],
+                "gender": "U",
+                "price": 75.00,
+                "compare_at_price": 85.00,
+                "description": (
+                    "Alquimia pura para recuperar a saúde dos fios pós-sol, praia ou química. Terapia capilar "
+                    "com massagem estimulante no couro cabeludo e óleos vegetais nobres."
+                ),
+                "fabric_composition": "Blend de Óleos Naturais, Queratina e Manteiga de Karité",
+                "care_instructions": "Devolve o brilho, maciez e vitalidade imediata aos fios.",
+                "is_featured": False,
+                "variants": [
+                    {"size": "Sessão Intensiva", "color": "Spa Capilar", "stock": 99},
+                ],
             },
         ]
 
-        for p_data in products_data:
-            variants = p_data.pop("variants")
-            image_url = p_data.pop("image_url")
-            product, created = Product.objects.get_or_create(
-                title=p_data["title"],
-                defaults=p_data
-            )
-            if created:
-                ProductImage.objects.create(
-                    product=product,
-                    image_url=image_url,
-                    alt_text=product.title,
-                    is_cover=True,
-                    order=1
-                )
-                for var in variants:
-                    ProductVariant.objects.create(
-                        product=product,
-                        size=var["size"],
-                        color=var["color"],
-                        sku=var["sku"],
-                        stock_quantity=var["stock"],
-                    )
-        self.stdout.write(self.style.SUCCESS(f"✅ {len(products_data)} Peças de moda exclusivas cadastradas com variações e fotos"))
+        # Limpar produtos antigos de moda que foram importados de teste
+        Product.objects.all().delete()
 
-        self.stdout.write(self.style.SUCCESS("\n🎉 Seed da Vakaria concluído com sucesso total!"))
+        for s_data in services_data:
+            variants = s_data.pop("variants")
+            prod = Product.objects.create(drop=drop_olinda, is_active=True, **s_data)
+            for v_data in variants:
+                ProductVariant.objects.create(
+                    product=prod,
+                    size=v_data["size"],
+                    color=v_data["color"],
+                    stock_quantity=v_data["stock"],
+                )
+
+        self.stdout.write(self.style.SUCCESS(f"✅ {len(services_data)} Serviços autorais cadastrados"))
+
+        # 6. Slides de Carrossel (Hero Principal)
+        CarouselSlide.objects.all().delete()
+        CarouselSlide.objects.create(
+            title="Cabeleireiro Eduardo Cardoso",
+            subtitle="Laboratório Artístico e Ecossistema de Beleza no Sítio Histórico de Olinda.",
+            badge_text="📍 Sítio Histórico de Olinda • Arte & Cultura",
+            button_text="Conhecer Serviços & Agendar",
+            button_url="/produtos/",
+            slide_type="hero",
+            order=1,
+            overlay_darkness="medium",
+        )
+        CarouselSlide.objects.create(
+            title="A Tesoura Não Tem Gênero",
+            subtitle="Cortes personalizados para todas as gerações. Foco em traduzir a sua identidade com escuta atenta e respeito.",
+            badge_text="✂️ Cortes Masculinos, Femininos & Infantis",
+            button_text="Ver Catálogo de Cortes",
+            button_url="/produtos/?category=cortes-personalizados",
+            slide_type="hero",
+            order=2,
+            overlay_darkness="medium",
+        )
+        CarouselSlide.objects.create(
+            title="Ritual da Barba & O Autêntico Nevou",
+            subtitle="Alinhamento na toalha quente, cuidados faciais e a celebração da estética urbana olindense.",
+            badge_text="🔥 Barboterapia & Alquimia Capilar",
+            button_text="Agendar Procedimento",
+            button_url="/pedidos/carrinho/",
+            slide_type="hero",
+            order=3,
+            overlay_darkness="medium",
+        )
+        self.stdout.write(self.style.SUCCESS("✅ 3 Banners Hero criados com a identidade de Olinda"))
+
+        # 7. Depoimentos de Clientes (Prova Social Olindense)
+        CustomerReview.objects.all().delete()
+        reviews = [
+            {
+                "name": "Rafael Mendonça",
+                "location": "Sítio Histórico, Olinda - PE",
+                "rating": 5,
+                "comment": "Experiência única nas ladeiras de Olinda! O corte do Eduardo é uma verdadeira consultoria de identidade. A tesoura dele respeita o estilo de cada um com muita conversa boa e acolhimento.",
+                "source": "google",
+                "order": 1,
+            },
+            {
+                "name": "Mariana Bezerra",
+                "location": "Carmo, Olinda - PE",
+                "rating": 5,
+                "comment": "Ambiente maravilhoso, acolhedor e seguro. Eduardo tem uma sensibilidade rara para ouvir o que a gente quer. Meu corte ficou com uma leveza incrível!",
+                "source": "instagram",
+                "order": 2,
+            },
+            {
+                "name": "Lucas Alencar",
+                "location": "Recife - PE",
+                "rating": 5,
+                "comment": "O ritual da barba com toalha quente é uma pausa necessária na semana. E o 'nevou' que ele faz é diferenciado demais, cabelo super hidratado e com cor impecável.",
+                "source": "whatsapp",
+                "order": 3,
+            },
+        ]
+        for r in reviews:
+            CustomerReview.objects.create(is_active=True, **r)
+        self.stdout.write(self.style.SUCCESS("✅ Depoimentos olindenses configurados"))
+
+        # 8. Configuração Centralizada da Home (HomePageConfig)
+        conf, _ = HomePageConfig.objects.get_or_create(id=1)
+        conf.announcement_active = True
+        conf.announcement_badge = "📍 OLINDA • PE"
+        conf.announcement_text = "Sua identidade cuidada com arte, respeito e alma olindense • Agende seu horário no WhatsApp"
+        conf.announcement_link = "https://wa.me/5581991650137"
+
+        # Cards de Destaque
+        conf.women_card_badge = "✂️ Todas as Gerações"
+        conf.women_card_title = "Cortes Personalizados"
+        conf.women_card_subtitle = "A tesoura não tem gênero. Cortes masculinos, femininos e infantis traduzindo a sua essência."
+        conf.women_card_url = "/produtos/?category=cortes-personalizados"
+        conf.women_card_btn_text = "Explorar Cortes"
+
+        conf.men_card_badge = "🔥 Barboterapia & Alquimia"
+        conf.men_card_title = "Barba na Toalha Quente & Nevou"
+        conf.men_card_subtitle = "Alinhamento preciso com toalha quente, tratamentos para a pele e o autêntico nevou da cultura urbana."
+        conf.men_card_url = "/produtos/?category=barba-bigode-cuidados-faciais"
+        conf.men_card_btn_text = "Ver Rituais & Cores"
+
+        # Seção Sobre / O Laboratório
+        conf.store_badge = "📍 Sítio Histórico de Olinda"
+        conf.store_title = "Cabeleireiro Eduardo Cardoso: Laboratório Artístico"
+        conf.store_description = (
+            "Muito mais que um salão ou uma barbearia tradicional, o espaço do Cabeleireiro Eduardo Cardoso "
+            "é um autêntico laboratório artístico fincado nas ladeiras de Olinda. Construído com um propósito claro, "
+            "o local funde um ecossistema completo de beleza com um ambiente de efervescência cultural. "
+            "Aqui, a arte do cuidado pessoal se encontra com a riqueza da cultura popular pernambucana."
+        )
+        conf.store_address = "Sítio Histórico de Olinda, Olinda - PE, Brasil"
+        conf.store_phone = "+55 81 99165-0137"
+        conf.store_instagram_handle = "@eduardocardosocabelo"
+        conf.store_maps_url = "https://maps.google.com/?q=Sitio+Historico+de+Olinda+PE"
+        conf.store_hours_text = "Terça a Sábado: 09h às 19h • Agendamentos pelo WhatsApp"
+
+        # 4 Diferenciais
+        conf.benefit1_icon = "solar:cup-star-bold-duotone"
+        conf.benefit1_title = "Acolhimento & Cultura"
+        conf.benefit1_subtitle = "Refúgio seguro, humano e radicalmente inclusivo nas ladeiras de Olinda"
+
+        conf.benefit2_icon = "solar:users-group-rounded-bold-duotone"
+        conf.benefit2_title = "Atendimento Humanizado"
+        conf.benefit2_subtitle = "Escuta atenta e respeito absoluto à individualidade de cada história"
+
+        conf.benefit3_icon = "solar:scissors-square-bold-duotone"
+        conf.benefit3_title = "A Tesoura Não Tem Gênero"
+        conf.benefit3_subtitle = "Cortes masculinos, femininos e infantis para todas as gerações"
+
+        conf.benefit4_icon = "solar:fire-bold-duotone"
+        conf.benefit4_title = "Alquimia & Nevou"
+        conf.benefit4_subtitle = "Barba na toalha quente, cor, química segura e expressão urbana"
+
+        # Depoimentos & Compartilhamento
+        conf.reviews_active = True
+        conf.reviews_title = "O que Dizem Nossos Clientes"
+        conf.reviews_subtitle = "Sua identidade cuidada com arte, respeito e alma olindense."
+        conf.og_share_title = "Cabeleireiro Eduardo Cardoso | Laboratório Artístico e Ecossistema de Beleza (Olinda - PE)"
+
+        conf.save()
+        self.stdout.write(self.style.SUCCESS("✅ Configurações da Página Inicial salvas com sucesso!"))
+
+        self.stdout.write(self.style.SUCCESS("\n🎉 Ecossistema de Eduardo Cardoso inicializado com sucesso total!"))
