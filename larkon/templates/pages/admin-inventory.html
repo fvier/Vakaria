@@ -1,0 +1,931 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Controle de Estoque (Entradas & Saídas) | Grife HF{% endblock title %}
+
+{% block extra_css %}
+<style>
+  .stock-kpi-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+  }
+  .stock-kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+  }
+  .variant-pill {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+  .variant-pill:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  }
+  .variant-pill.stock-zero {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+  .variant-pill.stock-low {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .variant-pill.stock-good {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  .badge-movement-in {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    font-weight: 600;
+  }
+  .badge-movement-out {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    font-weight: 600;
+  }
+  .badge-movement-adjust {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    font-weight: 600;
+  }
+  .timeline-history-item {
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 22px;
+  }
+  .timeline-history-item::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 6px;
+    bottom: -22px;
+    width: 2px;
+    background: #e2e8f0;
+  }
+  .timeline-history-item:last-child::before {
+    display: none;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: 2px;
+    top: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #fff;
+  }
+  .table-inventory td {
+    vertical-align: middle;
+  }
+  .bg-gold-subtle {
+    background-color: #fdf8eb !important;
+    border-color: #fce7b2 !important;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="page-title-box d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+          <h4 class="mb-1 text-dark fw-bold d-flex align-items-center gap-2">
+            <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="text-primary fs-24"></iconify-icon>
+            Controle de Estoque & Grade (Entradas e Saídas)
+          </h4>
+          <p class="text-muted mb-0 fs-13">
+            Gestão unificada de compras, vendas físicas, baixas de showroom, balanço e auditoria completa por tamanho (PP–GG).
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button type="button" class="btn btn-success d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalStockIn">
+            <iconify-icon icon="solar:arrow-down-bold" class="fs-16"></iconify-icon>
+            + Nova Entrada (Compra)
+          </button>
+          <button type="button" class="btn btn-danger d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalStockOut">
+            <iconify-icon icon="solar:arrow-up-bold" class="fs-16"></iconify-icon>
+            - Nova Saída (Baixa/Venda)
+          </button>
+          <button type="button" class="btn btn-primary d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalBatchGrid">
+            <iconify-icon icon="solar:layers-minimalistic-bold-duotone" class="fs-16"></iconify-icon>
+            Entrada em Grade Rápida
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages Alert -->
+  {% if messages %}
+    <div class="row">
+      <div class="col-12">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            <iconify-icon icon="solar:info-circle-bold" class="fs-18"></iconify-icon>
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- KPI Overview Cards -->
+  <div class="row g-3 mb-4">
+    <!-- Card 1: Total de Peças -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stock-kpi-card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-muted fw-semibold fs-13">Total em Estoque</span>
+            <div class="avatar-sm bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+              <iconify-icon icon="solar:t-shirt-bold-duotone" class="fs-20"></iconify-icon>
+            </div>
+          </div>
+          <h3 class="fw-bold mb-1 text-dark">{{ total_inventory_units }} <span class="fs-14 fw-normal text-muted">peças</span></h3>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <span class="badge bg-success-subtle text-success fs-11">{{ in_stock_products }} produtos ativos</span>
+            <span class="badge bg-danger-subtle text-danger fs-11">{{ out_of_stock_products }} esgotados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Valor de Venda Total (VGV) -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stock-kpi-card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-muted fw-semibold fs-13">Potencial de Venda (VGV)</span>
+            <div class="avatar-sm bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+              <iconify-icon icon="solar:dollar-minimalistic-bold-duotone" class="fs-20"></iconify-icon>
+            </div>
+          </div>
+          <h3 class="fw-bold mb-1 text-success">R$ {{ total_retail_value|floatformat:2 }}</h3>
+          <p class="text-muted fs-12 mb-0 mt-2">Valor total a preço de etiqueta</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Custo Investido -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stock-kpi-card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-muted fw-semibold fs-13">Custo Total de Aquisição</span>
+            <div class="avatar-sm bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
+              <iconify-icon icon="solar:wallet-money-bold-duotone" class="fs-20"></iconify-icon>
+            </div>
+          </div>
+          <h3 class="fw-bold mb-1 text-dark">R$ {{ total_cost_value|floatformat:2 }}</h3>
+          <p class="text-muted fs-12 mb-0 mt-2">Capital de giro imobilizado em peças</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Fluxo Mensal (Entradas vs Saídas) -->
+    <div class="col-sm-6 col-xl-3">
+      <div class="card stock-kpi-card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-muted fw-semibold fs-13">Movimentação no Mês</span>
+            <div class="avatar-sm bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center">
+              <iconify-icon icon="solar:refresh-circle-bold-duotone" class="fs-20"></iconify-icon>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-between mt-2">
+            <div>
+              <div class="fs-12 text-muted">Entradas</div>
+              <div class="fw-bold text-success fs-16">+{{ monthly_in }} un.</div>
+            </div>
+            <div class="vr"></div>
+            <div>
+              <div class="fs-12 text-muted">Saídas</div>
+              <div class="fw-bold text-danger fs-16">-{{ monthly_out }} un.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom p-0">
+          <ul class="nav nav-tabs card-header-tabs px-3 pt-2" id="stockTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if active_tab == 'inventory' %}active fw-bold text-primary{% else %}text-muted{% endif %}" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#tab-inventory" type="button" role="tab">
+                <iconify-icon icon="solar:box-minimalistic-bold-duotone" class="align-middle me-1 fs-18"></iconify-icon>
+                Estoque por Produto & Grade
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link {% if active_tab == 'extract' %}active fw-bold text-primary{% else %}text-muted{% endif %}" id="extract-tab" data-bs-toggle="tab" data-bs-target="#tab-extract" type="button" role="tab">
+                <iconify-icon icon="solar:history-bold-duotone" class="align-middle me-1 fs-18"></iconify-icon>
+                Extrato Geral de Movimentações (Auditoria)
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="tab-content" id="stockTabsContent">
+          
+          <!-- TAB 1: ESTOQUE POR PRODUTO & GRADE -->
+          <div class="tab-pane fade {% if active_tab == 'inventory' %}show active{% endif %}" id="tab-inventory" role="tabpanel">
+            
+            <!-- Filters Bar -->
+            <div class="p-3 bg-light-subtle border-bottom">
+              <form method="GET" action="" class="row g-2 align-items-center">
+                <input type="hidden" name="tab" value="inventory">
+                
+                <div class="col-md-4 col-12">
+                  <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><iconify-icon icon="solar:magnifer-linear"></iconify-icon></span>
+                    <input type="text" name="search" class="form-control border-start-0" placeholder="Buscar por peça, marca, categoria ou SKU..." value="{{ search }}">
+                  </div>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select name="brand" class="form-select">
+                    <option value="">Todas as Marcas</option>
+                    {% for b in brands %}
+                      <option value="{{ b.id }}" {% if selected_brand == b.id %}selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select name="category" class="form-select">
+                    <option value="">Todas as Categorias</option>
+                    {% for c in categories %}
+                      <option value="{{ c.id }}" {% if selected_category == c.id %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6">
+                  <select name="stock_status" class="form-select">
+                    <option value="">Todos os Status</option>
+                    <option value="in_stock" {% if selected_stock_status == 'in_stock' %}selected{% endif %}>Em Estoque (> 2 un)</option>
+                    <option value="low_stock" {% if selected_stock_status == 'low_stock' %}selected{% endif %}>Estoque Baixo (1-2 un)</option>
+                    <option value="out_of_stock" {% if selected_stock_status == 'out_of_stock' %}selected{% endif %}>Esgotado (0 un)</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2 col-6 d-flex gap-2">
+                  <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                  <a href="{% url 'catalog:admin_inventory' %}" class="btn btn-outline-secondary" title="Limpar Filtros"><iconify-icon icon="solar:restart-linear"></iconify-icon></a>
+                </div>
+              </form>
+            </div>
+
+            <!-- Products Table -->
+            <div class="table-responsive">
+              <table class="table table-hover table-inventory align-middle mb-0">
+                <thead class="table-light">
+                  <tr class="fs-12 text-uppercase text-muted">
+                    <th style="width: 320px;">Peça & Detalhes</th>
+                    <th>Categoria / Marca</th>
+                    <th>Preço de Venda</th>
+                    <th style="min-width: 280px;">Grade de Tamanhos & Saldo</th>
+                    <th class="text-center">Total Geral</th>
+                    <th class="text-end" style="min-width: 140px;">Ações Rápidas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in products_list %}
+                    <tr>
+                      <!-- Peça & Detalhes -->
+                      <td>
+                        <div class="d-flex align-items-center gap-3">
+                          <img src="{{ item.cover_url }}" alt="{{ item.product.title }}" class="avatar-md rounded object-fit-cover border shadow-sm" style="width: 52px; height: 52px;">
+                          <div>
+                            <a href="/admin/catalog/product/{{ item.product.id }}/change/" target="_blank" class="fw-bold text-dark text-decoration-none hover-primary">
+                              {{ item.product.title }}
+                            </a>
+                            <div class="text-muted fs-12 mt-1 d-flex align-items-center gap-2">
+                              <span>Gênero: <strong>{{ item.product.get_gender_display }}</strong></span>
+                              {% if item.product.is_exclusive %}
+                                <span class="badge bg-gold-subtle text-dark border"><i class="bx bxs-crown text-warning"></i> Exclusivo</span>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <!-- Categoria / Marca -->
+                      <td>
+                        <div class="fw-semibold text-dark">{{ item.product.brand.name|default:"Grife HF" }}</div>
+                        <div class="text-muted fs-12">{{ item.product.category.name|default:"Sem categoria" }}</div>
+                      </td>
+
+                      <!-- Preço -->
+                      <td>
+                        <span class="fw-bold text-dark">R$ {{ item.product.final_price|floatformat:2 }}</span>
+                        {% if item.product.old_price %}
+                          <div class="text-muted text-decoration-line-through fs-11">R$ {{ item.product.old_price|floatformat:2 }}</div>
+                        {% endif %}
+                      </td>
+
+                      <!-- Grade de Tamanhos Interativa -->
+                      <td>
+                        <div class="d-flex flex-wrap gap-1 align-items-center">
+                          {% for v in item.variants %}
+                            <div class="variant-pill {% if v.stock_quantity == 0 %}stock-zero{% elif v.stock_quantity <= 2 %}stock-low{% else %}stock-good{% endif %}"
+                                 title="Clique para ver histórico ou ajustar rápido"
+                                 onclick="openVariantDetails({{ v.id }}, '{{ item.product.title|escapejs }}', '{{ v.size }}', '{{ v.color|default:'Padrão'|escapejs }}', {{ v.stock_quantity }})">
+                              <span>{{ v.size }}</span>
+                              <span class="badge bg-white text-dark shadow-xs border">{{ v.stock_quantity }}</span>
+                            </div>
+                          {% empty %}
+                            <span class="badge bg-secondary-subtle text-secondary">Sem variações cadastradas</span>
+                          {% endfor %}
+                        </div>
+                      </td>
+
+                      <!-- Total Geral & Status -->
+                      <td class="text-center">
+                        <span class="badge {{ item.status_badge.class }} fs-12 px-2 py-1 rounded-pill">
+                          {{ item.total_stock }} un.
+                        </span>
+                        <div class="fs-11 text-muted mt-1">{{ item.status_badge.text }}</div>
+                      </td>
+
+                      <!-- Ações Rápidas -->
+                      <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                          <button type="button" class="btn btn-outline-success" title="Entrada Rápida (+)"
+                                  onclick="openStockInForProduct({{ item.product.id }}, '{{ item.product.title|escapejs }}')">
+                            <iconify-icon icon="solar:arrow-down-bold"></iconify-icon>
+                          </button>
+                          <button type="button" class="btn btn-outline-danger" title="Saída / Baixa (-)"
+                                  onclick="openStockOutForProduct({{ item.product.id }}, '{{ item.product.title|escapejs }}')">
+                            <iconify-icon icon="solar:arrow-up-bold"></iconify-icon>
+                          </button>
+                          <button type="button" class="btn btn-outline-primary" title="Grade Rápida"
+                                  onclick="openBatchGridForProduct({{ item.product.id }}, '{{ item.product.title|escapejs }}')">
+                            <iconify-icon icon="solar:layers-minimalistic-bold"></iconify-icon>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="6" class="text-center py-5">
+                        <div class="avatar-lg bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3">
+                          <iconify-icon icon="solar:box-minimalistic-linear" class="fs-36 text-muted"></iconify-icon>
+                        </div>
+                        <h5 class="fw-bold text-dark">Nenhum produto encontrado</h5>
+                        <p class="text-muted fs-13">Tente ajustar seus filtros de busca acima.</p>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- TAB 2: EXTRATO GERAL DE MOVIMENTAÇÕES (AUDITORIA) -->
+          <div class="tab-pane fade {% if active_tab == 'extract' %}show active{% endif %}" id="tab-extract" role="tabpanel">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr class="fs-12 text-uppercase text-muted">
+                    <th>Data & Hora</th>
+                    <th>Tipo</th>
+                    <th>Produto / Tamanho</th>
+                    <th>Qtd</th>
+                    <th>Saldo</th>
+                    <th>Motivo</th>
+                    <th>Documento/NF</th>
+                    <th>Responsável</th>
+                    <th>Observações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for m in recent_movements %}
+                    <tr>
+                      <td class="text-muted fs-12">{{ m.created_at|date:"d/m/Y H:i" }}</td>
+                      <td>
+                        {% if m.movement_type == 'IN' %}
+                          <span class="badge badge-movement-in px-2 py-1"><iconify-icon icon="solar:arrow-down-bold" class="align-middle me-1"></iconify-icon> Entrada</span>
+                        {% elif m.movement_type == 'OUT' %}
+                          <span class="badge badge-movement-out px-2 py-1"><iconify-icon icon="solar:arrow-up-bold" class="align-middle me-1"></iconify-icon> Saída</span>
+                        {% else %}
+                          <span class="badge badge-movement-adjust px-2 py-1"><iconify-icon icon="solar:refresh-circle-bold" class="align-middle me-1"></iconify-icon> Ajuste</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <div class="fw-bold text-dark">{{ m.variant.product.title }}</div>
+                        <div class="fs-12 text-muted">Tam: <strong>{{ m.variant.size }}</strong> | Cor: {{ m.variant.color|default:'Padrão' }}</div>
+                      </td>
+                      <td>
+                        {% if m.movement_type == 'IN' %}
+                          <span class="fw-bold text-success">+{{ m.quantity }}</span>
+                        {% elif m.movement_type == 'OUT' %}
+                          <span class="fw-bold text-danger">-{{ m.quantity }}</span>
+                        {% else %}
+                          <span class="fw-bold text-primary">{{ m.quantity }}</span>
+                        {% endif %}
+                      </td>
+                      <td class="fs-12">
+                        <span class="text-muted">{{ m.previous_stock }}</span>
+                        <iconify-icon icon="solar:arrow-right-linear" class="align-middle text-muted mx-1"></iconify-icon>
+                        <strong class="text-dark">{{ m.new_stock }}</strong>
+                      </td>
+                      <td>
+                        <span class="badge bg-light text-dark border">{{ m.get_reason_display }}</span>
+                      </td>
+                      <td class="text-muted fs-12">{{ m.invoice_number|default:"—" }}</td>
+                      <td class="text-muted fs-12">
+                        {% if m.created_by %}
+                          <span class="badge bg-secondary-subtle text-secondary">{{ m.created_by.username }}</span>
+                        {% else %}
+                          <span class="text-muted">Sistema</span>
+                        {% endif %}
+                      </td>
+                      <td class="text-muted fs-12" style="max-width: 200px;">{{ m.notes|default:"—" }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="9" class="text-center py-5 text-muted">
+                        <iconify-icon icon="solar:history-bold-duotone" class="fs-32 mb-2 d-block mx-auto text-muted"></iconify-icon>
+                        Nenhuma movimentação registrada no histórico.
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 1: REGISTRAR ENTRADA (+)             -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalStockIn" tabindex="-1" aria-labelledby="modalStockInLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalStockInLabel">
+          <iconify-icon icon="solar:arrow-down-bold"></iconify-icon> Registrar Entrada de Estoque (+)
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'catalog:admin_inventory' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="stock_in">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Selecione o Produto & Tamanho *</label>
+            <select name="variant_id" id="stockInVariantSelect" class="form-select" required>
+              <option value="">Escolha a peça e tamanho...</option>
+              <!-- Preenchido via JavaScript dinamicamente -->
+            </select>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Quantidade a Entrar *</label>
+              <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Motivo da Entrada</label>
+              <select name="reason" class="form-select">
+                <option value="purchase">Compra / Reposição</option>
+                <option value="return_customer">Devolução de Cliente</option>
+                <option value="return_consigned">Retorno de Showroom</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Custo Unitário (R$) <small class="text-muted">(Opcional)</small></label>
+              <input type="text" name="cost_price" class="form-control" placeholder="Ex: 89.90">
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Nota Fiscal / Doc <small class="text-muted">(Opcional)</small></label>
+              <input type="text" name="invoice_number" class="form-control" placeholder="Ex: NF-4921">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Observações</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Informações do fornecedor ou lote..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success fw-bold px-4">Salvar Entrada</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 2: REGISTRAR SAÍDA (-)               -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalStockOut" tabindex="-1" aria-labelledby="modalStockOutLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalStockOutLabel">
+          <iconify-icon icon="solar:arrow-up-bold"></iconify-icon> Registrar Saída / Baixa (-)
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'catalog:admin_inventory' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="stock_out">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Selecione o Produto & Tamanho *</label>
+            <select name="variant_id" id="stockOutVariantSelect" class="form-select" required>
+              <option value="">Escolha a peça e tamanho...</option>
+              <!-- Preenchido via JavaScript -->
+            </select>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Quantidade a Retirar *</label>
+              <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Motivo da Saída</label>
+              <select name="reason" class="form-select">
+                <option value="sale">Venda Balcão / WhatsApp</option>
+                <option value="consigned">Showroom / Influencer</option>
+                <option value="defect">Defeito / Avaria</option>
+                <option value="gift">Brinde / Cortesia VIP</option>
+                <option value="loss">Perda / Extravio</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Número do Pedido / Cupom <small class="text-muted">(Opcional)</small></label>
+            <input type="text" name="invoice_number" class="form-control" placeholder="Ex: PED-1082">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Observações</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="Motivo detalhado da baixa..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger fw-bold px-4">Salvar Saída</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 3: ENTRADA RÁPIDA EM GRADE           -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalBatchGrid" tabindex="-1" aria-labelledby="modalBatchGridLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="modalBatchGridLabel">
+          <iconify-icon icon="solar:layers-minimalistic-bold-duotone"></iconify-icon> Entrada Rápida em Grade de Tamanhos
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'catalog:admin_inventory' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="batch_grid_in">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Selecione o Produto *</label>
+            <select name="product_id" id="batchProductSelect" class="form-select" required onchange="renderBatchGridInputs()">
+              <option value="">Selecione o produto...</option>
+              {% for item in products_list %}
+                <option value="{{ item.product.id }}">{{ item.product.title }} ({{ item.product.brand.name|default:'Grife HF' }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Container dinâmico dos tamanhos -->
+          <div class="card bg-light border mb-3">
+            <div class="card-body">
+              <h6 class="fw-bold text-dark mb-3">Preencha as quantidades a adicionar para cada tamanho:</h6>
+              <div id="batchGridInputsContainer" class="row g-2">
+                <div class="col-12 text-muted text-center py-3">Selecione um produto acima para carregar a grade de tamanhos.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold">Motivo</label>
+              <select name="reason" class="form-select">
+                <option value="purchase">Compra de Coleção / Reposição</option>
+                <option value="return_customer">Devolução de Lote</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold">Nota Fiscal / Pedido de Compra</label>
+              <input type="text" name="invoice_number" class="form-control" placeholder="Ex: NF-1294">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Observações</label>
+            <input type="text" name="notes" class="form-control" placeholder="Ex: Chegada de reposição do drop semanal">
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary fw-bold px-4">Salvar Entrada em Grade</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL 4: DETALHES DA VARIANTE & HISTÓRICO  -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalVariantHistory" tabindex="-1" aria-labelledby="modalVariantHistoryLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="modalVariantHistoryTitle">Detalhes & Histórico da Peça</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Top Info Box with Quick Adjust -->
+        <div class="card bg-light border mb-4">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-7">
+                <h5 class="fw-bold text-dark mb-1" id="historyVariantProductTitle">—</h5>
+                <p class="text-muted mb-0 fs-13" id="historyVariantSpecs">—</p>
+                <div class="mt-2">
+                  <span class="fs-13 text-muted">Saldo Atual:</span>
+                  <span class="badge bg-primary fs-14 px-3 py-1 ms-1" id="historyVariantCurrentStock">0 un.</span>
+                </div>
+              </div>
+              <div class="col-md-5 mt-3 mt-md-0 border-start-md ps-md-4">
+                <form method="POST" action="{% url 'catalog:admin_inventory' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="quick_adjust">
+                  <input type="hidden" name="variant_id" id="historyVariantIdInput">
+                  <label class="form-label fw-bold fs-12 text-uppercase text-muted">Ajuste Direto de Balanço</label>
+                  <div class="input-group">
+                    <input type="number" name="new_stock" id="historyVariantNewStockInput" class="form-control" min="0" required>
+                    <button type="submit" class="btn btn-dark fw-bold">Salvar Saldo</button>
+                  </div>
+                  <small class="text-muted fs-11">Sobrescreve a quantidade exata.</small>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Timeline Container -->
+        <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+          <iconify-icon icon="solar:history-bold" class="text-primary"></iconify-icon>
+          Extrato de Entradas & Saídas desta Peça
+        </h6>
+
+        <div id="historyTimelineContainer" style="max-height: 380px; overflow-y: auto; padding-right: 8px;">
+          <div class="text-center py-4 text-muted">
+            <div class="spinner-border spinner-border-sm text-primary me-1" role="status"></div>
+            Carregando histórico...
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock page_content %}
+
+{% block extra_javascript %}
+<script>
+  // Carrega lista de variantes passada pelo backend
+  const allVariants = {{ variants_json|safe }};
+
+  // Popula os selects dos modais
+  function populateVariantSelects() {
+    const stockInSelect = document.getElementById('stockInVariantSelect');
+    const stockOutSelect = document.getElementById('stockOutVariantSelect');
+    
+    if (stockInSelect && stockOutSelect) {
+      let optionsHtml = '<option value="">Escolha a peça e tamanho...</option>';
+      allVariants.forEach(v => {
+        optionsHtml += `<option value="${v.id}">${v.product_title} — Tamanho: ${v.size} (Estoque: ${v.stock} un.)</option>`;
+      });
+      stockInSelect.innerHTML = optionsHtml;
+      stockOutSelect.innerHTML = optionsHtml;
+    }
+  }
+
+  // Abre modal de Entrada com variante pré-selecionada
+  function openStockInForProduct(productId, productTitle) {
+    const matching = allVariants.filter(v => v.product_id === productId);
+    const stockInSelect = document.getElementById('stockInVariantSelect');
+    if (stockInSelect) {
+      if (matching.length > 0) {
+        let opts = `<option value="">Escolha o tamanho de "${productTitle}"...</option>`;
+        matching.forEach(v => {
+          opts += `<option value="${v.id}">${v.size} (Estoque atual: ${v.stock} un.)</option>`;
+        });
+        stockInSelect.innerHTML = opts;
+      }
+    }
+    const modal = new bootstrap.Modal(document.getElementById('modalStockIn'));
+    modal.show();
+  }
+
+  // Abre modal de Saída com variante pré-selecionada
+  function openStockOutForProduct(productId, productTitle) {
+    const matching = allVariants.filter(v => v.product_id === productId);
+    const stockOutSelect = document.getElementById('stockOutVariantSelect');
+    if (stockOutSelect) {
+      if (matching.length > 0) {
+        let opts = `<option value="">Escolha o tamanho de "${productTitle}"...</option>`;
+        matching.forEach(v => {
+          opts += `<option value="${v.id}">${v.size} (Estoque atual: ${v.stock} un.)</option>`;
+        });
+        stockOutSelect.innerHTML = opts;
+      }
+    }
+    const modal = new bootstrap.Modal(document.getElementById('modalStockOut'));
+    modal.show();
+  }
+
+  // Abre modal de Entrada em Grade para um produto específico
+  function openBatchGridForProduct(productId, productTitle) {
+    const select = document.getElementById('batchProductSelect');
+    if (select) {
+      select.value = productId;
+      renderBatchGridInputs();
+    }
+    const modal = new bootstrap.Modal(document.getElementById('modalBatchGrid'));
+    modal.show();
+  }
+
+  // Renderiza os inputs de tamanho no modal de Grade Rápida
+  function renderBatchGridInputs() {
+    const select = document.getElementById('batchProductSelect');
+    const container = document.getElementById('batchGridInputsContainer');
+    if (!select || !container) return;
+
+    const productId = parseInt(select.value);
+    if (!productId) {
+      container.innerHTML = '<div class="col-12 text-muted text-center py-3">Selecione um produto acima para carregar a grade de tamanhos.</div>';
+      return;
+    }
+
+    const matching = allVariants.filter(v => v.product_id === productId);
+    if (matching.length === 0) {
+      container.innerHTML = '<div class="col-12 text-warning text-center py-3">Nenhum tamanho cadastrado para este produto no catálogo.</div>';
+      return;
+    }
+
+    let html = '';
+    matching.forEach(v => {
+      html += `
+        <div class="col-6 col-sm-4 col-md-3">
+          <div class="border rounded p-2 bg-white text-center">
+            <span class="badge bg-dark fs-12 px-2 py-1 mb-1">${v.size}</span>
+            <div class="text-muted fs-11 mb-2">Atual: <strong>${v.stock}</strong> un.</div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-success-subtle text-success fw-bold">+</span>
+              <input type="number" name="size_qty_${v.id}" class="form-control text-center fw-bold" placeholder="0" min="0">
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  // Abre modal de Histórico e Ajuste da Variante via AJAX
+  function openVariantDetails(variantId, productTitle, size, color, currentStock) {
+    document.getElementById('historyVariantProductTitle').innerText = productTitle;
+    document.getElementById('historyVariantSpecs').innerText = `Tamanho: ${size} | Cor: ${color}`;
+    document.getElementById('historyVariantCurrentStock').innerText = `${currentStock} un.`;
+    document.getElementById('historyVariantIdInput').value = variantId;
+    document.getElementById('historyVariantNewStockInput').value = currentStock;
+
+    const timelineContainer = document.getElementById('historyTimelineContainer');
+    timelineContainer.innerHTML = '<div class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-1" role="status"></div> Carregando histórico...</div>';
+
+    const modal = new bootstrap.Modal(document.getElementById('modalVariantHistory'));
+    modal.show();
+
+    // Fetch AJAX do histórico
+    fetch(`/estoque/variante/${variantId}/historico/`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.history || data.history.length === 0) {
+          timelineContainer.innerHTML = `
+            <div class="text-center py-4 text-muted">
+              <iconify-icon icon="solar:box-minimalistic-linear" class="fs-28 mb-2"></iconify-icon>
+              <div>Nenhuma movimentação registrada para este tamanho ainda.</div>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        data.history.forEach(item => {
+          let dotColor = '#10b981'; // verde para IN
+          let icon = 'solar:arrow-down-bold';
+          let badgeClass = 'badge-movement-in';
+          let sign = '+';
+
+          if (item.type === 'OUT') {
+            dotColor = '#ef4444';
+            icon = 'solar:arrow-up-bold';
+            badgeClass = 'badge-movement-out';
+            sign = '-';
+          } else if (item.type === 'ADJUST') {
+            dotColor = '#0ea5e9';
+            icon = 'solar:refresh-circle-bold';
+            badgeClass = 'badge-movement-adjust';
+            sign = '';
+          }
+
+          html += `
+            <div class="timeline-history-item">
+              <div class="timeline-dot" style="background-color: ${dotColor};">
+                <iconify-icon icon="${icon}"></iconify-icon>
+              </div>
+              <div class="bg-white p-3 rounded border shadow-xs">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="badge ${badgeClass}">${item.type_display}: ${sign}${item.quantity} un.</span>
+                  <small class="text-muted">${item.created_at}</small>
+                </div>
+                <div class="fs-13 text-dark mt-1">
+                  <strong>Motivo:</strong> ${item.reason_display}
+                  ${item.invoice_number ? ` | <strong>Doc:</strong> ${item.invoice_number}` : ''}
+                </div>
+                <div class="fs-12 text-muted mt-1">
+                  Saldo: ${item.previous_stock} &rarr; <strong class="text-dark">${item.new_stock} un.</strong>
+                  | Resp: <em>${item.created_by}</em>
+                </div>
+                ${item.notes ? `<div class="fs-12 text-secondary fst-italic mt-1 bg-light p-1 rounded">"${item.notes}"</div>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        timelineContainer.innerHTML = html;
+      })
+      .catch(err => {
+        timelineContainer.innerHTML = '<div class="alert alert-danger py-2 fs-13">Erro ao carregar o histórico. Tente novamente.</div>';
+      });
+  }
+
+  // Inicializa quando a página estiver carregada
+  document.addEventListener('DOMContentLoaded', function() {
+    populateVariantSelects();
+  });
+</script>
+{% endblock extra_javascript %}

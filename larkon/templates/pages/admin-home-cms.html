@@ -1,0 +1,2629 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Gerenciador da Página Inicial & Banners | Grife HF{% endblock title %}
+
+{% block extra_css %}
+<style>
+  .cms-preview-device-toggle .btn.active {
+    background-color: #1a1a1a !important;
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  /* Realistic Desktop Browser Frame wrapper */
+  .preview-desktop-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    background: #0f172a;
+    transition: all 0.3s ease;
+  }
+
+  .browser-top-bar {
+    background: #1e293b;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 11px;
+  }
+
+  /* Desktop Simulator (16:9 panoramic) */
+  .hero-live-preview-box {
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 380px;
+    height: 380px;
+    background-size: cover;
+    background-position: center 25%;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Smartphone Frame Mockup for Mobile (9:16) */
+  .hero-live-preview-box.mode-mobile {
+    max-width: 320px;
+    min-height: 560px;
+    height: 560px;
+    margin: 8px auto 16px;
+    border: 10px solid #0f172a;
+    border-radius: 40px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.55), 0 0 0 2px #334155;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+  }
+
+  .mobile-notch-bar {
+    display: none;
+  }
+  .mode-mobile .mobile-notch-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 0;
+    z-index: 25;
+    position: relative;
+    font-size: 11px;
+    color: rgba(255,255,255,0.9);
+    font-weight: 600;
+  }
+  .mode-mobile .mobile-camera-pill {
+    width: 60px;
+    height: 14px;
+    background: #000;
+    border-radius: 12px;
+    margin: 0 auto;
+  }
+
+  /* Exact gradient overlay matching landing.html */
+  .hero-live-overlay {
+    position: absolute;
+    inset: 0;
+    transition: background 0.3s ease;
+    z-index: 1;
+  }
+  .overlay-none { background: transparent; }
+  .overlay-light { background: linear-gradient(135deg, rgba(15, 23, 42, 0.40) 0%, rgba(15, 23, 42, 0.15) 50%, rgba(15, 23, 42, 0.35) 100%); }
+  .overlay-medium { background: linear-gradient(135deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.25) 50%, rgba(15, 23, 42, 0.65) 100%); }
+  .overlay-dark { background: linear-gradient(135deg, rgba(15, 23, 42, 0.90) 0%, rgba(15, 23, 42, 0.55) 50%, rgba(15, 23, 42, 0.85) 100%); }
+
+  /* Exact glassmorphism card matching landing.html (.hero-glass-card) */
+  .hero-live-card {
+    position: relative;
+    z-index: 5;
+    background: rgba(15, 23, 42, 0.76) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
+    border-radius: 18px;
+    padding: 22px 24px;
+    transition: all 0.3s ease;
+  }
+
+  .mode-mobile .hero-live-card {
+    padding: 16px 18px !important;
+    border-radius: 18px !important;
+    margin-top: 14px;
+  }
+  .mode-mobile #liveTitleText {
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+    margin-bottom: 6px !important;
+  }
+  .mode-mobile #liveSubtitleText {
+    font-size: 11.5px !important;
+    line-height: 1.35 !important;
+    margin-bottom: 10px !important;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .mode-mobile #liveBadgeText {
+    font-size: 9.5px !important;
+  }
+  .mode-mobile .hero-live-btn-group .btn {
+    padding: 5px 12px !important;
+    font-size: 11px !important;
+  }
+
+  /* Desktop Carousel navigation arrows mockup */
+  .preview-carousel-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  .preview-arrow-prev { left: 14px; }
+  .preview-arrow-next { right: 14px; }
+  .mode-mobile .preview-carousel-arrow { display: none !important; }
+
+  .btn-glass-pill-preview {
+    background: rgba(15, 23, 42, 0.82) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    transition: all 0.3s ease;
+    color: #ffffff !important;
+  }
+
+  .review-card-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e9ecef;
+  }
+  .review-card-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06) !important;
+  }
+  .badge-google { background-color: #4285F4; color: #fff; }
+  .badge-whatsapp { background-color: #25D366; color: #fff; }
+  .badge-vip { background-color: #c5a059; color: #000; font-weight: 700; }
+  
+  .instruction-guide-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #c5a059;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex flex-column flex-md-row align-items-md-center justify-content-between my-3 gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark px-2.5 py-1 fs-12 fw-bold">HOME CMS • GERENCIADOR DE BANNERS</span>
+            <h4 class="mb-0 text-dark fw-bold">Gerenciador da Página Inicial & Gerenciador de Banners</h4>
+          </div>
+          <p class="text-muted fs-13 mb-0 mt-1">
+            Personalize fotos, textos, depoimentos, cards de coleções e configurações da página inicial com pré-visualização ao vivo.
+          </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a href="{% url 'catalog:home' %}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1.5 shadow-xs">
+            <i class="bx bx-globe fs-16 text-primary"></i> <span>Ver Vitrine Pública</span>
+          </a>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1" onclick="window.location.reload();">
+            <i class="bx bx-refresh fs-16"></i> <span>Recarregar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-xs" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Top Educational Guide Box (Texto Explicativo & Painel Expandível) -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4" style="background: #ffffff; border: 1px solid rgba(0,0,0,0.06) !important;">
+    <div class="card-body p-3 p-md-4">
+      <div class="d-flex align-items-start gap-3">
+        
+        <!-- Ícone / Destaque -->
+        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs" style="width: 44px; height: 44px;">
+          <i class="bx bx-bulb fs-24"></i>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h5 class="fw-bold text-dark mb-0 fs-16 d-flex align-items-center gap-2">
+              <span>Central de Personalização da Página Inicial</span>
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-2.5 py-0.5 fs-11 fw-bold">Ao Vivo</span>
+            </h5>
+
+            <!-- Botão de Expandir / Recolher (+) -->
+            <button class="btn btn-outline-dark btn-sm rounded-pill px-3 py-1 fs-12 fw-bold d-inline-flex align-items-center gap-1.5 shadow-xs transition-all" type="button" data-bs-toggle="collapse" data-bs-target="#homeCmsGuideCollapse" aria-expanded="false" aria-controls="homeCmsGuideCollapse" id="btnToggleGuide">
+              <i class="bx bx-plus-circle fs-16 text-warning" id="guideToggleIcon"></i>
+              <span id="guideToggleText">Ver Guia Detalhado & Medidas</span>
+            </button>
+          </div>
+
+          <!-- Parágrafo Claro e Direto -->
+          <p class="text-muted fs-13 mb-0 leading-relaxed">
+            Aqui você personaliza em tempo real todos os elementos visuais, fotos, textos e recursos da página inicial da <strong>Grife HF</strong>. Todas as alterações salvas refletem imediatamente na vitrine para clientes no Desktop e Celular. Clique no botão ao lado para consultar as medidas recomendadas e dicas de design para cada seção.
+          </p>
+
+          <!-- Painel Expandível com Informações Detalhadas e Medidas (Colapsado por padrão) -->
+          <div class="collapse mt-3 pt-3 border-top" id="homeCmsGuideCollapse">
+            <div class="row g-3">
+              
+              <!-- 1. Banners do Topo -->
+              <div class="col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="rounded-circle bg-dark text-warning p-1.5 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                      <i class="bx bx-slideshow fs-16"></i>
+                    </span>
+                    <strong class="fs-13 text-dark">1. Banners do Topo (Hero)</strong>
+                  </div>
+                  <ul class="list-unstyled fs-12 text-muted mb-0 ps-1 d-flex flex-column gap-1.5">
+                    <li><strong class="text-dark">🖥️ Desktop:</strong> <code>1920 x 800 px</code> (16:9 - alta resolução)</li>
+                    <li><strong class="text-dark">📱 Mobile Vertical:</strong> <code>1080 x 1920 px</code> (9:16 - tela cheia)</li>
+                    <li><strong class="text-dark">🎨 Contraste:</strong> Ajuste o escurecimento (overlay) para garantir leitura clara dos textos.</li>
+                    <li><strong class="text-dark">📲 Simulador:</strong> Teste em tempo real no visualizador ao vivo antes de salvar.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 2. Depoimentos & Prova Social -->
+              <div class="col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="rounded-circle bg-warning text-dark p-1.5 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                      <i class="bx bx-star fs-16"></i>
+                    </span>
+                    <strong class="fs-13 text-dark">2. Depoimentos & Selos</strong>
+                  </div>
+                  <ul class="list-unstyled fs-12 text-muted mb-0 ps-1 d-flex flex-column gap-1.5">
+                    <li><strong class="text-dark">🛡️ Origens:</strong> Instagram Direct, WhatsApp, Google 5★, VIP ou Loja Física.</li>
+                    <li><strong class="text-dark">👤 Foto do Cliente:</strong> Upload direto do arquivo ou link externo com prévia instantânea.</li>
+                    <li><strong class="text-dark">✨ Automático:</strong> Se não enviar foto, o sistema gera o avatar com as iniciais do nome.</li>
+                    <li><strong class="text-dark">↩️ Desfazer:</strong> Conta com timer de 5s para recuperar exclusões acidentais.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 3. Cards das Coleções -->
+              <div class="col-md-6 col-lg-4">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="rounded-circle bg-primary text-white p-1.5 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                      <i class="bx bx-grid-alt fs-16"></i>
+                    </span>
+                    <strong class="fs-13 text-dark">3. Cards das Coleções</strong>
+                  </div>
+                  <ul class="list-unstyled fs-12 text-muted mb-0 ps-1 d-flex flex-column gap-1.5">
+                    <li><strong class="text-dark">📐 Medida Ideal:</strong> <code>800 x 1000 px</code> (proporção 4:5 vertical).</li>
+                    <li><strong class="text-dark">👗 Feminino & 👔 Masculino:</strong> Destaque os lançamentos mais procurados de cada linha.</li>
+                    <li><strong class="text-dark">🎯 Botões:</strong> Defina o texto do botão e o link de filtro na vitrine.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 4. Loja Física & Horários -->
+              <div class="col-md-6 col-lg-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="rounded-circle bg-success text-white p-1.5 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                      <i class="bx bx-store-alt fs-16"></i>
+                    </span>
+                    <strong class="fs-13 text-dark">4. Loja Física & Selo de Horário Inteligente</strong>
+                  </div>
+                  <ul class="list-unstyled fs-12 text-muted mb-0 ps-1 d-flex flex-column gap-1.5">
+                    <li><strong class="text-dark">📍 Informações:</strong> Endereço de Cajazeiras - PB, WhatsApp de consultoras e link do Google Maps.</li>
+                    <li><strong class="text-dark">🕒 Selo em Tempo Real:</strong> Calcula automaticamente se a loja física está aberta ou fechada conforme o horário e dia da semana.</li>
+                    <li><strong class="text-dark">🖼️ Foto do Espaço:</strong> <code>1200 x 800 px</code> (fachada, araras ou provador VIP).</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 5. Avisos, Drops & Grupo VIP -->
+              <div class="col-md-12 col-lg-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="rounded-circle bg-danger text-white p-1.5 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                      <i class="bx bx-badge-check fs-16"></i>
+                    </span>
+                    <strong class="fs-13 text-dark">5. Avisos, Contador Regressivo & Grupo VIP</strong>
+                  </div>
+                  <ul class="list-unstyled fs-12 text-muted mb-0 ps-1 d-flex flex-column gap-1.5">
+                    <li><strong class="text-dark">📢 Faixa Superior:</strong> Divulgação de frete grátis, cupons ou novidades da semana.</li>
+                    <li><strong class="text-dark">⏳ Contador Regressivo:</strong> Contagem ao vivo para data/hora do próximo lançamento de drop.</li>
+                    <li><strong class="text-dark">💬 Grupo VIP:</strong> Botão de entrada direta no grupo do WhatsApp da Grife HF.</li>
+                    <li><strong class="text-dark">🌐 Compartilhamento (OpenGraph):</strong> <code>1200 x 630 px</code> (foto que aparece ao mandar o link no WhatsApp).</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- CMS Nav Tabs -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-2 bg-light rounded-4">
+      <ul class="nav nav-pills nav-justified gap-2" id="homeCmsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'banners' or not active_tab %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-banners-btn" data-bs-toggle="pill" data-bs-target="#tab-banners" type="button" role="tab">
+            <i class="bx bx-slideshow fs-18"></i>
+            <span>🖼️ Banners do Topo</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'reviews' %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-reviews-btn" data-bs-toggle="pill" data-bs-target="#tab-reviews" type="button" role="tab">
+            <i class="bx bx-star fs-18 text-warning"></i>
+            <span>⭐ Depoimentos & Avaliações</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'cards' %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-cards-btn" data-bs-toggle="pill" data-bs-target="#tab-cards" type="button" role="tab">
+            <i class="bx bx-grid-alt fs-18"></i>
+            <span>🎴 Cards das Coleções</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'store' %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-store-btn" data-bs-toggle="pill" data-bs-target="#tab-store" type="button" role="tab">
+            <i class="bx bx-store-alt fs-18"></i>
+            <span>📍 Loja Física (Cajazeiras)</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'promo' %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-promo-btn" data-bs-toggle="pill" data-bs-target="#tab-promo" type="button" role="tab">
+            <i class="bx bx-time-five fs-18 text-danger"></i>
+            <span>⚡ Promoções & Timer</span>
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'benefits' %}active{% endif %} rounded-3 py-2.5 fw-bold fs-13 d-flex align-items-center justify-content-center gap-2" id="tab-benefits-btn" data-bs-toggle="pill" data-bs-target="#tab-benefits" type="button" role="tab">
+            <i class="bx bx-badge-check fs-18"></i>
+            <span>✨ Avisos & VIP</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Tab Content Area -->
+  <div class="tab-content" id="homeCmsTabContent">
+    
+    <!-- ============================================================== -->
+    <!-- ABA 1: BANNERS DO TOPO & CARROSSÉIS COM SIMULADOR AO VIVO      -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'banners' or not active_tab %}show active{% endif %}" id="tab-banners" role="tabpanel">
+      
+      <!-- Banner Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-dark text-warning p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-slideshow fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">💡 Como gerenciar os Banners do Topo:</strong>
+          Use o <strong>Simulador ao Vivo</strong> à esquerda para visualizar como o banner, textos e contraste ficam em tempo real nas versões Computador (16:9) e Celular (9:16). Preencha o formulário à direita para publicar ou atualizar.
+        </div>
+      </div>
+
+      <!-- Linha Superior: Simulador ao Vivo (Esquerda) + Formulário de Criação (Direita) -->
+      <div class="row g-4 mb-4">
+        
+        <!-- Coluna Esquerda: Simulador ao Vivo (Live Preview) -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bx bx-show fs-20 text-warning"></i>
+                <div>
+                  <h5 class="card-title mb-0 fw-bold text-dark fs-15">Simulador ao Vivo (Preview)</h5>
+                  <small class="text-muted fs-11">Visualize exatamente como o cliente verá no computador e no celular</small>
+                </div>
+              </div>
+              <div class="btn-group btn-group-sm cms-preview-device-toggle" role="group" aria-label="Alternar Dispositivo">
+                <button type="button" class="btn btn-outline-dark active" id="btnPreviewDesktop" onclick="setPreviewMode('desktop')">
+                  <i class="bx bx-desktop me-1"></i> Desktop (16:9)
+                </button>
+                <button type="button" class="btn btn-outline-dark" id="btnPreviewMobile" onclick="setPreviewMode('mobile')">
+                  <i class="bx bx-mobile-alt me-1"></i> Celular (9:16)
+                </button>
+              </div>
+            </div>
+            
+            <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-start bg-light">
+              <div class="text-center mb-2 text-muted fs-12 d-flex align-items-center justify-content-center gap-2">
+                <span id="previewModeBadge" class="badge bg-dark text-white px-3 py-1 rounded-pill">💻 VISUALIZAÇÃO DESKTOP (16:9)</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0.5 fs-10" id="previewImageSourceBadge">Foto Panorâmica</span>
+              </div>
+
+              <!-- Desktop Frame Container wrapper -->
+              <div id="previewContainerWrapper" class="preview-desktop-container w-100 mb-2">
+                
+                <!-- Browser window top bar (Desktop only) -->
+                <div id="previewBrowserBar" class="browser-top-bar">
+                  <div class="d-flex align-items-center gap-1.5">
+                    <span class="rounded-circle bg-danger" style="width: 9px; height: 9px; opacity: 0.85;"></span>
+                    <span class="rounded-circle bg-warning" style="width: 9px; height: 9px; opacity: 0.85;"></span>
+                    <span class="rounded-circle bg-success" style="width: 9px; height: 9px; opacity: 0.85;"></span>
+                  </div>
+                  <div class="bg-dark px-3 py-0.5 rounded-pill text-light fw-medium fs-11 d-flex align-items-center gap-1.5 border border-secondary-subtle">
+                    <i class="bx bx-lock-alt text-success fs-12"></i> https://grifehf.com.br
+                  </div>
+                  <span class="badge bg-secondary-subtle text-light fs-10 px-2 py-0.5 rounded-pill">1920×1080</span>
+                </div>
+
+                <!-- Live Simulator Box -->
+                <div id="heroLiveBox" class="hero-live-preview-box p-3 p-md-4" style="background-image: url('{% if hero_slides.0 %}{{ hero_slides.0.final_image_url }}{% else %}{% static 'images/hero_feminina.jpg' %}{% endif %}');">
+                  
+                  <!-- Notch bar visible only on mobile mode -->
+                  <div class="mobile-notch-bar">
+                    <span>09:41</span>
+                    <div class="mobile-camera-pill"></div>
+                    <div class="d-flex gap-1 align-items-center">
+                      <i class="bx bx-wifi fs-12"></i>
+                      <i class="bx bxs-battery-full fs-12"></i>
+                    </div>
+                  </div>
+
+                  <!-- Overlay de contraste -->
+                  <div id="heroLiveOverlay" class="hero-live-overlay overlay-medium"></div>
+
+                  <!-- Carousel Side Navigation Arrows (Desktop) -->
+                  <div class="preview-carousel-arrow preview-arrow-prev"><i class="bx bx-chevron-left fs-22"></i></div>
+                  <div class="preview-carousel-arrow preview-arrow-next"><i class="bx bx-chevron-right fs-22"></i></div>
+
+                  <!-- Content Card Wrapper -->
+                  <div id="heroLiveContentWrapper" class="position-relative z-index-5 w-100 text-start me-auto" style="max-width: 440px;">
+                    <div class="hero-live-card text-white">
+                      <div id="heroLiveBadgeWrapper" class="d-flex align-items-center gap-1.5 mb-1.5 text-warning fw-bold text-uppercase" style="font-size: 10.5px; letter-spacing: 1.2px;">
+                        <i class="bx bxs-map-pin text-warning fs-13"></i>
+                        <span id="liveBadgeText">{% if hero_slides.0.badge_text %}{{ hero_slides.0.badge_text }}{% else %}✨ DROP EXCLUSIVO • CAJAZEIRAS - PB{% endif %}</span>
+                      </div>
+                      <h4 id="liveTitleText" class="fw-bold text-white mb-2" style="letter-spacing: -0.5px; font-size: 19px; line-height: 1.25;">
+                        {% if hero_slides.0.title %}{{ hero_slides.0.title }}{% else %}Nova Coleção Primavera / Verão{% endif %}
+                      </h4>
+                      <p id="liveSubtitleText" class="text-white-50 fs-13 mb-3 leading-relaxed">
+                        {% if hero_slides.0.subtitle %}{{ hero_slides.0.subtitle }}{% else %}Curadoria exclusiva de alta moda feminina e masculina. Peças autorais das marcas mais consagradas do país.{% endif %}
+                      </p>
+                      <div id="heroLiveBtnGroup" class="d-flex align-items-center gap-2 hero-live-btn-group flex-wrap justify-content-start">
+                        <button type="button" id="liveBtnPrimary" class="btn btn-warning btn-sm rounded-pill px-3.5 py-2 fw-bold text-dark fs-12 shadow-sm d-inline-flex align-items-center gap-1.5">
+                          <i class="bx bx-shopping-bag fs-15"></i> <span id="liveBtnText">{% if hero_slides.0.button_text %}{{ hero_slides.0.button_text }}{% else %}Explorar Coleção{% endif %}</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 fw-semibold fs-12 d-inline-flex align-items-center gap-1.5 shadow-sm">
+                          <i class="bx bxl-whatsapp text-success fs-15"></i> <span>Consultoria VIP</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Floating bottom pill button (desktop only) -->
+                  <div id="liveBottomPill" class="position-absolute bottom-0 end-0 pb-3 pe-3 z-index-5">
+                    <span class="btn btn-glass-pill-preview rounded-pill px-3.5 py-2 d-inline-flex align-items-center gap-1.5 text-white fw-semibold fs-11">
+                      <i class="bx bx-store-alt text-warning fs-15"></i> <span>Ver Vitrine Completa</span>
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="alert alert-info border-0 rounded-3 mt-auto mb-0 fs-12 d-flex align-items-center gap-2 py-2">
+                <i class="bx bx-info-circle fs-16 text-info flex-shrink-0"></i>
+                <span>O simulador reflete em tempo real o carrossel oficial da loja, com suporte a proporção 16:9 (Desktop) e 9:16 (Celular).</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna Direita: Formulário de Adicionar Novo Banner -->
+        <div class="col-lg-6">
+          <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                <i class="bx bx-plus-circle text-warning fs-20"></i> Adicionar Novo Banner
+              </h5>
+              <span class="badge bg-warning text-dark fs-11 fw-bold">HERO CAROUSEL</span>
+            </div>
+            <div class="card-body p-4">
+              <form method="POST" enctype="multipart/form-data" id="createBannerForm">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_banner">
+                
+                <div class="row g-2 mb-3">
+                  <div class="col-md-7">
+                    <label class="form-label fw-bold fs-12 text-dark">Posição / Tipo</label>
+                    <select name="slide_type" id="bannerTypeInput" class="form-select form-select-sm rounded-3 fs-13 py-2" required>
+                      <option value="hero" selected>Hero Principal (Topo da Página)</option>
+                      <option value="drops">Drops & Novidades da Semana</option>
+                      <option value="promo">Banner Promocional</option>
+                    </select>
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold fs-12 text-dark">Ordem de Exibição</label>
+                    <input type="number" name="order" class="form-control form-control-sm rounded-3 fs-13 py-2" value="1" min="1">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Título Principal <span class="text-danger">*</span></label>
+                  <input type="text" name="title" id="bannerTitleInput" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: Nova Coleção Primavera / Verão" required value="Nova Coleção Primavera / Verão">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Subtítulo / Descrição</label>
+                  <textarea name="subtitle" id="bannerSubtitleInput" rows="2" class="form-control form-control-sm rounded-3 fs-13" placeholder="Curadoria exclusiva em linho nobre, seda pura e alfaiataria...">Curadoria exclusiva de alta moda feminina e masculina. Peças autorais das marcas mais consagradas do país.</textarea>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge Dourada</label>
+                    <input type="text" name="badge_text" id="bannerBadgeInput" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: Grife HF • Cajazeiras - PB" value="✨ Drop Exclusivo • Cajazeiras - PB">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Alinhamento do Texto</label>
+                    <select name="text_alignment" id="bannerAlignInput" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                      <option value="left" selected>Esquerda (Padrão Luxo)</option>
+                      <option value="center">Centralizado</option>
+                      <option value="right">Direita</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Botão</label>
+                    <input type="text" name="button_text" id="bannerBtnTextInput" class="form-control form-control-sm rounded-3 fs-13 py-2" value="Explorar Coleção">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Estilo do Botão</label>
+                    <select name="button_style" id="bannerBtnStyleInput" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                      <option value="gold" selected>Dourado Luxo (Padrão)</option>
+                      <option value="dark">Preto Minimalista</option>
+                      <option value="whatsapp">Verde WhatsApp</option>
+                      <option value="outline">Borda Branca</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Link de Destino</label>
+                    <input type="text" name="button_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="/produtos/">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Contraste da Foto (Overlay)</label>
+                    <select name="overlay_darkness" id="bannerOverlayInput" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                      <option value="light">Leve (25%)</option>
+                      <option value="medium" selected>Médio (45% - Recomendado)</option>
+                      <option value="dark">Intenso (70% - Fotos Claras)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3 p-3 bg-light rounded-3 border">
+                  <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center gap-1">
+                    <i class="bx bx-desktop text-primary"></i> Foto Desktop (Panorâmica 16:9 / 1920x1080)
+                  </label>
+                  <input type="file" name="image" id="bannerImageFile" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="image_url" id="bannerImageUrl" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" placeholder="Ou URL Direta da Foto (CDN / Link externo)">
+                </div>
+
+                <div class="mb-3 p-3 bg-light rounded-3 border">
+                  <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center gap-1">
+                    <i class="bx bx-mobile-alt text-success"></i> Foto Mobile Opcional (Vertical 4:5 ou 9:16)
+                  </label>
+                  <input type="file" name="image_mobile" id="bannerMobileImageFile" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="image_mobile_url" id="bannerMobileImageUrl" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" placeholder="Ou URL Direta Mobile (Opcional)">
+                </div>
+
+                <button type="submit" class="btn btn-warning text-dark w-100 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                  <i class="bx bx-check-circle fs-18"></i> Publicar Banner
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tabela / Grade Visual de Banners Cadastrados -->
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0 fw-bold text-dark fs-15">Banners Cadastrados no Carrossel</h5>
+            <small class="text-muted fs-12">Banners ativos aparecem em ordem na vitrine da loja</small>
+          </div>
+          <span class="badge bg-dark rounded-pill px-3 py-1 fs-12">
+            {{ hero_slides.count|add:drop_slides.count }} Banners
+          </span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted fs-11 text-uppercase">
+                <tr>
+                  <th class="ps-4">Banner / Foto</th>
+                  <th>Posição</th>
+                  <th>Alinhamento & Filtro</th>
+                  <th>Ordem</th>
+                  <th>Status</th>
+                  <th class="text-end pe-4">Ações Rápidas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for slide in hero_slides %}
+                <tr>
+                  <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <img src="{{ slide.final_image_url }}" alt="{{ slide.title }}" class="rounded-3 shadow-xs" style="width: 80px; height: 50px; object-fit: cover;">
+                      <div>
+                        <strong class="text-dark d-block fs-13 text-truncate" style="max-width: 240px;">{{ slide.title }}</strong>
+                        <small class="text-muted fs-11">{{ slide.badge_text|default:"Sem tag" }}</small>
+                        {% if slide.image_mobile or slide.image_mobile_url %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-1.5 py-0.5 fs-10 ms-1">📱 Mobile Vertical</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="badge bg-dark rounded-pill px-2.5 py-1 fs-11">Hero Topo</span></td>
+                  <td>
+                    <div class="d-flex flex-column gap-1">
+                      <span class="badge bg-light text-dark border fs-11 text-capitalize"><i class="bx bx-align-left"></i> {{ slide.get_text_alignment_display|default:'Esquerda' }}</span>
+                      <span class="badge bg-light text-muted border fs-10 text-capitalize">{{ slide.get_overlay_darkness_display|default:'Médio' }}</span>
+                    </div>
+                  </td>
+                  <td class="fw-bold fs-13 text-dark">#{{ slide.order }}</td>
+                  <td>
+                    <a href="{% url 'pages:admin_carousel_toggle' slide.pk %}" class="btn btn-sm {% if slide.is_active %}btn-success-subtle text-success border-success-subtle{% else %}btn-secondary-subtle text-muted border-secondary-subtle{% endif %} rounded-pill px-2.5 py-1 fs-12 fw-semibold d-inline-flex align-items-center gap-1" title="Clique para alternar">
+                      <i class="bx {% if slide.is_active %}bx-check-circle{% else %}bx-x-circle{% endif %}"></i>
+                      <span>{% if slide.is_active %}Ativo no Site{% else %}Desativado{% endif %}</span>
+                    </a>
+                  </td>
+                  <td class="text-end pe-4">
+                    <div class="d-flex justify-content-end gap-1.5">
+                      <button type="button" class="btn btn-outline-dark btn-sm rounded-pill px-2.5 py-1 d-flex align-items-center gap-1" onclick="previewBannerData({ title: '{{ slide.title|escapejs }}', subtitle: '{{ slide.subtitle|escapejs }}', badge_text: '{{ slide.badge_text|escapejs }}', button_text: '{{ slide.button_text|default:'Explorar Coleção'|escapejs }}', button_style: '{{ slide.button_style|default:'gold'|escapejs }}', overlay_darkness: '{{ slide.overlay_darkness|default:'medium'|escapejs }}', text_alignment: '{{ slide.text_alignment|default:'left'|escapejs }}', image_url: '{{ slide.final_image_url|escapejs }}', image_mobile_url: '{{ slide.final_mobile_image_url|escapejs }}' })" title="Ver este banner no Simulador ao Vivo">
+                        <i class="bx bx-show fs-15"></i> <span>Simulador</span>
+                      </button>
+                      <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-1 d-flex align-items-center gap-1" onclick="openEditBannerModal({{ slide.pk }})">
+                        <i class="bx bx-edit-alt fs-15"></i> <span>Editar</span>
+                      </button>
+                      <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 d-flex align-items-center gap-1" onclick="deleteWithUndo(event, { url: '{% url 'pages:admin_carousel_delete' slide.pk %}', itemName: '{{ slide.title|escapejs }}', itemType: 'Banner', element: this.closest('tr') })" title="Excluir Banner">
+                        <i class="bx bx-trash fs-15"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bx bx-slideshow fs-36 text-muted mb-2 d-block"></i>
+                    Nenhum banner cadastrado no momento. Cadastre seu primeiro banner acima!
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- ABA 2: DEPOIMENTOS & AVALIAÇÕES (PROVA SOCIAL DINÂMICA)        -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'reviews' %}show active{% endif %}" id="tab-reviews" role="tabpanel">
+      
+      <!-- Reviews Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-warning text-dark p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-star fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">⭐ Como funcionam as Avaliações & Depoimentos:</strong>
+          Cadastre elogios e mensagens recebidas no Google Meu Negócio, WhatsApp ou de clientes VIP. Os depoimentos com status ativo aparecem no rodapé da vitrine principal com estrelas douradas e selos de autenticidade. Caso o cliente não possua foto, um avatar com a inicial do nome é gerado automaticamente.
+        </div>
+      </div>
+
+      <div class="row g-4 mb-4">
+        
+        <!-- Formulário: Adicionar Novo Depoimento -->
+        <div class="col-lg-4">
+          <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
+              <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                <i class="bx bx-star text-warning fs-20"></i> Novo Depoimento
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_review">
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Nome do Cliente <span class="text-danger">*</span></label>
+                  <input type="text" name="name" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: Mariana Albuquerque" required>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-7">
+                    <label class="form-label fw-bold fs-12 text-dark">Cidade / Localização</label>
+                    <input type="text" name="location" class="form-control form-control-sm rounded-3 fs-13 py-2" value="Cajazeiras - PB">
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold fs-12 text-dark">Nota (Estrelas)</label>
+                    <select name="rating" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                      <option value="5" selected>5 Estrelas ★★★★★</option>
+                      <option value="4">4 Estrelas ★★★★☆</option>
+                      <option value="3">3 Estrelas ★★★☆☆</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Origem / Selo de Confiança</label>
+                  <select name="source" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                    <option value="instagram" selected>📸 Instagram Direct / Story</option>
+                    <option value="google">🌐 Google Reviews (5.0 ★)</option>
+                    <option value="whatsapp">💬 WhatsApp VIP & Atendimento</option>
+                    <option value="vip">👑 Cliente VIP / Provador</option>
+                    <option value="direct">✉️ Direct / Mensagem Privada</option>
+                    <option value="loja">📍 Loja Física (Cajazeiras)</option>
+                    <option value="outro">🛡️ Cliente Verificado / Indicação</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Depoimento / Comentário <span class="text-danger">*</span></label>
+                  <textarea name="comment" rows="3" class="form-control form-control-sm rounded-3 fs-13" placeholder="Conte o elogio do cliente sobre o atendimento, tecido das peças, entrega..." required></textarea>
+                </div>
+
+                <div class="mb-3 p-3 bg-light rounded-3 border">
+                  <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center gap-1">
+                    <i class="bx bx-user-circle text-primary"></i> Foto / Avatar do Cliente (Opcional)
+                  </label>
+                  <div class="d-flex align-items-center gap-3 mb-2">
+                    <img id="createAvatarPreviewImg" src="{% static 'images/users/avatar-1.jpg' %}" alt="Avatar" class="rounded-circle shadow-xs border" style="width: 44px; height: 44px; object-fit: cover; display: none;">
+                    <div id="createAvatarInitialPlaceholder" class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center shadow-xs" style="width: 44px; height: 44px; font-size: 16px;">
+                      HF
+                    </div>
+                    <div class="flex-grow-1">
+                      <input type="file" name="avatar" id="createReviewAvatarFile" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                    </div>
+                  </div>
+                  <input type="url" name="avatar_url" id="createReviewAvatarUrl" class="form-control form-control-sm rounded-3 fs-12" placeholder="Ou URL Direta da Foto (ex: link do Instagram/Cloud)">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Ordem de Exibição</label>
+                  <input type="number" name="order" class="form-control form-control-sm rounded-3 fs-13 py-2" value="1" min="1">
+                </div>
+
+                <button type="submit" class="btn btn-warning text-dark w-100 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                  <i class="bx bx-check-circle fs-18"></i> Publicar Depoimento
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grade de Depoimentos Cadastrados -->
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-0 fw-bold text-dark fs-15">Depoimentos Ativos no Site</h5>
+                <small class="text-muted fs-12">Exibidos na seção de Prova Social na Home</small>
+              </div>
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fs-12 fw-bold">
+                {{ reviews.count }} Depoimentos
+              </span>
+            </div>
+            <div class="card-body p-4">
+              <div class="row g-3">
+                {% for review in reviews %}
+                <div class="col-md-6 review-card-wrapper">
+                  <div class="card review-card-item rounded-4 p-3 bg-white h-100 shadow-xs">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                      <div class="d-flex align-items-center gap-2.5">
+                        {% if review.final_avatar_url %}
+                        <img src="{{ review.final_avatar_url }}" alt="{{ review.name }}" class="rounded-circle shadow-xs border" style="width: 42px; height: 42px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle text-white fw-bold d-flex align-items-center justify-content-center shadow-xs" style="width: 42px; height: 42px; font-size: 16px; background: {% cycle '#2563eb' '#059669' '#7c3aed' '#d97706' '#db2777' %};">
+                          {{ review.initial_letter }}
+                        </div>
+                        {% endif %}
+                        <div>
+                          <strong class="text-dark d-block fs-13 leading-tight">{{ review.name }}</strong>
+                          <small class="text-muted fs-11">{{ review.location }}</small>
+                        </div>
+                      </div>
+
+                      <!-- Selo de Origem Dinâmico -->
+                      {% if review.source == 'instagram' %}
+                      <span class="badge rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 text-white shadow-xs" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+                        <i class="bx bxl-instagram"></i> Instagram
+                      </span>
+                      {% elif review.source == 'google' %}
+                      <span class="badge badge-google rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 shadow-xs">
+                        <i class="bx bxl-google"></i> Google
+                      </span>
+                      {% elif review.source == 'whatsapp' %}
+                      <span class="badge badge-whatsapp rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 shadow-xs">
+                        <i class="bx bxl-whatsapp"></i> WhatsApp
+                      </span>
+                      {% elif review.source == 'vip' %}
+                      <span class="badge badge-vip rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 shadow-xs">
+                        <i class="bx bx-crown"></i> VIP
+                      </span>
+                      {% elif review.source == 'direct' %}
+                      <span class="badge rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 text-white shadow-xs" style="background-color: #8b5cf6;">
+                        <i class="bx bx-message-rounded-dots"></i> Direct
+                      </span>
+                      {% elif review.source == 'loja' %}
+                      <span class="badge rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 text-white shadow-xs" style="background-color: #1e293b;">
+                        <i class="bx bx-store-alt"></i> Loja Física
+                      </span>
+                      {% else %}
+                      <span class="badge rounded-pill px-2.5 py-1 fs-10 d-flex align-items-center gap-1 text-white shadow-xs" style="background-color: #64748b;">
+                        <i class="bx bx-check-shield"></i> Verificado
+                      </span>
+                      {% endif %}
+                    </div>
+
+                    <div class="text-warning fs-12 mb-2">
+                      {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= review.rating %}
+                        <i class="bx bxs-star"></i>
+                        {% else %}
+                        <i class="bx bx-star text-muted"></i>
+                        {% endif %}
+                      {% endfor %}
+                      <span class="text-muted fs-11 ms-1">Ordem: #{{ review.order }}</span>
+                    </div>
+
+                    <p class="text-muted fs-13 mb-3 flex-grow-1 leading-relaxed">
+                      "{{ review.comment }}"
+                    </p>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                      <a href="{% url 'pages:admin_review_toggle' review.pk %}" class="btn btn-sm {% if review.is_active %}btn-success-subtle text-success border-success-subtle{% else %}btn-secondary-subtle text-muted border-secondary-subtle{% endif %} rounded-pill px-2.5 py-0.5 fs-11 fw-semibold">
+                        {% if review.is_active %}● Ativo{% else %}○ Pausado{% endif %}
+                      </a>
+
+                      <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0.5 fs-12 d-flex align-items-center gap-1" onclick="openEditReviewModal({{ review.pk }})">
+                          <i class="bx bx-edit-alt"></i> <span>Editar</span>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2 py-0.5 fs-12" onclick="deleteWithUndo(event, { url: '{% url 'pages:admin_review_delete' review.pk %}', itemName: '{{ review.name|escapejs }}', itemType: 'Depoimento', element: this.closest('.review-card-wrapper') })" title="Excluir Depoimento">
+                          <i class="bx bx-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5 text-muted">
+                  <i class="bx bx-star fs-36 text-muted mb-2 d-block"></i>
+                  Nenhum depoimento cadastrado no momento.
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- ABA 3: CARDS DAS COLEÇÕES (FEMININO & MASCULINO)               -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'cards' %}show active{% endif %}" id="tab-cards" role="tabpanel">
+      
+      <!-- Cards Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-primary text-white p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-grid-alt fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">🎴 Como configurar os Cards das Coleções:</strong>
+          Estes são os dois grandes blocos visuais exibidos logo abaixo dos banners, separando a navegação entre a <strong>Coleção Feminina</strong> e a <strong>Coleção Masculina</strong>. Recomendamos fotos editoriais de modelo em formato vertical (800x1000px).
+        </div>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_cards">
+
+        <div class="row g-4">
+          
+          <!-- Card Feminino -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-female text-warning fs-20"></i> Card: Moda Feminina
+                </h5>
+                <span class="badge bg-warning text-dark fs-11 fw-bold">VITRINE HOME</span>
+              </div>
+              <div class="card-body p-4">
+                
+                <!-- Preview Atual -->
+                <div class="mb-3 position-relative rounded-3 overflow-hidden shadow-xs" style="height: 180px;">
+                  <img src="{{ home_config.final_women_card_image }}" alt="Card Feminino" class="w-100 h-100" style="object-fit: cover;">
+                  <div class="position-absolute bottom-0 start-0 p-3 text-white w-100" style="background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%);">
+                    <span class="badge bg-warning text-dark fs-10 fw-bold mb-1">{{ home_config.women_card_badge }}</span>
+                    <h6 class="mb-0 fw-bold text-white fs-14">{{ home_config.women_card_title }}</h6>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Trocar Foto Feminina (Arquivo)</label>
+                  <input type="file" name="women_card_image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="women_card_image_url" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" value="{{ home_config.women_card_image_url }}" placeholder="Ou link direto da foto">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge</label>
+                    <input type="text" name="women_card_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.women_card_badge }}">
+                  </div>
+                  <div class="col-md-7">
+                    <label class="form-label fw-bold fs-12 text-dark">Título do Card</label>
+                    <input type="text" name="women_card_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.women_card_title }}" required>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Descrição Curta</label>
+                  <textarea name="women_card_subtitle" rows="2" class="form-control form-control-sm rounded-3 fs-13">{{ home_config.women_card_subtitle }}</textarea>
+                </div>
+
+                <div class="row g-2 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Botão</label>
+                    <input type="text" name="women_card_btn_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.women_card_btn_text }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Link de Destino</label>
+                    <input type="text" name="women_card_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.women_card_url }}">
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Masculino -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-male text-warning fs-20"></i> Card: Moda Masculina
+                </h5>
+                <span class="badge bg-warning text-dark fs-11 fw-bold">VITRINE HOME</span>
+              </div>
+              <div class="card-body p-4">
+                
+                <!-- Preview Atual -->
+                <div class="mb-3 position-relative rounded-3 overflow-hidden shadow-xs" style="height: 180px;">
+                  <img src="{{ home_config.final_men_card_image }}" alt="Card Masculino" class="w-100 h-100" style="object-fit: cover;">
+                  <div class="position-absolute bottom-0 start-0 p-3 text-white w-100" style="background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%);">
+                    <span class="badge bg-warning text-dark fs-10 fw-bold mb-1">{{ home_config.men_card_badge }}</span>
+                    <h6 class="mb-0 fw-bold text-white fs-14">{{ home_config.men_card_title }}</h6>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Trocar Foto Masculina (Arquivo)</label>
+                  <input type="file" name="men_card_image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="men_card_image_url" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" value="{{ home_config.men_card_image_url }}" placeholder="Ou link direto da foto">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge</label>
+                    <input type="text" name="men_card_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.men_card_badge }}">
+                  </div>
+                  <div class="col-md-7">
+                    <label class="form-label fw-bold fs-12 text-dark">Título do Card</label>
+                    <input type="text" name="men_card_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.men_card_title }}" required>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Descrição Curta</label>
+                  <textarea name="men_card_subtitle" rows="2" class="form-control form-control-sm rounded-3 fs-13">{{ home_config.men_card_subtitle }}</textarea>
+                </div>
+
+                <div class="row g-2 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Botão</label>
+                    <input type="text" name="men_card_btn_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.men_card_btn_text }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Link de Destino</label>
+                    <input type="text" name="men_card_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.men_card_url }}">
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <button type="submit" class="btn btn-warning text-dark px-5 py-2.5 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-sm mx-auto">
+              <i class="bx bx-save fs-18"></i> Salvar Cards das Coleções
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- ABA 4: LOJA FÍSICA & HORÁRIO DE FUNCIONAMENTO                  -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'store' %}show active{% endif %}" id="tab-store" role="tabpanel">
+      
+      <!-- Store Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-success text-white p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-store-alt fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">📍 Como gerenciar as informações da Loja Física e Selo de Horário:</strong>
+          Defina os horários de abertura e fechamento para Segunda a Sexta, Sábado e Domingo. O <strong>Selo de Status ao Vivo</strong> calcula automaticamente se a loja física em Cajazeiras está aberta ou fechada no momento exato em que o cliente acessa o site.
+        </div>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_store">
+
+        <div class="row g-4">
+          
+          <!-- Foto da Loja Física -->
+          <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-image text-warning fs-20"></i> Foto da Loja Física
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <div class="mb-3 rounded-3 overflow-hidden shadow-xs" style="height: 240px;">
+                  <img src="{{ home_config.final_store_image }}" alt="Loja Física" class="w-100 h-100" style="object-fit: cover;">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Arquivo de Foto (Fachada / Provador VIP)</label>
+                  <input type="file" name="store_image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="store_image_url" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" value="{{ home_config.store_image_url }}" placeholder="Ou URL da imagem">
+                </div>
+                <div class="p-3 bg-light rounded-3 border">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="fs-12 fw-bold text-dark">Prévia do Selo Atual:</span>
+                    <span class="badge {{ home_config.current_store_status.badge_class }} px-2.5 py-1 rounded-pill fs-11 d-flex align-items-center gap-1">
+                      <i class="{{ home_config.current_store_status.badge_icon }}"></i>
+                      {{ home_config.current_store_status.badge_text }}
+                    </span>
+                  </div>
+                  <small class="text-muted fs-11">Calculado automaticamente com base no relógio do Brasil (UTC-3).</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informações de Contato e Endereço -->
+          <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-map-pin text-warning fs-20"></i> Informações & Contatos da Loja
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge</label>
+                    <input type="text" name="store_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_badge }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Título da Seção</label>
+                    <input type="text" name="store_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_title }}" required>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Descrição de Acolhimento</label>
+                  <textarea name="store_description" rows="3" class="form-control form-control-sm rounded-3 fs-13">{{ home_config.store_description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Endereço Completo</label>
+                  <input type="text" name="store_address" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_address }}">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">WhatsApp & Telefone</label>
+                    <input type="text" name="store_phone" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_phone }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Instagram Handle</label>
+                    <input type="text" name="store_instagram_handle" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_instagram_handle }}">
+                  </div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label fw-bold fs-12 text-dark">Link do Google Maps</label>
+                  <input type="url" name="store_maps_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_maps_url }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Completo: Horário de Funcionamento & Selo de Status -->
+          <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-time-five text-warning fs-20"></i> Horário de Funcionamento & Selo de Status em Tempo Real
+                </h5>
+                <span class="badge bg-warning text-dark fs-11 fw-bold">CALCULADO AUTOMATICAMENTE</span>
+              </div>
+              <div class="card-body p-4">
+                
+                <div class="row g-3 mb-4">
+                  <!-- Modo do Selo -->
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Modo de Exibição do Selo</label>
+                    <select name="store_status_mode" id="storeStatusModeSelect" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                      <option value="auto" {% if home_config.store_status_mode == 'auto' %}selected{% endif %}>🟢 Automático pelo Horário de Funcionamento (Recomendado)</option>
+                      <option value="open" {% if home_config.store_status_mode == 'open' %}selected{% endif %}>🟢 Forçar Sempre Aberto</option>
+                      <option value="closed" {% if home_config.store_status_mode == 'closed' %}selected{% endif %}>🔴 Forçar Fechado Temporariamente</option>
+                      <option value="manual" {% if home_config.store_status_mode == 'manual' %}selected{% endif %}>✏️ Texto Manual Fixo</option>
+                    </select>
+                    <small class="text-muted fs-11 d-block mt-1">No modo automático, o site verifica o relógio do visitante e exibe "Aberto agora até 18:00" ou "Fechado • Abre amanhã".</small>
+                  </div>
+
+                  <!-- Texto Manual Alternativo -->
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto Manual / Mensagem Extra (Opcional)</label>
+                    <input type="text" name="store_status_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_status_badge }}" placeholder="Ex: Aberto hoje até 18h / Plantão de Feriado">
+                    <small class="text-muted fs-11 d-block mt-1">Usado no modo Manual ou como fallback.</small>
+                  </div>
+                </div>
+
+                <!-- Grade de Horários por Dia da Semana -->
+                <div class="row g-3 p-3 bg-light rounded-4 border mb-4">
+                  
+                  <!-- Segunda a Sexta -->
+                  <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-3 shadow-xs border h-100">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary text-white fs-11">Segunda a Sexta</span>
+                        <span class="fs-12 fw-bold text-dark">Dias Úteis</span>
+                      </div>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Abertura</label>
+                          <input type="time" name="store_weekday_open" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_weekday_open|time:'H:i'|default:'08:00' }}">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Fechamento</label>
+                          <input type="time" name="store_weekday_close" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_weekday_close|time:'H:i'|default:'18:00' }}">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Sábado -->
+                  <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-3 shadow-xs border h-100">
+                      <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge bg-warning text-dark fs-11">Sábado</span>
+                          <span class="fs-12 fw-bold text-dark">Fim de Semana</span>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                          <input class="form-check-input" type="checkbox" name="store_saturday_active" value="1" id="satActiveSwitch" {% if home_config.store_saturday_active %}checked{% endif %}>
+                        </div>
+                      </div>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Abertura</label>
+                          <input type="time" name="store_saturday_open" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_saturday_open|time:'H:i'|default:'08:00' }}">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Fechamento</label>
+                          <input type="time" name="store_saturday_close" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_saturday_close|time:'H:i'|default:'13:00' }}">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Domingo / Feriado -->
+                  <div class="col-md-4">
+                    <div class="p-3 bg-white rounded-3 shadow-xs border h-100">
+                      <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="badge bg-secondary text-white fs-11">Domingo / Feriado</span>
+                          <span class="fs-12 fw-bold text-dark">Plantão</span>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                          <input class="form-check-input" type="checkbox" name="store_sunday_active" value="1" id="sunActiveSwitch" {% if home_config.store_sunday_active %}checked{% endif %}>
+                        </div>
+                      </div>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Abertura</label>
+                          <input type="time" name="store_sunday_open" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_sunday_open|time:'H:i'|default:'09:00' }}">
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label fs-11 text-muted mb-1">Fechamento</label>
+                          <input type="time" name="store_sunday_close" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.store_sunday_close|time:'H:i'|default:'13:00' }}">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Texto Resumo dos Horários para Clientes -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Texto Resumo dos Horários (Exibido aos Clientes na Página)</label>
+                  <input type="text" name="store_hours_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.store_hours_text }}" placeholder="Ex: Segunda a Sexta: 08h às 18h • Sábado: 08h às 13h">
+                  <small class="text-muted fs-11">Esse texto aparece na seção de informações e contatos da loja física.</small>
+                </div>
+
+                <!-- Botão Salvar -->
+                <button type="submit" class="btn btn-warning text-dark px-5 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm mx-auto">
+                  <i class="bx bx-save fs-18"></i> Salvar Horários & Dados da Loja Física
+                </button>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- ABA 5: ⚡ PROMOÇÕES RELÂMPAGO & CONTADOR REGRESSIVO (TIMER)    -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'promo' %}show active{% endif %}" id="tab-promo" role="tabpanel">
+      
+      <!-- Promo Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-time-five fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">⚡ Como configurar as Promoções & Timer Regressivo:</strong>
+          Esta seção ativa a experiência de <strong>Drop Promocional de Tempo Limitado</strong> na página inicial com um <strong>Contador Regressivo ao Vivo</strong>. Você pode definir a data/hora de encerramento, o percentual de desconto, a imagem de destaque e se deseja exibir uma barra de urgência fixa no topo do site.
+        </div>
+      </div>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_promo">
+
+        <div class="row g-4">
+          
+          <!-- Coluna 1: Ativação, Timer & Prazos -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-timer text-warning fs-20"></i> Timer Regressivo & Status
+                </h5>
+                <span class="badge bg-danger text-white fs-11 fw-bold">URGÊNCIA AO VIVO</span>
+              </div>
+              <div class="card-body p-4">
+                
+                <!-- Toggle Geral da Promoção -->
+                <div class="form-check form-switch mb-3 p-3 bg-light rounded-3 border">
+                  <input class="form-check-input ms-0 me-3" type="checkbox" name="promo_active" value="1" id="promo_active_switch" {% if home_config.promo_active %}checked{% endif %} style="width: 2.2em; height: 1.2em;">
+                  <label class="form-check-label fw-bold text-dark fs-14" for="promo_active_switch">
+                    Ativar Bloco de Promoções & Timer na Home
+                  </label>
+                  <div class="text-muted fs-12 ms-5">Habilita a aba/seção de Ofertas Relâmpago e a contagem regressiva para os clientes.</div>
+                </div>
+
+                <!-- Toggle Ticker Topbar -->
+                <div class="form-check form-switch mb-4 p-3 bg-light rounded-3 border">
+                  <input class="form-check-input ms-0 me-3" type="checkbox" name="promo_top_ticker_active" value="1" id="promo_top_ticker_switch" {% if home_config.promo_top_ticker_active %}checked{% endif %} style="width: 2.2em; height: 1.2em;">
+                  <label class="form-check-label fw-bold text-dark fs-14" for="promo_top_ticker_switch">
+                    Exibir Barra Fixa com Timer no Topo do Site
+                  </label>
+                  <div class="text-muted fs-12 ms-5">Exibe uma faixa de urgência no cabeçalho acompanhando a rolagem do visitante.</div>
+                </div>
+
+                <!-- Configuração do Timer -->
+                <label class="form-label fw-bold fs-13 text-dark mb-1">
+                  <i class="bx bx-calendar-event text-danger me-1"></i> Data & Horário de Encerramento do Timer
+                </label>
+                <p class="text-muted fs-12 mb-2">Quando o relógio chegar a zero, a mensagem indicará que o lote encerrou.</p>
+                
+                <input type="datetime-local" name="promo_end_date" id="promoEndDateInput" class="form-control rounded-3 py-2 fs-13 mb-2" value="{{ home_config.promo_end_date|date:'Y-m-d\TH:i' }}">
+
+                <!-- Atalhos Rápidos de Prazo -->
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-4">
+                  <span class="fs-12 text-muted fw-semibold">Atalhos rápidos:</span>
+                  <button type="button" class="btn btn-outline-dark btn-sm rounded-pill fs-11" onclick="setPromoPreset('24h')">+24 Horas</button>
+                  <button type="button" class="btn btn-outline-dark btn-sm rounded-pill fs-11" onclick="setPromoPreset('48h')">+48 Horas</button>
+                  <button type="button" class="btn btn-outline-danger btn-sm rounded-pill fs-11 fw-bold" onclick="setPromoPreset('sunday')">Até Domingo (23:59)</button>
+                </div>
+
+                <!-- Textos & Badges -->
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Tag / Badge da Oferta</label>
+                  <input type="text" name="promo_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_badge }}" placeholder="Ex: ⚡ DROP RELÂMPAGO DE 48 HORAS">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-8">
+                    <label class="form-label fw-bold fs-12 text-dark">Título Principal da Campanha</label>
+                    <input type="text" name="promo_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_title }}" placeholder="Ex: Peças Selecionadas com até 30% OFF">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-bold fs-12 text-dark">Badge de Desconto</label>
+                    <input type="text" name="promo_discount_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_discount_badge }}" placeholder="Ex: -30% OFF">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Subtítulo / Descrição de Urgência</label>
+                  <textarea name="promo_subtitle" rows="2" class="form-control form-control-sm rounded-3 fs-13">{{ home_config.promo_subtitle }}</textarea>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label fw-bold fs-12 text-dark">Alerta de Escassez de Estoque</label>
+                  <input type="text" name="promo_stock_alert_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_stock_alert_text }}" placeholder="Ex: ⚠️ Últimas unidades disponíveis na loja física">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna 2: Imagem do Banner & Botão de Ação -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-image text-warning fs-20"></i> Imagem Editorial & Botão
+                </h5>
+                <span class="badge bg-warning text-dark fs-11 fw-bold">DESIGN</span>
+              </div>
+              <div class="card-body p-4">
+                
+                <!-- Preview do Card Promocional -->
+                <div class="mb-3 position-relative rounded-3 overflow-hidden shadow-xs" style="height: 200px;">
+                  <img src="{{ home_config.final_promo_card_image }}" alt="Card Promocional" class="w-100 h-100" style="object-fit: cover;">
+                  <div class="position-absolute bottom-0 start-0 p-3 text-white w-100" style="background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.88) 100%);">
+                    <span class="badge bg-danger text-white fs-10 fw-bold mb-1">{{ home_config.promo_badge }}</span>
+                    <h6 class="mb-0 fw-bold text-white fs-15">{{ home_config.promo_title }}</h6>
+                    <small class="text-warning fw-semibold">{{ home_config.promo_discount_badge }}</small>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Trocar Foto do Card Promocional (Arquivo)</label>
+                  <input type="file" name="promo_card_image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="promo_card_image_url" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" value="{{ home_config.promo_card_image_url }}" placeholder="Ou cole o link direto da foto">
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Botão de Compra</label>
+                    <input type="text" name="promo_button_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_button_text }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Link do Botão (WhatsApp ou Filtro)</label>
+                    <input type="text" name="promo_button_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.promo_button_url }}">
+                  </div>
+                </div>
+
+                <!-- Mini Simulador do Timer -->
+                <div class="p-3 bg-dark text-white rounded-3 mt-4 text-center">
+                  <div class="fs-11 text-uppercase text-warning fw-bold mb-2">Simulação do Relógio Regressivo:</div>
+                  <div class="d-flex align-items-center justify-content-center gap-2">
+                    <div class="bg-black bg-opacity-50 border border-secondary border-opacity-50 rounded-2 p-2" style="min-width: 50px;">
+                      <div class="fs-18 fw-bold text-white" id="simDays">01</div>
+                      <div class="fs-9 text-muted text-uppercase">Dias</div>
+                    </div>
+                    <span class="fs-16 fw-bold text-warning">:</span>
+                    <div class="bg-black bg-opacity-50 border border-secondary border-opacity-50 rounded-2 p-2" style="min-width: 50px;">
+                      <div class="fs-18 fw-bold text-white" id="simHours">08</div>
+                      <div class="fs-9 text-muted text-uppercase">Horas</div>
+                    </div>
+                    <span class="fs-16 fw-bold text-warning">:</span>
+                    <div class="bg-black bg-opacity-50 border border-secondary border-opacity-50 rounded-2 p-2" style="min-width: 50px;">
+                      <div class="fs-18 fw-bold text-white" id="simMins">45</div>
+                      <div class="fs-9 text-muted text-uppercase">Min</div>
+                    </div>
+                    <span class="fs-16 fw-bold text-warning">:</span>
+                    <div class="bg-black bg-opacity-50 border border-secondary border-opacity-50 rounded-2 p-2" style="min-width: 50px;">
+                      <div class="fs-18 fw-bold text-danger" id="simSecs">20</div>
+                      <div class="fs-9 text-muted text-uppercase">Seg</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão de Salvar -->
+          <div class="col-12 text-center mt-2 mb-4">
+            <button type="submit" class="btn btn-warning text-dark px-5 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm mx-auto fs-14">
+              <i class="bx bx-save fs-18"></i> Salvar Configurações de Promoção & Timer
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- ABA 6: AVISOS, GRUPO VIP & DIFERENCIAIS                        -->
+    <!-- ============================================================== -->
+    <div class="tab-pane fade {% if active_tab == 'benefits' %}show active{% endif %}" id="tab-benefits" role="tabpanel">
+      
+      <!-- Benefits Instruction Callout -->
+      <div class="alert alert-light border rounded-4 p-3 mb-4 d-flex align-items-center gap-3 shadow-xs">
+        <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+          <i class="bx bx-timer fs-22"></i>
+        </div>
+        <div class="fs-13 text-muted">
+          <strong class="text-dark d-block mb-0.5">✨ Como configurar a Faixa de Avisos, Contador e Grupo VIP:</strong>
+          Use a <strong>Barra Superior</strong> para divulgar benefícios como frete grátis ou lançamentos. Ative o <strong>Contador Regressivo</strong> para contagem regressiva ao vivo de novos Drops e vincule o <strong>Grupo VIP do WhatsApp</strong> para convidar clientes a receberem novidades em primeira mão.
+        </div>
+      </div>
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save_benefits">
+
+        <div class="row g-4">
+          
+          <!-- Barra de Avisos & Contador -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-broadcast text-warning fs-20"></i> Barra de Aviso Superior
+                </h5>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" name="announcement_active" value="1" id="announcementSwitch" {% if home_config.announcement_active %}checked{% endif %}>
+                  <label class="form-check-label text-white fs-12 fw-bold" for="announcementSwitch">Ativa</label>
+                </div>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-2 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge</label>
+                    <input type="text" name="announcement_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.announcement_badge }}">
+                  </div>
+                  <div class="col-md-8">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Aviso</label>
+                    <input type="text" name="announcement_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.announcement_text }}">
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold fs-12 text-dark">Link de Destino</label>
+                  <input type="text" name="announcement_link" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.announcement_link }}">
+                </div>
+              </div>
+            </div>
+
+            <!-- Contador Regressivo para Drops -->
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-time-five text-warning fs-20"></i> Contador Regressivo (Drops)
+                </h5>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" name="countdown_active" value="1" id="countdownSwitch" {% if home_config.countdown_active %}checked{% endif %}>
+                  <label class="form-check-label text-white fs-12 fw-bold" for="countdownSwitch">Exibir</label>
+                </div>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto / Título do Drop</label>
+                    <input type="text" name="countdown_label" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.countdown_label }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Data e Hora do Lançamento</label>
+                    <input type="datetime-local" name="countdown_target_date" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.countdown_target_date|date:'Y-m-d\TH:i' }}">
+                  </div>
+                </div>
+                <small class="text-muted fs-12 d-block">
+                  Quando ativo, exibe um cronômetro regressivo elegante (*dias, horas, minutos*) na barra de aviso do topo.
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botão VIP & Compartilhamento Social (WhatsApp) -->
+          <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bxl-whatsapp text-success fs-20"></i> Grupo VIP & Vendas WhatsApp
+                </h5>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" name="whatsapp_group_active" value="1" id="vipSwitch" {% if home_config.whatsapp_group_active %}checked{% endif %}>
+                  <label class="form-check-label text-white fs-12 fw-bold" for="vipSwitch">Exibir</label>
+                </div>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Texto do Botão Flutuante</label>
+                    <input type="text" name="whatsapp_group_text" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.whatsapp_group_text }}">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold fs-12 text-dark">Link de Convite do Grupo</label>
+                    <input type="text" name="whatsapp_group_url" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.whatsapp_group_url }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compartilhamento Social (OpenGraph) -->
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-share-alt text-warning fs-20"></i> Foto de Compartilhamento no WhatsApp
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <label class="form-label fw-bold fs-12 text-dark">Foto que aparece ao enviar o link (WhatsApp / Instagram)</label>
+                  <input type="file" name="og_share_image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                  <input type="url" name="og_share_image_url" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" value="{{ home_config.og_share_image_url }}" placeholder="Ou URL da foto">
+                </div>
+                <div class="mb-2">
+                  <label class="form-label fw-bold fs-12 text-dark">Título de Compartilhamento</label>
+                  <input type="text" name="og_share_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.og_share_title }}">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Vantagens / Diferenciais de Compra -->
+          <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-dark text-white rounded-top-4 py-3 px-4">
+                <h5 class="card-title mb-0 fw-bold text-white d-flex align-items-center gap-2 fs-15">
+                  <i class="bx bx-check-shield text-warning fs-20"></i> 4 Vantagens da Loja (Faixa Institucional)
+                </h5>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-3">
+                  
+                  <!-- Card 1 -->
+                  <div class="col-md-6 col-lg-3">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                      <span class="badge bg-warning text-dark mb-2">Card 1</span>
+                      <div class="mb-2">
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Título</label>
+                        <input type="text" name="benefit1_title" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit1_title }}">
+                      </div>
+                      <div>
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Subtítulo</label>
+                        <input type="text" name="benefit1_subtitle" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit1_subtitle }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card 2 -->
+                  <div class="col-md-6 col-lg-3">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                      <span class="badge bg-primary text-white mb-2">Card 2</span>
+                      <div class="mb-2">
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Título</label>
+                        <input type="text" name="benefit2_title" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit2_title }}">
+                      </div>
+                      <div>
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Subtítulo</label>
+                        <input type="text" name="benefit2_subtitle" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit2_subtitle }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card 3 -->
+                  <div class="col-md-6 col-lg-3">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                      <span class="badge bg-success text-white mb-2">Card 3</span>
+                      <div class="mb-2">
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Título</label>
+                        <input type="text" name="benefit3_title" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit3_title }}">
+                      </div>
+                      <div>
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Subtítulo</label>
+                        <input type="text" name="benefit3_subtitle" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit3_subtitle }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Card 4 -->
+                  <div class="col-md-6 col-lg-3">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                      <span class="badge bg-danger text-white mb-2">Card 4</span>
+                      <div class="mb-2">
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Título</label>
+                        <input type="text" name="benefit4_title" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit4_title }}">
+                      </div>
+                      <div>
+                        <label class="form-label fw-bold fs-11 text-dark mb-1">Subtítulo</label>
+                        <input type="text" name="benefit4_subtitle" class="form-control form-control-sm rounded-3 fs-12" value="{{ home_config.benefit4_subtitle }}">
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção de Drops da Semana & Reviews -->
+          <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+              <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0 fw-bold text-dark fs-15">Cabeçalhos de Seções & Avaliações</h5>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" name="reviews_active" value="1" id="switchReviews" {% if home_config.reviews_active %}checked{% endif %}>
+                  <label class="form-check-label text-dark fs-12 fw-bold" for="switchReviews">Exibir Avaliações do Google</label>
+                </div>
+              </div>
+              <div class="card-body p-4">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label fw-bold fs-12 text-dark">Tag / Badge Drops</label>
+                    <input type="text" name="drops_badge" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.drops_badge }}">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-bold fs-12 text-dark">Título da Seção de Drops</label>
+                    <input type="text" name="drops_title" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.drops_title }}">
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label fw-bold fs-12 text-dark">Subtítulo da Seção de Drops</label>
+                    <input type="text" name="drops_subtitle" class="form-control form-control-sm rounded-3 fs-13 py-2" value="{{ home_config.drops_subtitle }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Salvar -->
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-warning text-dark px-5 py-2.5 rounded-pill fw-bold fs-14 shadow-sm">
+              <i class="bx bx-check-circle fs-18"></i> Salvar Avisos e Diferenciais
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal: Editar Banner do Carrossel -->
+<div class="modal fade" id="editBannerModal" tabindex="-1" aria-labelledby="editBannerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit_banner">
+        <input type="hidden" name="pk" id="editBannerId">
+
+        <div class="modal-header bg-dark text-white px-4 py-3 border-0">
+          <h5 class="modal-title fs-15 fw-bold text-white mb-0" id="editBannerModalLabel">
+            <i class="bx bx-edit text-warning me-1"></i> Editar Banner
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <div class="row g-3 mb-3">
+            <div class="col-md-7">
+              <label class="form-label fw-bold fs-12 text-dark">Posição / Tipo</label>
+              <select name="slide_type" id="editSlideType" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="hero">Hero Principal (Topo da Página)</option>
+                <option value="drops">Drops & Novidades da Semana</option>
+                <option value="promo">Banner Promocional</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-bold fs-12 text-dark">Ordem de Exibição</label>
+              <input type="number" name="order" id="editOrder" class="form-control form-control-sm rounded-3 fs-13 py-2" min="1">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-12 text-dark">Título Principal <span class="text-danger">*</span></label>
+            <input type="text" name="title" id="editTitle" class="form-control form-control-sm rounded-3 fs-13 py-2" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-12 text-dark">Subtítulo / Descrição</label>
+            <textarea name="subtitle" id="editSubtitle" rows="2" class="form-control form-control-sm rounded-3 fs-13"></textarea>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Tag / Badge</label>
+              <input type="text" name="badge_text" id="editBadgeText" class="form-control form-control-sm rounded-3 fs-13 py-2">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Alinhamento do Texto</label>
+              <select name="text_alignment" id="editTextAlign" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="left">Esquerda (Padrão Luxo)</option>
+                <option value="center">Centralizado</option>
+                <option value="right">Direita</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Texto do Botão</label>
+              <input type="text" name="button_text" id="editButtonText" class="form-control form-control-sm rounded-3 fs-13 py-2">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Estilo do Botão</label>
+              <select name="button_style" id="editButtonStyle" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="gold">Dourado Luxo (Padrão)</option>
+                <option value="white">Branco Minimalista</option>
+                <option value="dark">Preto Elegance</option>
+                <option value="outline">Borda Transparente</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Link de Destino</label>
+              <input type="text" name="button_url" id="editButtonUrl" class="form-control form-control-sm rounded-3 fs-13 py-2">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold fs-12 text-dark">Contraste (Overlay)</label>
+              <select name="overlay_darkness" id="editOverlayDarkness" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="none">Sem escurecimento</option>
+                <option value="light">Suave (25%)</option>
+                <option value="medium">Médio (45% - Recomendado)</option>
+                <option value="dark">Intenso (70%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded-3 border h-100">
+                <label class="form-label fw-bold fs-12 text-dark mb-1">Trocar Foto Desktop (16:9)</label>
+                <input type="file" name="image" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                <input type="url" name="image_url" id="editImageUrl" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" placeholder="Ou URL Direta">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="p-3 bg-light rounded-3 border h-100">
+                <label class="form-label fw-bold fs-12 text-dark mb-1">Trocar Foto Mobile (9:16)</label>
+                <input type="file" name="image_mobile" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+                <input type="url" name="image_mobile_url" id="editImageMobileUrl" class="form-control form-control-sm rounded-3 fs-12 mt-1.5" placeholder="Ou URL Mobile">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light px-4 py-3 border-0 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning text-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
+            <i class="bx bx-check-circle"></i> Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Editar Depoimento de Cliente -->
+<div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit_review">
+        <input type="hidden" name="pk" id="editReviewId">
+
+        <div class="modal-header bg-dark text-white px-4 py-3 border-0">
+          <h5 class="modal-title fs-15 fw-bold text-white mb-0" id="editReviewModalLabel">
+            <i class="bx bx-edit text-warning me-1"></i> Editar Depoimento
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-12 text-dark">Nome do Cliente <span class="text-danger">*</span></label>
+            <input type="text" name="name" id="editReviewName" class="form-control form-control-sm rounded-3 fs-13 py-2" required>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-7">
+              <label class="form-label fw-bold fs-12 text-dark">Cidade / Localização</label>
+              <input type="text" name="location" id="editReviewLocation" class="form-control form-control-sm rounded-3 fs-13 py-2">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-bold fs-12 text-dark">Nota (Estrelas)</label>
+              <select name="rating" id="editReviewRating" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="5">5 Estrelas ★★★★★</option>
+                <option value="4">4 Estrelas ★★★★☆</option>
+                <option value="3">3 Estrelas ★★★☆☆</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-7">
+              <label class="form-label fw-bold fs-12 text-dark">Origem / Selo de Confiança</label>
+              <select name="source" id="editReviewSource" class="form-select form-select-sm rounded-3 fs-13 py-2">
+                <option value="instagram">📸 Instagram Direct / Story</option>
+                <option value="google">🌐 Google Reviews (5.0 ★)</option>
+                <option value="whatsapp">💬 WhatsApp VIP & Atendimento</option>
+                <option value="vip">👑 Cliente VIP / Provador</option>
+                <option value="direct">✉️ Direct / Mensagem Privada</option>
+                <option value="loja">📍 Loja Física (Cajazeiras)</option>
+                <option value="outro">🛡️ Cliente Verificado / Indicação</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-bold fs-12 text-dark">Ordem</label>
+              <input type="number" name="order" id="editReviewOrder" class="form-control form-control-sm rounded-3 fs-13 py-2" min="1">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold fs-12 text-dark">Depoimento Completo <span class="text-danger">*</span></label>
+            <textarea name="comment" id="editReviewComment" rows="3" class="form-control form-control-sm rounded-3 fs-13" required></textarea>
+          </div>
+
+          <div class="mb-2 p-3 bg-light rounded-3 border">
+            <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center gap-1">
+              <i class="bx bx-user-circle text-primary"></i> Foto / Avatar do Cliente
+            </label>
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <img id="editReviewAvatarPreviewImg" src="" alt="Avatar" class="rounded-circle shadow-xs border" style="width: 44px; height: 44px; object-fit: cover; display: none;">
+              <div id="editReviewAvatarInitialPlaceholder" class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center shadow-xs" style="width: 44px; height: 44px; font-size: 16px;">
+                HF
+              </div>
+              <div class="flex-grow-1">
+                <input type="file" name="avatar" id="editReviewAvatarFile" class="form-control form-control-sm rounded-3 fs-12" accept="image/*">
+              </div>
+            </div>
+            <input type="url" name="avatar_url" id="editReviewAvatarUrl" class="form-control form-control-sm rounded-3 fs-12" placeholder="Ou URL Direta da Foto (ex: link do Instagram/Cloud)">
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light px-4 py-3 border-0 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning text-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
+            <i class="bx bx-check-circle"></i> Salvar Depoimento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- FLOATING UNDO TOAST (5 SEGUNDOS PARA DESFAZER EXCLUSÃO)        -->
+<!-- ============================================================== -->
+<div id="hfUndoToastContainer" class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999; display: none; min-width: 320px; max-width: 95vw;">
+  <div class="card bg-dark text-white border-0 shadow-lg rounded-4 overflow-hidden" style="background: rgba(24, 24, 28, 0.97) !important; backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 12px 35px rgba(0,0,0,0.45) !important;">
+    <div class="card-body p-3 d-flex align-items-center justify-content-between gap-3">
+      
+      <!-- Mensagem do Item Removido -->
+      <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+        <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+          <i class="bx bx-trash fs-18"></i>
+        </div>
+        <div class="text-truncate">
+          <span class="fs-13 fw-bold text-white d-block text-truncate" id="hfUndoToastTitle">Item excluído</span>
+          <small class="text-white-50 fs-11" id="hfUndoToastSubtitle">Exclusão permanente em <strong class="text-warning fw-bold" id="hfUndoCountdownNum">5s</strong></small>
+        </div>
+      </div>
+
+      <!-- Botão Desfazer e Fechar -->
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <button type="button" id="hfUndoBtn" class="btn btn-warning text-dark btn-sm rounded-pill px-3 py-1.5 fw-bold fs-12 d-flex align-items-center gap-1 shadow-sm">
+          <i class="bx bx-undo fs-16"></i> <span>DESFAZER</span>
+        </button>
+        <button type="button" id="hfUndoDismissBtn" class="btn btn-link text-white-50 p-1 btn-sm" title="Confirmar exclusão agora">
+          <i class="bx bx-x fs-20"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Barra de Progresso Decrescente (5s) -->
+    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.12); border-radius: 0;">
+      <div id="hfUndoProgressBar" class="progress-bar bg-warning" role="progressbar" style="width: 100%;"></div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock page_content %}
+
+{% block extra_javascript %}
+<script>
+  // Estado do Simulador
+  let currentPreviewMode = 'desktop';
+  let desktopPreviewImage = "{% if hero_slides.0 %}{{ hero_slides.0.final_image_url|escapejs }}{% else %}{% static 'images/hero_feminina.jpg' %}{% endif %}";
+  let mobilePreviewImage = "{% if hero_slides.0 %}{{ hero_slides.0.final_mobile_image_url|escapejs }}{% else %}{% static 'images/hero_feminina.jpg' %}{% endif %}";
+
+  // Função para Alternar Modo Desktop / Mobile
+  function setPreviewMode(mode) {
+    currentPreviewMode = mode;
+    const box = document.getElementById('heroLiveBox');
+    const container = document.getElementById('previewContainerWrapper');
+    const browserBar = document.getElementById('previewBrowserBar');
+    const badge = document.getElementById('previewModeBadge');
+    const sourceBadge = document.getElementById('previewImageSourceBadge');
+    const btnDesk = document.getElementById('btnPreviewDesktop');
+    const btnMob = document.getElementById('btnPreviewMobile');
+    const bottomPill = document.getElementById('liveBottomPill');
+
+    if (mode === 'mobile') {
+      btnMob.classList.add('active');
+      btnDesk.classList.remove('active');
+      if (browserBar) browserBar.style.display = 'none';
+      if (container) container.className = 'w-100 d-flex justify-content-center mb-2';
+      box.classList.add('mode-mobile');
+      badge.textContent = '📱 VISUALIZAÇÃO SMARTPHONE (9:16)';
+      badge.className = 'badge bg-success text-white px-3 py-1 rounded-pill';
+      
+      if (bottomPill) bottomPill.style.display = 'none';
+
+      // Aplica imagem mobile se disponível
+      if (mobilePreviewImage && mobilePreviewImage !== desktopPreviewImage) {
+        box.style.backgroundImage = `url('${mobilePreviewImage}')`;
+        sourceBadge.textContent = 'Foto Mobile Vertical';
+        sourceBadge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0.5 fs-10';
+      } else {
+        box.style.backgroundImage = `url('${desktopPreviewImage}')`;
+        sourceBadge.textContent = 'Adaptado do Desktop';
+        sourceBadge.className = 'badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5 fs-10';
+      }
+    } else {
+      btnDesk.classList.add('active');
+      btnMob.classList.remove('active');
+      if (browserBar) browserBar.style.display = 'flex';
+      if (container) container.className = 'preview-desktop-container w-100 mb-2';
+      box.classList.remove('mode-mobile');
+      badge.textContent = '💻 VISUALIZAÇÃO DESKTOP (16:9)';
+      badge.className = 'badge bg-dark text-white px-3 py-1 rounded-pill';
+      
+      if (bottomPill) bottomPill.style.display = 'block';
+
+      box.style.backgroundImage = `url('${desktopPreviewImage}')`;
+      sourceBadge.textContent = 'Foto Panorâmica';
+      sourceBadge.className = 'badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0.5 fs-10';
+    }
+  }
+
+  // Carregar dados de qualquer banner no Simulador ao Vivo
+  function previewBannerData(data) {
+    if (!data) return;
+    if (data.title) {
+      const t = document.getElementById('liveTitleText');
+      if (t) t.textContent = data.title;
+    }
+    if (data.subtitle !== undefined) {
+      const s = document.getElementById('liveSubtitleText');
+      if (s) s.textContent = data.subtitle;
+    }
+    if (data.badge_text !== undefined) {
+      const b = document.getElementById('liveBadgeText');
+      if (b) b.textContent = data.badge_text || '✨ DROP EXCLUSIVO • CAJAZEIRAS - PB';
+    }
+    if (data.button_text) {
+      const bt = document.getElementById('liveBtnText');
+      if (bt) bt.textContent = data.button_text;
+    }
+    if (data.button_style) {
+      const btn = document.getElementById('liveBtnPrimary');
+      if (btn) {
+        btn.className = 'btn btn-sm rounded-pill px-3.5 py-2 fw-bold fs-12 shadow-sm d-inline-flex align-items-center gap-1.5';
+        if (data.button_style === 'white' || data.button_style === 'light') {
+          btn.classList.add('btn-light', 'text-dark');
+        } else if (data.button_style === 'dark') {
+          btn.classList.add('btn-dark', 'text-white', 'border', 'border-secondary');
+        } else if (data.button_style === 'outline') {
+          btn.classList.add('btn-outline-light');
+        } else if (data.button_style === 'whatsapp') {
+          btn.classList.add('btn-success', 'text-white');
+        } else {
+          btn.classList.add('btn-warning', 'text-dark');
+        }
+      }
+    }
+    if (data.overlay_darkness) {
+      const ov = document.getElementById('heroLiveOverlay');
+      if (ov) ov.className = `hero-live-overlay overlay-${data.overlay_darkness}`;
+    }
+    if (data.text_alignment) {
+      const w = document.getElementById('heroLiveContentWrapper');
+      const bg = document.getElementById('heroLiveBtnGroup');
+      const bd = document.getElementById('heroLiveBadgeWrapper');
+      if (w) {
+        w.classList.remove('me-auto', 'mx-auto', 'ms-auto', 'text-start', 'text-center', 'text-end');
+        if (bg) bg.classList.remove('justify-content-start', 'justify-content-center', 'justify-content-end');
+        if (bd) bd.classList.remove('justify-content-start', 'justify-content-center', 'justify-content-end');
+        if (data.text_alignment === 'center') {
+          w.classList.add('mx-auto', 'text-center');
+          if (bg) bg.classList.add('justify-content-center');
+          if (bd) bd.classList.add('justify-content-center');
+        } else if (data.text_alignment === 'right') {
+          w.classList.add('ms-auto', 'text-end');
+          if (bg) bg.classList.add('justify-content-end');
+          if (bd) bd.classList.add('justify-content-end');
+        } else {
+          w.classList.add('me-auto', 'text-start');
+          if (bg) bg.classList.add('justify-content-start');
+          if (bd) bd.classList.add('justify-content-start');
+        }
+      }
+    }
+    if (data.image_url) {
+      desktopPreviewImage = data.image_url;
+    }
+    if (data.image_mobile_url) {
+      mobilePreviewImage = data.image_mobile_url;
+    } else {
+      mobilePreviewImage = data.image_url;
+    }
+
+    setPreviewMode(currentPreviewMode);
+
+    const liveBox = document.getElementById('heroLiveBox');
+    if (liveBox) {
+      liveBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  // Sincronização em Tempo Real (Live Listeners)
+  document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('bannerTitleInput');
+    const subtitleInput = document.getElementById('bannerSubtitleInput');
+    const badgeInput = document.getElementById('bannerBadgeInput');
+    const btnTextInput = document.getElementById('bannerBtnTextInput');
+    const btnStyleInput = document.getElementById('bannerBtnStyleInput');
+    const alignInput = document.getElementById('bannerAlignInput');
+    const overlayInput = document.getElementById('bannerOverlayInput');
+    const imageFileInput = document.getElementById('bannerImageFile');
+    const imageUrlInput = document.getElementById('bannerImageUrl');
+    const mobileImageFileInput = document.getElementById('bannerMobileImageFile');
+    const mobileImageUrlInput = document.getElementById('bannerMobileImageUrl');
+
+    const liveTitle = document.getElementById('liveTitleText');
+    const liveSubtitle = document.getElementById('liveSubtitleText');
+    const liveBadge = document.getElementById('liveBadgeText');
+    const liveBtnText = document.getElementById('liveBtnText');
+    const liveBtnPrimary = document.getElementById('liveBtnPrimary');
+    const liveOverlay = document.getElementById('heroLiveOverlay');
+    const liveContentWrapper = document.getElementById('heroLiveContentWrapper');
+    const liveBtnGroup = document.getElementById('heroLiveBtnGroup');
+    const liveBadgeWrapper = document.getElementById('heroLiveBadgeWrapper');
+    const liveBox = document.getElementById('heroLiveBox');
+
+    if (titleInput && liveTitle) {
+      titleInput.addEventListener('input', () => {
+        liveTitle.textContent = titleInput.value.trim() || 'Título do Banner';
+      });
+    }
+
+    if (subtitleInput && liveSubtitle) {
+      subtitleInput.addEventListener('input', () => {
+        liveSubtitle.textContent = subtitleInput.value.trim() || 'Descrição e curadoria exclusiva...';
+      });
+    }
+
+    if (badgeInput && liveBadge) {
+      badgeInput.addEventListener('input', () => {
+        liveBadge.textContent = badgeInput.value.trim() || '✨ DROP EXCLUSIVO • CAJAZEIRAS - PB';
+      });
+    }
+
+    if (btnTextInput && liveBtnText) {
+      btnTextInput.addEventListener('input', () => {
+        liveBtnText.textContent = btnTextInput.value.trim() || 'Explorar Coleção';
+      });
+    }
+
+    if (btnStyleInput && liveBtnPrimary) {
+      btnStyleInput.addEventListener('change', () => {
+        const val = btnStyleInput.value;
+        liveBtnPrimary.className = 'btn btn-sm rounded-pill px-3.5 py-2 fw-bold fs-12 shadow-sm d-inline-flex align-items-center gap-1.5';
+        if (val === 'white' || val === 'light') {
+          liveBtnPrimary.classList.add('btn-light', 'text-dark');
+        } else if (val === 'dark') {
+          liveBtnPrimary.classList.add('btn-dark', 'text-white', 'border', 'border-secondary');
+        } else if (val === 'outline') {
+          liveBtnPrimary.classList.add('btn-outline-light');
+        } else if (val === 'whatsapp') {
+          liveBtnPrimary.classList.add('btn-success', 'text-white');
+        } else {
+          liveBtnPrimary.classList.add('btn-warning', 'text-dark');
+        }
+      });
+    }
+
+    if (alignInput && liveContentWrapper) {
+      alignInput.addEventListener('change', () => {
+        const val = alignInput.value;
+        liveContentWrapper.classList.remove('ms-auto', 'me-auto', 'mx-auto', 'text-start', 'text-center', 'text-end');
+        if (liveBtnGroup) liveBtnGroup.classList.remove('justify-content-start', 'justify-content-center', 'justify-content-end');
+        if (liveBadgeWrapper) liveBadgeWrapper.classList.remove('justify-content-start', 'justify-content-center', 'justify-content-end');
+        if (val === 'center') {
+          liveContentWrapper.classList.add('mx-auto', 'text-center');
+          if (liveBtnGroup) liveBtnGroup.classList.add('justify-content-center');
+          if (liveBadgeWrapper) liveBadgeWrapper.classList.add('justify-content-center');
+        } else if (val === 'right') {
+          liveContentWrapper.classList.add('ms-auto', 'text-end');
+          if (liveBtnGroup) liveBtnGroup.classList.add('justify-content-end');
+          if (liveBadgeWrapper) liveBadgeWrapper.classList.add('justify-content-end');
+        } else {
+          liveContentWrapper.classList.add('me-auto', 'text-start');
+          if (liveBtnGroup) liveBtnGroup.classList.add('justify-content-start');
+          if (liveBadgeWrapper) liveBadgeWrapper.classList.add('justify-content-start');
+        }
+      });
+    }
+
+    if (overlayInput && liveOverlay) {
+      overlayInput.addEventListener('change', () => {
+        const val = overlayInput.value;
+        liveOverlay.className = `hero-live-overlay overlay-${val}`;
+      });
+    }
+
+    // Upload de Imagem Desktop -> Preview Instantâneo
+    if (imageFileInput) {
+      imageFileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            desktopPreviewImage = e.target.result;
+            if (currentPreviewMode === 'desktop' || !mobilePreviewImage) {
+              liveBox.style.backgroundImage = `url('${desktopPreviewImage}')`;
+            }
+          };
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    }
+
+    if (imageUrlInput) {
+      imageUrlInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          desktopPreviewImage = this.value.trim();
+          if (currentPreviewMode === 'desktop') {
+            liveBox.style.backgroundImage = `url('${desktopPreviewImage}')`;
+          }
+        }
+      });
+    }
+
+    // Upload de Imagem Mobile -> Preview Instantâneo no modo celular
+    if (mobileImageFileInput) {
+      mobileImageFileInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            mobilePreviewImage = e.target.result;
+            if (currentPreviewMode === 'mobile') {
+              liveBox.style.backgroundImage = `url('${mobilePreviewImage}')`;
+              document.getElementById('previewImageSourceBadge').textContent = 'Foto Mobile Carregada';
+            }
+          };
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    }
+
+    if (mobileImageUrlInput) {
+      mobileImageUrlInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          mobilePreviewImage = this.value.trim();
+          if (currentPreviewMode === 'mobile') {
+            liveBox.style.backgroundImage = `url('${mobilePreviewImage}')`;
+            document.getElementById('previewImageSourceBadge').textContent = 'Foto Mobile Carregada';
+          }
+        }
+      });
+    }
+  });
+
+  // Modal: Editar Banner
+  function openEditBannerModal(pk) {
+    fetch(`/dashboard/admin/carrossel/${pk}/data/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('editBannerId').value = data.id;
+          document.getElementById('editTitle').value = data.title;
+          document.getElementById('editSubtitle').value = data.subtitle || '';
+          document.getElementById('editBadgeText').value = data.badge_text || '';
+          document.getElementById('editButtonText').value = data.button_text || 'Explorar Coleção';
+          document.getElementById('editButtonUrl').value = data.button_url || '/produtos/';
+          document.getElementById('editSlideType').value = data.slide_type || 'hero';
+          document.getElementById('editOrder').value = data.order || 1;
+          document.getElementById('editTextAlign').value = data.text_alignment || 'left';
+          document.getElementById('editButtonStyle').value = data.button_style || 'gold';
+          document.getElementById('editOverlayDarkness').value = data.overlay_darkness || 'medium';
+          document.getElementById('editImageUrl').value = data.image_url || '';
+          document.getElementById('editImageMobileUrl').value = data.image_mobile_url || '';
+
+          const modal = new bootstrap.Modal(document.getElementById('editBannerModal'));
+          modal.show();
+        } else {
+          alert('Erro ao carregar dados do banner.');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+      });
+  }
+
+  // Modal: Editar Depoimento
+  function openEditReviewModal(pk) {
+    fetch(`/dashboard/admin/depoimentos/${pk}/data/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('editReviewId').value = data.id;
+          document.getElementById('editReviewName').value = data.name;
+          document.getElementById('editReviewLocation').value = data.location || '';
+          document.getElementById('editReviewRating').value = data.rating || 5;
+          document.getElementById('editReviewSource').value = data.source || 'instagram';
+          document.getElementById('editReviewComment').value = data.comment || '';
+          document.getElementById('editReviewOrder').value = data.order || 1;
+          document.getElementById('editReviewAvatarUrl').value = data.avatar_url || '';
+
+          const previewImg = document.getElementById('editReviewAvatarPreviewImg');
+          const placeholder = document.getElementById('editReviewAvatarInitialPlaceholder');
+          
+          if (data.final_avatar_url) {
+            previewImg.src = data.final_avatar_url;
+            previewImg.style.display = 'block';
+            placeholder.style.display = 'none';
+          } else {
+            previewImg.style.display = 'none';
+            placeholder.style.display = 'flex';
+            placeholder.textContent = (data.name && data.name.length > 0) ? data.name[0].toUpperCase() : 'HF';
+          }
+
+          const modal = new bootstrap.Modal(document.getElementById('editReviewModal'));
+          modal.show();
+        } else {
+          alert('Erro ao carregar dados do depoimento.');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+      });
+  }
+
+  // Live avatar preview for create & edit forms
+  document.addEventListener('DOMContentLoaded', function() {
+    // Create form preview
+    const createAvatarFile = document.getElementById('createReviewAvatarFile');
+    const createAvatarUrl = document.getElementById('createReviewAvatarUrl');
+    const createPreviewImg = document.getElementById('createAvatarPreviewImg');
+    const createPlaceholder = document.getElementById('createAvatarInitialPlaceholder');
+
+    if (createAvatarFile && createPreviewImg && createPlaceholder) {
+      createAvatarFile.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            createPreviewImg.src = e.target.result;
+            createPreviewImg.style.display = 'block';
+            createPlaceholder.style.display = 'none';
+          };
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    }
+
+    if (createAvatarUrl && createPreviewImg && createPlaceholder) {
+      createAvatarUrl.addEventListener('input', function() {
+        if (this.value.trim()) {
+          createPreviewImg.src = this.value.trim();
+          createPreviewImg.style.display = 'block';
+          createPlaceholder.style.display = 'none';
+        }
+      });
+    }
+
+    // Edit form preview
+    const editAvatarFile = document.getElementById('editReviewAvatarFile');
+    const editAvatarUrl = document.getElementById('editReviewAvatarUrl');
+    const editPreviewImg = document.getElementById('editReviewAvatarPreviewImg');
+    const editPlaceholder = document.getElementById('editReviewAvatarInitialPlaceholder');
+
+    if (editAvatarFile && editPreviewImg && editPlaceholder) {
+      editAvatarFile.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            editPreviewImg.src = e.target.result;
+            editPreviewImg.style.display = 'block';
+            editPlaceholder.style.display = 'none';
+          };
+          reader.readAsDataURL(this.files[0]);
+        }
+      });
+    }
+
+    if (editAvatarUrl && editPreviewImg && editPlaceholder) {
+      editAvatarUrl.addEventListener('input', function() {
+        if (this.value.trim()) {
+          editPreviewImg.src = this.value.trim();
+          editPreviewImg.style.display = 'block';
+          editPlaceholder.style.display = 'none';
+        }
+      });
+    }
+
+    // Toggle Icon e Texto do Guia Educacional
+    const guideCollapse = document.getElementById('homeCmsGuideCollapse');
+    const guideToggleIcon = document.getElementById('guideToggleIcon');
+    const guideToggleText = document.getElementById('guideToggleText');
+
+    if (guideCollapse && guideToggleIcon && guideToggleText) {
+      guideCollapse.addEventListener('show.bs.collapse', function () {
+        guideToggleIcon.className = 'bx bx-minus-circle fs-16 text-warning';
+        guideToggleText.textContent = 'Ocultar Guia';
+      });
+      guideCollapse.addEventListener('hide.bs.collapse', function () {
+        guideToggleIcon.className = 'bx bx-plus-circle fs-16 text-warning';
+        guideToggleText.textContent = 'Ver Guia Detalhado & Medidas';
+      });
+    }
+  });
+
+  // ==============================================================
+  // SISTEMA DE EXCLUSÃO COM BOTÃO DESFAZER (5 SEGUNDOS)
+  // ==============================================================
+  let currentUndoAction = null;
+
+  function deleteWithUndo(event, options) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const {
+      url,
+      itemName = 'Item',
+      itemType = 'Item',
+      element = null,
+      onUndo = null,
+      onConfirmed = null
+    } = options;
+
+    // Se já havia uma exclusão anterior pendente, efetiva imediatamente no banco
+    if (currentUndoAction && currentUndoAction.timer) {
+      commitUndoAction(currentUndoAction);
+    }
+
+    // Oculta/esmaece visualmente o item imediatamente com transição suave
+    if (element) {
+      element.dataset.prevOpacity = element.style.opacity || '1';
+      element.dataset.prevDisplay = element.style.display || '';
+      element.style.transition = 'all 0.35s ease';
+      element.style.opacity = '0';
+      element.style.transform = 'scale(0.95)';
+      element.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if (element && element.style.opacity === '0') {
+          element.style.display = 'none';
+        }
+      }, 350);
+    }
+
+    const container = document.getElementById('hfUndoToastContainer');
+    const titleEl = document.getElementById('hfUndoToastTitle');
+    const subtitleEl = document.getElementById('hfUndoToastSubtitle');
+    const countdownNum = document.getElementById('hfUndoCountdownNum');
+    const progressBar = document.getElementById('hfUndoProgressBar');
+    const undoBtn = document.getElementById('hfUndoBtn');
+    const dismissBtn = document.getElementById('hfUndoDismissBtn');
+
+    if (!container) return;
+
+    titleEl.textContent = `${itemType} "${itemName}" excluído`;
+    subtitleEl.innerHTML = `Você pode desfazer em <strong class="text-warning fw-bold" id="hfUndoCountdownNum">5s</strong>`;
+    undoBtn.style.display = 'inline-flex';
+    progressBar.style.display = 'block';
+
+    // Reset da barra de progresso
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '100%';
+
+    container.style.display = 'block';
+
+    // Inicia a animação linear de 5s da barra
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progressBar.style.transition = 'width 5s linear';
+        progressBar.style.width = '0%';
+      });
+    });
+
+    let secondsLeft = 5;
+    const intervalId = setInterval(() => {
+      secondsLeft -= 1;
+      const counterEl = document.getElementById('hfUndoCountdownNum');
+      if (counterEl && secondsLeft >= 0) {
+        counterEl.textContent = `${secondsLeft}s`;
+      }
+      if (secondsLeft <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 1000);
+
+    const timerId = setTimeout(() => {
+      clearInterval(intervalId);
+      commitUndoAction(currentUndoAction);
+    }, 5000);
+
+    currentUndoAction = {
+      url,
+      itemName,
+      itemType,
+      element,
+      timer: timerId,
+      interval: intervalId,
+      onUndo,
+      onConfirmed,
+      isCancelled: false
+    };
+
+    // Botão DESFAZER
+    undoBtn.onclick = function() {
+      if (!currentUndoAction || currentUndoAction.isCancelled) return;
+      currentUndoAction.isCancelled = true;
+      clearTimeout(currentUndoAction.timer);
+      clearInterval(currentUndoAction.interval);
+
+      // Restaura o elemento DOM
+      if (currentUndoAction.element) {
+        currentUndoAction.element.style.display = currentUndoAction.element.dataset.prevDisplay || '';
+        requestAnimationFrame(() => {
+          currentUndoAction.element.style.opacity = '1';
+          currentUndoAction.element.style.transform = 'scale(1)';
+          currentUndoAction.element.style.pointerEvents = 'auto';
+        });
+      }
+
+      if (currentUndoAction.onUndo) {
+        currentUndoAction.onUndo();
+      }
+
+      // Feedback de Sucesso
+      titleEl.innerHTML = `✅ <span class="text-success fw-bold">Exclusão desfeita com sucesso!</span>`;
+      subtitleEl.textContent = `"${itemName}" foi mantido.`;
+      undoBtn.style.display = 'none';
+      progressBar.style.display = 'none';
+
+      setTimeout(() => {
+        container.style.display = 'none';
+        currentUndoAction = null;
+      }, 1800);
+    };
+
+    // Botão Fechar / Confirmar Exclusão Imediatamente
+    dismissBtn.onclick = function() {
+      if (currentUndoAction && !currentUndoAction.isCancelled) {
+        clearTimeout(currentUndoAction.timer);
+        clearInterval(currentUndoAction.interval);
+        commitUndoAction(currentUndoAction);
+      }
+    };
+  }
+
+  function commitUndoAction(action) {
+    if (!action || action.isCancelled) return;
+    action.isCancelled = true;
+    clearTimeout(action.timer);
+    clearInterval(action.interval);
+
+    const container = document.getElementById('hfUndoToastContainer');
+    if (container) container.style.display = 'none';
+
+    // Executa a exclusão definitiva via requisição assíncrona
+    fetch(action.url, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (action.element) {
+        action.element.remove();
+      }
+      if (action.onConfirmed) {
+        action.onConfirmed(data);
+      }
+    })
+    .catch(err => {
+      console.error('Erro ao efetivar exclusão no servidor:', err);
+    });
+
+    currentUndoAction = null;
+  }
+
+  // Função para definir prazos rápidos do Timer Promocional
+  function setPromoPreset(preset) {
+    const input = document.getElementById('promoEndDateInput');
+    if (!input) return;
+
+    const now = new Date();
+    let target = new Date();
+
+    if (preset === '24h') {
+      target.setHours(target.getHours() + 24);
+    } else if (preset === '48h') {
+      target.setHours(target.getHours() + 48);
+    } else if (preset === 'sunday') {
+      const day = now.getDay(); // 0 = Domingo, 1 = Seg, ..., 6 = Sab
+      const diff = day === 0 ? 0 : 7 - day;
+      target.setDate(now.getDate() + diff);
+      target.setHours(23, 59, 0, 0);
+    }
+
+    const year = target.getFullYear();
+    const month = String(target.getMonth() + 1).padStart(2, '0');
+    const date = String(target.getDate()).padStart(2, '0');
+    const hours = String(target.getHours()).padStart(2, '0');
+    const mins = String(target.getMinutes()).padStart(2, '0');
+
+    input.value = `${year}-${month}-${date}T${hours}:${mins}`;
+  }
+</script>
+{% endblock extra_javascript %}

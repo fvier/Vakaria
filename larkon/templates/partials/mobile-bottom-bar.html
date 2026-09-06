@@ -1,0 +1,51 @@
+{% load static i18n %}
+
+<!-- ==========================================================================
+     Grife HF ERP - Mobile Bottom Navigation Bar (< 992px)
+     Modern, Touch-friendly Tab Bar with Quick Shortcuts for Store Owners
+     ========================================================================== -->
+<nav class="mobile-bottom-nav d-lg-none" aria-label="Navegação rápida móvel">
+  <div class="mobile-bottom-nav-inner">
+    
+    <!-- 1. Início / Dashboard -->
+    <a href="{% url 'pages:dashboard' %}" class="mobile-nav-item {% if request.path == '/dashboard/' or request.path == '/' %}active{% endif %}" title="Início">
+      <div class="mobile-nav-icon-wrap">
+        <iconify-icon icon="solar:home-2-bold-duotone" class="mobile-nav-icon"></iconify-icon>
+      </div>
+      <span class="mobile-nav-label">Início</span>
+    </a>
+
+    <!-- 2. Novo Pedido PDV (Destaque VIP) -->
+    <a href="/pedidos/novo/" class="mobile-nav-item mobile-nav-item-highlight {% if '/pedidos/novo/' in request.path %}active{% endif %}" title="+ Novo Pedido (PDV)">
+      <div class="mobile-nav-icon-wrap highlight-icon">
+        <i class="bx bx-plus fs-22"></i>
+      </div>
+      <span class="mobile-nav-label fw-bold">Novo PDV</span>
+    </a>
+
+    <!-- 3. Reservas & Fila VIP -->
+    <a href="/reservas/" class="mobile-nav-item {% if '/reservas/' in request.path %}active{% endif %}" title="Reservas & Fila VIP">
+      <div class="mobile-nav-icon-wrap position-relative">
+        <iconify-icon icon="solar:list-check-bold-duotone" class="mobile-nav-icon text-warning"></iconify-icon>
+      </div>
+      <span class="mobile-nav-label">Reservas</span>
+    </a>
+
+    <!-- 4. Vitrine / Catálogo -->
+    <a href="{% url 'catalog:product_grid' %}" class="mobile-nav-item {% if '/catalog/' in request.path or '/product' in request.path %}active{% endif %}" title="Catálogo & Vitrine">
+      <div class="mobile-nav-icon-wrap">
+        <iconify-icon icon="solar:t-shirt-bold-duotone" class="mobile-nav-icon"></iconify-icon>
+      </div>
+      <span class="mobile-nav-label">Catálogo</span>
+    </a>
+
+    <!-- 5. Mais / Abrir Menu Gaveta -->
+    <button type="button" class="mobile-nav-item mobile-nav-toggle button-toggle-menu border-0 bg-transparent" title="Abrir Menu Completo" aria-label="Menu Completo">
+      <div class="mobile-nav-icon-wrap">
+        <iconify-icon icon="solar:hamburger-menu-bold-duotone" class="mobile-nav-icon"></iconify-icon>
+      </div>
+      <span class="mobile-nav-label">Menu</span>
+    </button>
+
+  </div>
+</nav>

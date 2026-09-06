@@ -1,0 +1,143 @@
+{% extends 'layout-store.html' %}
+{% load static i18n %}
+
+{% block title %}Marcas & Curadorias Oficiais | Grife HF{% endblock %}
+
+{% block extra_css %}
+<style>
+  .brand-card {
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #ffffff;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  }
+  .brand-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    border-color: #0f172a;
+  }
+  .brand-logo-container {
+    height: 110px;
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .brand-logo-img {
+    max-height: 65px;
+    max-width: 85%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.04));
+    transition: transform 0.25s ease;
+  }
+  .brand-card:hover .brand-logo-img {
+    transform: scale(1.06);
+  }
+</style>
+{% endblock %}
+
+{% block store_content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb mb-0 fs-13">
+    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="bx bx-home-alt me-1"></i>Início</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}" class="text-decoration-none text-muted">Vitrine</a></li>
+    <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Marcas Oficiais</li>
+  </ol>
+</nav>
+
+<!-- Banner Superior de Curadoria -->
+<div class="card bg-dark text-white border-0 shadow-sm mb-4 overflow-hidden rounded-3">
+  <div class="card-body p-4 p-md-4 position-relative">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <span class="badge bg-warning text-dark px-2.5 py-1 fs-11 fw-bold text-uppercase mb-2">Curadoria Multimarcas Premium</span>
+        <h2 class="fs-22 fs-md-26 fw-bold mb-1 text-white">Marcas Oficiais da Grife HF</h2>
+        <p class="text-white-50 fs-13 fs-md-14 mb-0">
+          Trabalhamos exclusivamente com peças 100% autênticas das marcas mais desejadas da moda masculina, streetwear e feminina fitness.
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0 d-none d-md-block">
+        <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-light btn-sm px-3 fw-semibold">
+          <i class="bx bx-grid-alt me-1"></i> Ver Todas as Peças
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grade de Marcas Oficiais -->
+<div class="row g-3 g-md-4 mb-5">
+  {% for brand in brands %}
+  <div class="col-6 col-sm-6 col-md-4 col-xl-3">
+    <div class="brand-card h-100 d-flex flex-column overflow-hidden">
+      
+      <!-- Box do Logotipo Oficial -->
+      <a href="{% url 'catalog:product_grid' %}?brand={{ brand.slug }}" class="brand-logo-container text-decoration-none">
+        {% if brand.slug == 'lacoste' %}
+        <img src="{% static 'images/brands/lacoste.png' %}" alt="Lacoste" class="brand-logo-img">
+        {% elif brand.slug == 'nike' %}
+        <img src="{% static 'images/brands/nike.png' %}" alt="Nike" class="brand-logo-img">
+        {% elif brand.slug == 'adidas' %}
+        <img src="{% static 'images/brands/adidas.png' %}" alt="Adidas" class="brand-logo-img">
+        {% elif brand.slug == 'puma' %}
+        <img src="{% static 'images/brands/puma.png' %}" alt="Puma" class="brand-logo-img">
+        {% elif brand.slug == 'jordan' %}
+        <img src="{% static 'images/brands/jordan.png' %}" alt="Jordan" class="brand-logo-img">
+        {% elif brand.slug == 'oakley' %}
+        <img src="{% static 'images/brands/oakley.png' %}" alt="Oakley" class="brand-logo-img">
+        {% elif brand.slug == 'calvin-klein' %}
+        <img src="{% static 'images/brands/calvin-klein.png' %}" alt="Calvin Klein" class="brand-logo-img">
+        {% elif brand.slug == 'tommy-hilfiger' %}
+        <img src="{% static 'images/brands/tommy-hilfiger.png' %}" alt="Tommy Hilfiger" class="brand-logo-img">
+        {% elif brand.slug == 'caunt-jeans' %}
+        <img src="{% static 'images/brands/caunt-jeans.png' %}" alt="Caunt Jeans" class="brand-logo-img">
+        {% elif brand.slug == 'luiza-fit' %}
+        <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" class="brand-logo-img">
+        {% elif brand.slug == 'grife-hf' %}
+        <img src="{% static 'images/logo-dark.png' %}" alt="Grife HF" class="brand-logo-img">
+        {% elif brand.logo %}
+        <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="brand-logo-img">
+        {% else %}
+        <span class="fs-18 fw-bold text-dark">{{ brand.name }}</span>
+        {% endif %}
+      </a>
+
+      <!-- Detalhes da Marca -->
+      <div class="p-3 d-flex flex-column flex-grow-1">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <h4 class="fs-15 fw-bold text-dark mb-0">
+            <a href="{% url 'catalog:product_grid' %}?brand={{ brand.slug }}" class="text-dark text-decoration-none">
+              {{ brand.name }}
+            </a>
+          </h4>
+          <span class="badge bg-light-subtle text-secondary border fs-10 px-2 py-0.5">
+            {{ brand.products.count }} {% if brand.products.count == 1 %}peça{% else %}peças{% endif %}
+          </span>
+        </div>
+
+        <p class="text-muted fs-12 mb-3 flex-grow-1 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+          {{ brand.description|default:"Curadoria de alta moda e produtos originais." }}
+        </p>
+
+        <!-- Botão de Ação Direta para a Vitrine Filtrada -->
+        <a href="{% url 'catalog:product_grid' %}?brand={{ brand.slug }}" class="btn btn-dark btn-sm w-100 py-1.5 fs-12 fw-semibold d-flex align-items-center justify-content-center gap-1.5 shadow-sm">
+          <span>Ver Coleção</span>
+          <i class="bx bx-right-arrow-alt fs-15"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12 text-center py-5">
+    <p class="text-muted fs-14">Nenhuma marca cadastrada no momento.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

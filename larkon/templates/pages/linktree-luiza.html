@@ -1,0 +1,286 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+  <title>Luiza Fit | Moda Feminina Fitness &amp; Casual • Links Oficiais</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Acesse o catálogo oficial Luiza Fit, atendimento WhatsApp no (83) 99341-3058, novidades e moda fitness feminina premium em Cajazeiras-PB."/>
+  
+  <!-- App favicons -->
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+
+  <!-- Icons & Bootstrap 5 -->
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --lf-rose: #d97787;
+      --lf-rose-dark: #b85d6e;
+      --lf-champagne: #dfb27b;
+      --lf-dark: #1f1d1d;
+      --lf-bg: #faf6f5;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--lf-bg);
+      background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, #faf6f5 75%);
+      min-height: 100vh;
+      color: #2d2424;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin: 0;
+      padding: 0;
+    }
+
+    .linktree-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 36px 20px 24px;
+      width: 100%;
+    }
+
+    .luiza-logo-wrap {
+      margin: 0 auto 20px;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .luiza-logo-img {
+      max-height: 125px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 16px rgba(217, 119, 135, 0.2));
+    }
+
+    .link-card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 13px;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+
+    .link-card-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(217, 119, 135, 0.15);
+    }
+
+    /* Estilos dos Botões */
+    .btn-style-whatsapp,
+    .btn-style-success {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: #ffffff !important;
+      border: none;
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.25);
+    }
+    .btn-style-whatsapp:hover,
+    .btn-style-success:hover {
+      background: linear-gradient(135deg, #2ae06d 0%, #107c6f 100%);
+      color: #ffffff;
+    }
+
+    .btn-style-rose {
+      background: linear-gradient(135deg, #d97787 0%, #b85d6e 100%);
+      color: #ffffff !important;
+      border: none;
+      box-shadow: 0 6px 18px rgba(217, 119, 135, 0.28);
+    }
+    .btn-style-rose:hover {
+      background: linear-gradient(135deg, #e28594 0%, #c4687a 100%);
+      color: #ffffff;
+    }
+
+    .btn-style-champagne,
+    .btn-style-gold {
+      background: linear-gradient(135deg, #c5a059 0%, #a9843c 100%);
+      color: #ffffff !important;
+      border: none;
+      box-shadow: 0 6px 18px rgba(197, 160, 89, 0.25);
+    }
+    .btn-style-champagne:hover,
+    .btn-style-gold:hover {
+      background: linear-gradient(135deg, #d4b06a 0%, #b8934b 100%);
+      color: #ffffff;
+    }
+
+    .btn-style-dark {
+      background: #1f1d1d;
+      color: #ffffff !important;
+      border: none;
+      box-shadow: 0 6px 18px rgba(31, 29, 29, 0.2);
+    }
+    .btn-style-dark:hover {
+      background: #2e2b2b;
+      color: #ffffff;
+    }
+
+    .btn-style-outline {
+      background: #ffffff;
+      color: #2d2424 !important;
+      border: 1.5px solid #ebdcd9;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .btn-style-outline:hover {
+      background: #fff8f7;
+      border-color: var(--lf-rose);
+    }
+
+    .icon-badge {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .icon-badge-white {
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .highlight-pulse {
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% {
+        box-shadow: 0 0 0 0 rgba(217, 119, 135, 0.5);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(217, 119, 135, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(217, 119, 135, 0);
+      }
+    }
+
+    .social-footer-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--lf-dark);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: 1px solid #ebdcd9;
+    }
+    .social-footer-btn:hover {
+      background: var(--lf-rose);
+      color: #ffffff;
+      border-color: var(--lf-rose);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="linktree-container text-center">
+    
+    <!-- Logotipo Luiza Fit Solto e com Transparência Real -->
+    <div class="luiza-logo-wrap">
+      <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" class="luiza-logo-img">
+    </div>
+
+    <!-- Apresentação / Subtítulo -->
+    <p class="text-dark fw-bold fs-15 mb-1">
+      Moda Feminina Fitness &amp; Casual Premium
+    </p>
+    <p class="text-muted fs-13 mb-3">
+      Cajazeiras - PB
+    </p>
+
+    <!-- Badge de Status -->
+    <div class="mb-4">
+      <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1.5 fs-12 rounded-pill d-inline-flex align-items-center gap-1.5 fw-semibold">
+        <span class="rounded-circle bg-danger d-inline-block" style="width: 8px; height: 8px;"></span>
+        Loja &amp; Atendimento WhatsApp Online
+      </span>
+    </div>
+
+    <!-- Lista de Links Exclusivos Luiza Fit -->
+    <div class="links-list text-start">
+      {% for link in links %}
+      <a href="{% url 'pages:linktree_click' pk=link.pk %}" target="_blank" class="link-card-btn btn-style-{{ link.style }} {% if link.is_highlighted %}highlight-pulse{% endif %}">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-badge icon-badge-white">
+            <i class="{{ link.icon|default:'bx bx-link' }} fs-20 {% if link.style == 'success' or link.style == 'whatsapp' %}text-success{% elif link.style == 'rose' %}text-danger{% elif link.style == 'champagne' or link.style == 'gold' %}text-warning{% elif link.style == 'outline' %}text-danger{% else %}text-dark{% endif %}"></i>
+          </div>
+          <div>
+            <div class="fs-15 fw-bold leading-tight">{{ link.title }}</div>
+            {% if link.subtitle %}
+            <small class="opacity-75 fs-12 d-block mt-0.5">{{ link.subtitle }}</small>
+            {% endif %}
+          </div>
+        </div>
+        <i class="bx bx-chevron-right fs-22 opacity-75"></i>
+      </a>
+      {% empty %}
+      <a href="https://wa.me/5583993413058?text=Ol%C3%A1!%20Vim%20pelo%20link%20da%20Luiza%20Fit%20e%20gostaria%20de%20conhecer%20as%20novidades%20e%20fazer%20um%20pedido." target="_blank" class="link-card-btn btn-style-whatsapp highlight-pulse">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-badge icon-badge-white">
+            <i class="bx bxl-whatsapp fs-22 text-success"></i>
+          </div>
+          <div>
+            <div class="fs-15 fw-bold leading-tight">Atendimento &amp; Pedidos no WhatsApp</div>
+            <small class="opacity-75 fs-12 d-block mt-0.5">(83) 99341-3058 • Fale com nossa equipe</small>
+          </div>
+        </div>
+        <i class="bx bx-chevron-right fs-22 opacity-75"></i>
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Redes Sociais no Rodapé -->
+    <div class="d-flex justify-content-center gap-2 mt-4 pt-2">
+      <a href="https://www.instagram.com/useluizafit?igsi=ZXRwOHptZ2l3bzNl" target="_blank" class="social-footer-btn" title="Instagram @useluizafit">
+        <i class="bx bxl-instagram"></i>
+      </a>
+      <a href="https://wa.me/5583993413058?text=Ol%C3%A1!%20Vim%20pelo%20link%20da%20Luiza%20Fit%20e%20gostaria%20de%20atendimento." target="_blank" class="social-footer-btn" title="WhatsApp Luiza Fit">
+        <i class="bx bxl-whatsapp"></i>
+      </a>
+      <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" class="social-footer-btn" title="Catálogo Completo">
+        <i class="bx bx-shopping-bag"></i>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Rodapé / Assinatura -->
+  <footer class="text-center pb-4 pt-2">
+    <small class="text-muted fs-12">
+      &copy; {% now "Y" %} <strong>Luiza Fit</strong> • Moda Feminina Premium • Cajazeiras - PB
+    </small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

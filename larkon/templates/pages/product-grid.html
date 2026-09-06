@@ -1,0 +1,2658 @@
+{% extends 'layout-store.html' %}
+{% load static i18n %}
+
+{% block title %}Vitrine & Catálogo Exclusivo | Grife HF{% endblock %}
+
+{% block extra_css %}
+<style>
+  .category-toggle {
+    transition: all 0.2s ease;
+    border-radius: 8px;
+  }
+  .category-toggle:hover {
+    background-color: #f1f3f5;
+  }
+  .category-toggle .chevron-icon {
+    transition: transform 0.25s ease-in-out;
+  }
+  .category-toggle:not(.collapsed) .chevron-icon {
+    transform: rotate(180deg);
+  }
+  .category-subitem {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: #495057;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+  }
+  .category-subitem:hover {
+    background-color: #e9ecef;
+    color: #000;
+    padding-left: 16px;
+  }
+  .category-subitem.active {
+    background-color: #212529;
+    color: #ffc107 !important;
+    font-weight: 600;
+    padding-left: 16px;
+  }
+  .chips-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 8px;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+  .chips-scroll-container::-webkit-scrollbar {
+    height: 4px;
+  }
+  .chips-scroll-container::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 4px;
+  }
+  .luiza-fit-card {
+    background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+  .product-img-wrap {
+    height: 220px;
+    overflow: hidden;
+    background-color: #f8fafc;
+    position: relative;
+  }
+  @media (max-width: 576px) {
+    .product-img-wrap {
+      height: 165px;
+    }
+  }
+  .product-item-card {
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .product-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08) !important;
+  }
+
+  /* Tarja Diagonal de Crime / Caution - Produto Esgotado */
+  .out-of-stock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.25);
+  }
+  .crime-tape-ribbon {
+    position: absolute;
+    width: 160%;
+    background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 6px 0;
+    transform: rotate(-25deg);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+    border-top: 2px dashed rgba(255, 255, 255, 0.75);
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.75);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  .sold-out-img {
+    filter: grayscale(70%) brightness(0.85);
+    transition: filter 0.3s ease;
+  }
+  .product-img-wrap .secondary-hover-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .product-item-card:hover .product-img-wrap .secondary-hover-img {
+    opacity: 1;
+  }
+  .color-dot-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.25);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  /* Seletor Inteligente de Cores (Luxury Swatches) */
+  .luxury-color-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.22), 0 2px 5px rgba(0,0,0,0.12);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .luxury-color-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px #000, 0 4px 8px rgba(0,0,0,0.25);
+  }
+  .luxury-color-btn.selected {
+    box-shadow: 0 0 0 2.5px #000, 0 4px 10px rgba(0,0,0,0.3);
+    transform: scale(1.08);
+  }
+  .luxury-color-btn .check-icon {
+    display: none;
+    font-size: 15px;
+    font-weight: 900;
+  }
+  .luxury-color-btn.selected .check-icon {
+    display: block;
+  }
+  .luxury-color-badge-pill {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 3px 10px 3px 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .luxury-color-badge-pill:hover {
+    background: #f1f5f9;
+  }
+  .luxury-color-badge-pill .btn-remove-color {
+    cursor: pointer;
+    color: #94a3b8;
+    margin-left: 2px;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .luxury-color-badge-pill .btn-remove-color:hover {
+    color: #ef4444;
+  }
+
+  @media (max-width: 576px) {
+    .crime-tape-ribbon {
+      font-size: 9.5px;
+      letter-spacing: 1.5px;
+      padding: 4.5px 0;
+    }
+    
+    /* Modais em Formato Bottom-Sheet no Celular */
+    .modal.fade .modal-dialog {
+      margin: 0 !important;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      transform: translateY(100%) !important;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    .modal.show .modal-dialog {
+      transform: translateY(0) !important;
+    }
+    .modal-content {
+      border-radius: 20px 20px 0 0 !important;
+      max-height: 88vh !important;
+      overflow-y: auto !important;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.25) !important;
+    }
+    .modal-header {
+      border-radius: 20px 20px 0 0 !important;
+      position: sticky;
+      top: 0;
+      z-index: 25;
+    }
+    .modal-footer {
+      position: sticky;
+      bottom: 0;
+      background: #f8fafc !important;
+      z-index: 25;
+      border-top: 1px solid #e2e8f0;
+      padding: 12px 16px !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block store_content %}
+{% if request.user.is_authenticated and request.user.is_staff %}
+<!-- Barra de Gestão Rápida para o Administrador da Grife HF -->
+<div class="alert bg-dark text-white border-0 shadow-sm rounded-3 py-2 px-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2 fs-12">
+        <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="bx bxs-shield me-1"></i>Modo Administrador</span>
+        <span class="text-white-50">|</span>
+        <span class="text-light">📦 Total: <strong>{{ admin_total_products|default:"0" }}</strong></span>
+        <span class="text-white-50">•</span>
+        <span class="text-light">🟢 Em Estoque: <strong>{{ admin_in_stock|default:"0" }}</strong></span>
+        <span class="text-white-50">•</span>
+        <span class="text-light">🔴 Esgotados: <strong>{{ admin_out_of_stock|default:"0" }}</strong></span>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-success btn-sm fs-11 px-2.5 py-1 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickProductModal">
+            <i class="bx bx-plus-circle me-1"></i>+ Cadastrar Peça
+        </button>
+        <a href="/dashboard/" class="btn btn-outline-light btn-sm fs-11 px-2.5 py-1">
+            <i class="bx bx-tachometer me-1"></i>Painel
+        </a>
+        <a href="{% url 'account_logout_direct' %}" class="btn btn-link text-white-50 fs-11 p-0 text-decoration-none">
+            Sair
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Breadcrumb da Vitrine -->
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb mb-0 fs-13">
+    <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="bx bx-home-alt me-1"></i>Início</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}" class="text-decoration-none {% if not selected_category %}text-dark fw-bold{% else %}text-muted{% endif %}">Vitrine</a></li>
+    {% if selected_parent %}
+      {% if selected_parent.slug != selected_category.slug %}
+      <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}?category={{ selected_parent.slug }}" class="text-decoration-none text-muted">{{ selected_parent.name }}</a></li>
+      <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ selected_category.name }}</li>
+      {% else %}
+      <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">{{ selected_parent.name }}</li>
+      {% endif %}
+    {% endif %}
+  </ol>
+</nav>
+
+<div class="row">
+    <!-- Barra Lateral de Filtros & Categorias (Visível no Desktop e disponível via Offcanvas no Mobile) -->
+    <div class="col-lg-3 d-none d-lg-block">
+        <!-- Busca Rápida -->
+        <div class="card bg-light-subtle mb-3">
+            <div class="card-body p-3">
+                <form method="get" action="{% url 'catalog:product_grid' %}">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Buscar peça, marca..." value="{{ search_query }}">
+                        {% if active_gender %}<input type="hidden" name="gender" value="{{ active_gender }}">{% endif %}
+                        {% if active_brand %}<input type="hidden" name="brand" value="{{ active_brand }}">{% endif %}
+                        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+                        <button class="btn btn-primary" type="submit"><i class="bx bx-search-alt"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- MENU DE CATEGORIAS: GRIFE HF (MASCULINO & GERAL) -->
+        {% if not is_luiza_fit %}
+        <div class="card mb-3 shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
+                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Grife HF • Departamentos</span>
+            </div>
+            <div class="card-body p-2">
+                <!-- Botão Ver Todas as Peças -->
+                <a href="{% url 'catalog:product_grid' %}" class="category-subitem mb-2 fw-semibold {% if not active_category and not active_gender and not active_brand %}active{% endif %}">
+                    <span>✨ Todas as Peças</span>
+                    <i class="bx bx-chevron-right fs-14"></i>
+                </a>
+
+                <div class="accordion accordion-flush" id="accordionGrifeHF">
+                    {% for parent in men_categories %}
+                    <div class="accordion-item border-0 mb-1">
+                        <h2 class="accordion-header" id="heading-{{ parent.id }}">
+                            <button class="category-toggle btn btn-sm w-100 text-start d-flex justify-content-between align-items-center p-2 {% if selected_parent.id != parent.id %}collapsed{% endif %}" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse-{{ parent.id }}" 
+                                    aria-expanded="{% if selected_parent.id == parent.id %}true{% else %}false{% endif %}" 
+                                    aria-controls="collapse-{{ parent.id }}">
+                                <span class="fw-semibold text-dark fs-13">
+                                    <i class="bx bx-folder me-1 text-primary"></i> {{ parent.name }}
+                                </span>
+                                <i class="bx bx-chevron-down chevron-icon text-muted fs-16"></i>
+                            </button>
+                        </h2>
+                        <div id="collapse-{{ parent.id }}" 
+                             class="accordion-collapse collapse {% if selected_parent.id == parent.id %}show{% endif %}" 
+                             aria-labelledby="heading-{{ parent.id }}" 
+                             data-bs-parent="#accordionGrifeHF">
+                            <div class="accordion-body p-1 ps-3 bg-light-subtle rounded-2 my-1">
+                                <!-- Opção TODAS da Categoria Pai -->
+                                <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
+                                   class="category-subitem fw-semibold {% if active_category == parent.slug %}active{% endif %}">
+                                    <span>• TODAS ({{ parent.name }})</span>
+                                </a>
+                                <!-- Lista de Subcategorias -->
+                                {% for child in parent.children.all %}
+                                    {% if child.is_active %}
+                                    <a href="{% url 'catalog:product_grid' %}?category={{ child.slug }}" 
+                                       class="category-subitem {% if active_category == child.slug %}active{% endif %}">
+                                        <span>• {{ child.name }}</span>
+                                    </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- MENU DE CATEGORIAS: LUIZA FIT (FEMININO PREMIUM) -->
+        {% if is_luiza_fit or not is_masculine_context %}
+        {% for parent in women_categories %}
+        <div class="card mb-3 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+                <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" height="28" style="object-fit: contain;">
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-11 px-2 py-0.5 fw-semibold">Feminino</span>
+            </div>
+            <div class="card-body p-2">
+                <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" 
+                   class="category-subitem mb-2 fw-semibold {% if active_category == 'luiza-fit' or active_category == parent.slug %}active{% endif %}"
+                   style="background-color: {% if active_category == 'luiza-fit' or active_category == parent.slug %}#dc2626 !important; color: #fff !important;{% endif %}">
+                    <span>✨ Todas as Peças Luiza Fit</span>
+                    <i class="bx bx-chevron-right fs-14"></i>
+                </a>
+
+                <div class="d-flex flex-column gap-1">
+                    {% for child in parent.children.all %}
+                        {% if child.is_active %}
+                        <a href="{% url 'catalog:product_grid' %}?category={{ child.slug }}" 
+                           class="category-subitem {% if active_category == child.slug %}active{% endif %}">
+                            <span>• {{ child.name }}</span>
+                            <i class="bx bx-chevron-right fs-12 text-muted"></i>
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if is_luiza_fit %}
+                <div class="border-top pt-2 mt-2 text-center">
+                    <a href="{% url 'catalog:product_grid' %}" class="btn btn-sm btn-outline-dark w-100 fs-12">
+                        ← Ver Moda Masculina / Geral
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Marcas Multimarcas -->
+        {% if brands %}
+        <div class="card mb-3 shadow-sm border-0">
+            <div class="card-header bg-transparent border-bottom py-2">
+                <span class="fw-semibold fs-13 text-dark"><i class="bx bx-tag me-1 text-primary"></i> Marcas Selecionadas</span>
+            </div>
+            <div class="card-body p-3">
+                <div class="d-flex flex-wrap gap-1">
+                    {% for brand in brands %}
+                    <a href="{% url 'catalog:product_grid' %}?brand={{ brand.slug }}{% if active_category %}&category={{ active_category }}{% endif %}" 
+                       class="badge {% if active_brand == brand.slug %}bg-primary text-white{% else %}bg-light text-dark border{% endif %} p-2 fs-11 text-decoration-none">
+                        {{ brand.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if active_gender or active_brand or active_drop or active_category or search_query %}
+        <div class="mb-3 text-center">
+            <a href="{% url 'catalog:product_grid' %}" class="btn btn-sm btn-outline-danger w-100">
+                <i class="bx bx-x me-1"></i> Limpar Todos os Filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Grade de Produtos & Chips Mobile -->
+    <div class="col-12 col-lg-9">
+        <!-- Barra de Ações Rápidas no Mobile (Filtros & Busca) -->
+        <div class="d-flex d-lg-none align-items-center justify-content-between gap-2 mb-2">
+            <button class="btn btn-dark btn-sm rounded-pill px-3 py-1.5 fs-12 fw-semibold d-flex align-items-center gap-1.5 shadow-xs" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStoreMenu">
+                <i class="bx bx-slider-alt fs-14"></i>
+                <span>Departamentos & Filtros</span>
+            </button>
+            <span class="fs-12 text-muted fw-medium">{{ products|length }} peças</span>
+        </div>
+
+        <!-- Topo da Listagem com Título e Estatísticas -->
+        <div class="card bg-white mb-3 border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center gap-3">
+                            {% if selected_parent.slug == 'luiza-fit' or selected_category.slug == 'luiza-fit' or active_category == 'luiza-fit' %}
+                            <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" height="46" style="object-fit: contain;">
+                            {% endif %}
+                            <div>
+                                <h4 class="fs-18 fw-bold text-dark mb-1">
+                                    {% if selected_category and selected_category.slug != 'luiza-fit' %}
+                                        <i class="bx bx-collection text-primary me-1"></i> {{ selected_category.name }}
+                                    {% elif selected_category %}
+                                        {{ selected_category.name }}
+                                    {% elif active_gender == 'F' %}👗 Coleção Feminina — Luiza Fit
+                                    {% elif active_gender == 'M' %}👔 Coleção Masculina — Grife HF
+                                    {% elif active_brand %}🏷️ Marca: {{ active_brand|title }}
+                                    {% else %}✨ Todas as Peças &amp; Lançamentos
+                                    {% endif %}
+                                </h4>
+                                <p class="mb-0 text-muted fs-13">
+                                    Mostrando {{ products|length }} {% if products|length == 1 %}peça encontrada{% else %}peças exclusivas{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 text-md-end mt-2 mt-md-0">
+                        <div class="d-inline-flex gap-2">
+                            {% if request.user.is_authenticated and request.user.is_staff %}
+                            <button type="button" class="btn btn-success btn-sm px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickProductModal">
+                                <i class="bx bx-plus-circle me-1 fs-16"></i> Cadastrar Peça
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 fw-semibold">
+                                <i class="bx bx-cart me-1"></i> Sacola
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra Rápida de Categorias & Subcategorias (Chips Horizontais Deslizantes) -->
+                <div class="pt-3 border-top mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <span class="fs-11 fw-bold text-muted text-uppercase letter-spacing-1">
+                            {% if selected_parent %}
+                                📂 Subcategorias de {{ selected_parent.name }}:
+                            {% elif active_gender == 'M' %}
+                                👔 Departamentos Masculinos:
+                            {% elif active_gender == 'F' or active_category == 'luiza-fit' %}
+                                👗 Linha Feminina (Luiza Fit):
+                            {% else %}
+                                ✨ Departamentos &amp; Categorias:
+                            {% endif %}
+                        </span>
+                        {% if selected_parent or active_category or active_gender or active_brand %}
+                        <a href="{% url 'catalog:product_grid' %}" class="fs-11 fw-semibold text-danger text-decoration-none">Ver Todas as Peças ✕</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="chips-scroll-container pb-1">
+                        {% if selected_parent %}
+                            <!-- 1. Categoria Pai Selecionada: Opção "TODAS (Pai)" + Subcategorias Filhas -->
+                            <a href="{% url 'catalog:product_grid' %}?category={{ selected_parent.slug }}" 
+                               class="btn btn-sm {% if active_category == selected_parent.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                • Todas ({{ selected_parent.name }})
+                            </a>
+                            {% for sub in chips_subcategories %}
+                            <a href="{% url 'catalog:product_grid' %}?category={{ sub.slug }}" 
+                               class="btn btn-sm {% if active_category == sub.slug %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                {{ sub.name }}
+                            </a>
+                            {% endfor %}
+
+                        {% elif active_gender == 'M' %}
+                            <!-- 2. Filtro Masculino Ativo: Chip Todas Masculinas + Todas as Categorias Masculinas -->
+                            <a href="{% url 'catalog:product_grid' %}?gender=M" 
+                               class="btn btn-sm {% if not active_category %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                ✨ Todas Masculinas
+                            </a>
+                            {% for parent in men_categories %}
+                                {% if parent.children.exists or parent.products.exists %}
+                                <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
+                                   class="btn btn-sm {% if active_category == parent.slug %}btn-primary text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                    {{ parent.name }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+
+                        {% elif active_gender == 'F' or active_category == 'luiza-fit' %}
+                            <!-- 3. Filtro Luiza Fit / Feminino Ativo -->
+                            <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" 
+                               class="btn btn-sm {% if active_category == 'luiza-fit' or not active_category %}btn-danger text-white fw-bold shadow-sm{% else %}btn-outline-danger{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                ✨ Todas Luiza Fit
+                            </a>
+                            {% for parent in women_categories %}
+                                {% for sub in parent.children.all %}
+                                <a href="{% url 'catalog:product_grid' %}?category={{ sub.slug }}" 
+                                   class="btn btn-sm {% if active_category == sub.slug %}btn-danger text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                    {{ sub.name }}
+                                </a>
+                                {% endfor %}
+                            {% endfor %}
+
+                        {% else %}
+                            <!-- 4. Vitrine Geral: Todos os Departamentos Principais -->
+                            <a href="{% url 'catalog:product_grid' %}" 
+                               class="btn btn-sm {% if not active_category and not active_gender and not active_brand %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                ✨ Todas as Peças
+                            </a>
+                            {% for parent in all_parent_categories %}
+                                {% if parent.children.exists %}
+                                <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
+                                   class="btn btn-sm {% if active_category == parent.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                    {{ parent.name }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Barra Rápida de Marcas com Logos Oficiais (Mobile & Desktop) -->
+                <div class="pt-3 border-top mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <span class="fs-11 fw-bold text-muted text-uppercase letter-spacing-1">Marcas Parceiras:</span>
+                        <a href="{% url 'catalog:brand_list' %}" class="fs-11 fw-semibold text-primary text-decoration-none">Ver Showroom de Marcas →</a>
+                    </div>
+                    <div class="chips-scroll-container pb-1">
+                        <a href="{% url 'catalog:product_grid' %}" class="btn btn-sm {% if not active_brand %}btn-dark text-white fw-bold{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 d-flex align-items-center gap-1">
+                            <span>Todas</span>
+                        </a>
+                        {% for b in brands %}
+                        <a href="{% url 'catalog:product_grid' %}?brand={{ b.slug }}" 
+                           class="btn btn-sm {% if active_brand == b.slug %}btn-dark text-white fw-bold border-dark shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-2.5 py-1 fs-12 d-flex align-items-center gap-1.5 flex-shrink-0">
+                            {% if b.slug == 'lacoste' %}
+                            <img src="{% static 'images/brands/lacoste.png' %}" height="13" alt="Lacoste">
+                            {% elif b.slug == 'nike' %}
+                            <img src="{% static 'images/brands/nike.png' %}" height="12" alt="Nike">
+                            {% elif b.slug == 'adidas' %}
+                            <img src="{% static 'images/brands/adidas.png' %}" height="13" alt="Adidas">
+                            {% elif b.slug == 'puma' %}
+                            <img src="{% static 'images/brands/puma.png' %}" height="12" alt="Puma">
+                            {% elif b.slug == 'jordan' %}
+                            <img src="{% static 'images/brands/jordan.png' %}" height="13" alt="Jordan">
+                            {% elif b.slug == 'oakley' %}
+                            <img src="{% static 'images/brands/oakley.png' %}" height="12" alt="Oakley">
+                            {% elif b.slug == 'calvin-klein' %}
+                            <img src="{% static 'images/brands/calvin-klein.png' %}" height="11" alt="Calvin Klein">
+                            {% elif b.slug == 'tommy-hilfiger' %}
+                            <img src="{% static 'images/brands/tommy-hilfiger.png' %}" height="12" alt="Tommy Hilfiger">
+                            {% elif b.slug == 'caunt-jeans' %}
+                            <img src="{% static 'images/brands/caunt-jeans.png' %}" height="11" alt="Caunt Jeans">
+                            {% elif b.slug == 'luiza-fit' %}
+                            <img src="{% static 'images/logoluiza.png' %}" height="13" alt="Luiza Fit">
+                            {% endif %}
+                            <span>{{ b.name }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grade de Peças Compactas & Elegantes -->
+        <div class="row g-2 g-sm-3">
+            {% for product in products %}
+            <div class="col-6 col-sm-6 col-md-4 col-xl-3 mb-3" id="product-card-col-{{ product.id }}">
+                <div class="card h-100 shadow-sm border-0 position-relative overflow-hidden product-item-card transition-all">
+                    <!-- Foto da Peça (Compacta & Proporcional) -->
+                    <div class="product-img-wrap position-relative overflow-hidden">
+                        <a href="{{ product.get_absolute_url }}" class="d-block w-100 h-100" onclick="openQuickViewModal({{ product.id }}); return false;" title="Clique para ver a foto ampliada">
+                            {% if product.cover_image %}
+                            <img src="{{ product.cover_image.url }}" alt="{{ product.title }}" class="w-100 h-100 object-fit-cover product-cover-img-{{ product.id }} {% if not product.in_stock %}sold-out-img{% endif %}" loading="lazy">
+                            {% else %}
+                            <img src="{% static 'images/product/p-1.png' %}" alt="{{ product.title }}" class="w-100 h-100 object-fit-cover product-cover-img-{{ product.id }} {% if not product.in_stock %}sold-out-img{% endif %}">
+                            {% endif %}
+
+                            {% if product.secondary_image %}
+                            <img src="{{ product.secondary_image.url }}" alt="{{ product.title }}" class="secondary-hover-img object-fit-cover" loading="lazy">
+                            {% endif %}
+                        </a>
+
+                        <!-- Contador de Fotos se houver mais de 1 -->
+                        {% if product.images.count > 1 %}
+                        <span class="badge bg-dark bg-opacity-75 text-white fs-9 position-absolute bottom-0 end-0 m-1.5 pointer-events-none" style="z-index: 5;">
+                            <i class="bx bx-images me-0.5"></i>{{ product.images.count }}
+                        </span>
+                        {% endif %}
+
+                        <!-- Tarja Diagonal Estilo Faixa de Isolamento / Crime Tape (Esgotado) -->
+                        {% if not product.in_stock %}
+                        <div class="out-of-stock-overlay" onclick="openQuickViewModal({{ product.id }}); return false;" style="cursor: pointer; pointer-events: auto;">
+                            <div class="crime-tape-ribbon">
+                                <span>⛔ ESGOTADO • EM BREVE ⛔</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Badges de Exclusividade & Marca -->
+                        <div class="position-absolute top-0 start-0 m-1.5 d-flex flex-column gap-1 pointer-events-none" style="z-index: 7;">
+                            <span class="badge bg-dark text-white px-1.5 py-0.5 fs-10 text-uppercase shadow-sm">{{ product.brand.name }}</span>
+                            {% if product.is_exclusive %}
+                            <span class="badge bg-warning text-dark px-1.5 py-0.5 fs-10 fw-bold shadow-sm">✨ Exclusiva</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Ações de Administrador (Edição e Exclusão) & Gênero -->
+                        <div class="position-absolute top-0 end-0 m-1.5 d-flex align-items-center gap-1" style="z-index: 7;">
+                            {% if request.user.is_authenticated and request.user.is_staff %}
+                            <button type="button" class="btn btn-light btn-sm p-0 rounded-circle shadow-sm border text-dark btn-edit-product" onclick="openEditProductModal({{ product.id }})" title="Editar Foto & Detalhes" style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.95);">
+                                <i class="bx bx-edit text-dark fs-14"></i>
+                            </button>
+                            <button type="button" class="btn btn-light btn-sm p-0 rounded-circle shadow-sm border text-danger btn-delete-product" onclick="openDeleteProductModal({{ product.id }}, '{{ product.title|escapejs }}')" title="Excluir ou Desativar Peça" style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.95);">
+                                <i class="bx bx-trash text-danger fs-14"></i>
+                            </button>
+                            {% endif %}
+                            <span class="badge {% if product.gender == 'F' %}bg-danger{% elif product.gender == 'M' %}bg-primary{% else %}bg-secondary{% endif %} text-white fs-10 shadow-sm pointer-events-none">
+                                {{ product.get_gender_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Detalhes da Peça -->
+                    <div class="card-body d-flex flex-column p-2 p-sm-2.5">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <small class="text-muted text-uppercase fs-10 fw-bold text-truncate me-1">{{ product.category.name }}</small>
+                            {% if product.variants.exists %}
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                {% for variant in product.variants.all|slice:":3" %}
+                                <span class="badge bg-light text-secondary border fs-9 px-1 py-0.5">{{ variant.size }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <h5 class="fs-13 fs-sm-14 fw-semibold text-dark mb-1 text-truncate" title="{{ product.title }}">
+                            <a href="{{ product.get_absolute_url }}" onclick="openQuickViewModal({{ product.id }}); return false;" class="text-dark text-decoration-none hover-primary product-title-{{ product.id }}">{{ product.title }}</a>
+                        </h5>
+
+                        <!-- Cores Disponíveis na Peça -->
+                        {% if product.available_colors %}
+                        <div class="d-flex align-items-center gap-1 mb-1">
+                            {% for col in product.available_colors|slice:":5" %}
+                            <span class="color-dot-swatch" style="background-color: {{ col.hex }};" title="{{ col.name }}"></span>
+                            {% endfor %}
+                            {% if product.available_colors|length > 5 %}
+                            <small class="text-muted fs-10 fw-bold">+{{ product.available_colors|length|add:"-5" }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-auto pt-1.5 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fs-14 fs-sm-15 fw-bold text-dark d-block leading-tight product-price-{{ product.id }}">R$ {{ product.price|floatformat:2 }}</span>
+                                {% if product.in_stock %}
+                                <small class="text-muted fs-10 d-none d-sm-block">em até 3x</small>
+                                {% else %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 fs-9 px-1 py-0.5 mt-0.5 d-inline-block">Chegará em breve</span>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-1">
+                                {% if product.in_stock %}
+                                <form action="{% url 'orders:add_to_cart' %}" method="POST" class="ajax-add-cart-form d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <button type="submit" class="btn btn-dark btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Adicionar à Sacola">
+                                        <i class="bx bx-shopping-bag fs-14"></i> <span class="d-none d-md-inline fs-11">Sacola</span>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <a href="https://wa.me/558391650137?text=Ol%C3%A1!%20Tenho%20interesse%20na%20pe%C3%A7a%20'{{ product.title|urlencode }}'%20que%20est%C3%A1%20esgotada.%20Quando%20chegar%C3%A1%20novamente%3F" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Encomendar no WhatsApp">
+                                    <i class="bx bxl-whatsapp fs-14"></i> <span class="d-none d-md-inline fs-11">Encomendar</span>
+                                </a>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" onclick="openQuickViewModal({{ product.id }})" title="Ver Peça Ampliada">
+                                    <i class="bx bx-expand-alt fs-14"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="avatar-lg bg-light-subtle rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3">
+                    <i class="bx bx-shopping-bag fs-36 text-muted"></i>
+                </div>
+                <h4 class="fs-18 fw-bold text-dark">Nenhuma peça encontrada nesta categoria</h4>
+                <p class="text-muted fs-14">Novas peças chegam semanalmente. Tente outro filtro ou limpe a busca.</p>
+                <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-primary btn-sm">
+                    Ver Todas as Peças
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginação -->
+        {% if is_paginated %}
+        <div class="d-flex justify-content-center mt-3 mb-4">
+            <nav>
+                <ul class="pagination pagination-sm">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if active_category %}&category={{ active_category }}{% endif %}{% if active_brand %}&brand={{ active_brand }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Anterior</a>
+                    </li>
+                    {% endif %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} de {{ paginator.num_pages }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if active_category %}&category={{ active_category }}{% endif %}{% if active_brand %}&brand={{ active_brand }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Próxima</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if request.user.is_authenticated and request.user.is_staff %}
+<!-- ============================================================== -->
+<!-- MODAL DE CADASTRO RÁPIDO DE PEÇAS (GRIFE HF ADMIN)             -->
+<!-- ============================================================== -->
+<div class="modal fade" id="quickProductModal" tabindex="-1" aria-labelledby="quickProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            
+            <div class="modal-header bg-dark text-white px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark p-2 rounded-circle"><i class="bx bx-plus fs-18"></i></span>
+                    <div>
+                        <h5 class="modal-title fs-16 fw-bold mb-0 text-white" id="quickProductModalLabel">Cadastrar Nova Peça no Catálogo</h5>
+                        <small class="text-white-50 fs-12">Adicione fotos, categoria e tamanhos em segundos</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="quickProductForm" action="{% url 'catalog:quick_create_product' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        
+                        <!-- Coluna 1: Upload de Foto Principal e Galeria -->
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold fs-13 text-dark">📸 Foto Principal da Peça *</label>
+                            <div class="border rounded-3 p-3 text-center position-relative bg-light mb-2" style="min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;" onclick="document.getElementById('quickCoverInput').click();">
+                                <img id="quickImagePreview" src="{% static 'images/product/p-1.png' %}" alt="Preview" class="img-fluid rounded mb-2 d-none" style="max-height: 180px; object-fit: contain;">
+                                <div id="quickUploadPlaceholder">
+                                    <i class="bx bx-cloud-upload fs-36 text-muted mb-1"></i>
+                                    <p class="fs-13 fw-semibold text-dark mb-0">Foto de Capa</p>
+                                    <small class="text-muted fs-11">JPG, PNG ou WEBP</small>
+                                </div>
+                                <input type="file" id="quickCoverInput" name="cover_image" accept="image/*" class="d-none">
+                            </div>
+
+                            <!-- Fotos Extras da Galeria -->
+                            <div class="p-2 border rounded-2 bg-light">
+                                <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center justify-content-between">
+                                    <span>📸 Fotos Extras / Galeria</span>
+                                    <span class="badge bg-secondary fs-9">Múltiplas</span>
+                                </label>
+                                <input type="file" name="gallery_images" id="quickGalleryInput" multiple accept="image/*" class="form-control form-control-sm fs-11">
+                                <small class="text-muted fs-10 d-block mt-1">Selecione fotos de outros ângulos da peça.</small>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 2: Dados Básicos e Categorias Encadeadas -->
+                        <div class="col-md-7">
+                            
+                            <!-- Nome da Peça -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-13 text-dark">Título / Nome da Peça *</label>
+                                <input type="text" name="title" class="form-control" placeholder="Ex: Camisa Polo Pima Classic Black" required>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <!-- Preço -->
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Preço de Venda (R$) *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted fs-13">R$</span>
+                                        <input type="text" name="price" class="form-control" placeholder="189,90" required>
+                                    </div>
+                                </div>
+                                <!-- Marca -->
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Grife *</label>
+                                    <select name="brand" class="form-select fs-13">
+                                        {% for b in brands %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Gênero & Linha -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-13 text-dark d-block mb-1">Gênero / Linha</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="gender" id="quickGenderM" value="M" checked>
+                                    <label class="btn btn-outline-primary btn-sm py-1.5" for="quickGenderM"><i class="bx bx-male me-1"></i>Masculino</label>
+
+                                    <input type="radio" class="btn-check" name="gender" id="quickGenderF" value="F">
+                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="quickGenderF"><i class="bx bx-female me-1"></i>Feminino (Luiza Fit)</label>
+
+                                    <input type="radio" class="btn-check" name="gender" id="quickGenderU" value="U">
+                                    <label class="btn btn-outline-secondary btn-sm py-1.5" for="quickGenderU">Unissex</label>
+                                </div>
+                            </div>
+
+                            <!-- Categoria Pai e Subcategoria (Encadeadas) -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Categoria Principal *</label>
+                                    <select id="quickParentCategorySelect" class="form-select fs-13" required>
+                                        <option value="">Selecione...</option>
+                                        {% for cat in parent_categories %}
+                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Subcategoria *</label>
+                                    <select id="quickChildCategorySelect" name="category" class="form-select fs-13" required>
+                                        <option value="">Escolha a principal primeiro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Seletor Inteligente de Cores (Paleta Luxury + Ferramenta de Cor Específica) -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <label class="form-label fw-bold fs-13 text-dark mb-0">🎨 Cores Disponíveis na Peça:</label>
+                                    <button type="button" class="btn btn-xs btn-outline-dark fs-11 py-0.5 px-2.5 rounded-pill d-flex align-items-center gap-1" onclick="toggleCustomColorPicker('quick')">
+                                        <i class="bx bx-colorize"></i> + Outra Cor / Tom
+                                    </button>
+                                </div>
+                                
+                                <div class="p-2.5 border rounded-3 bg-white shadow-xs">
+                                    <!-- Círculos de Cores Padrão -->
+                                    <div class="d-flex flex-wrap gap-2 align-items-center" id="quickColorSwatchesContainer">
+                                        <!-- Injetado dinamicamente via JS -->
+                                    </div>
+
+                                    <!-- Campo Seletor de Cor Personalizada -->
+                                    <div id="quickCustomColorBox" class="mt-2.5 pt-2 border-top d-none">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="color" id="quickCustomColorPicker" class="form-control form-control-color border-0 p-0" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" value="#2563eb" title="Escolha o tom no espectro">
+                                            <input type="text" id="quickCustomColorName" class="form-control form-control-sm fs-12" placeholder="Nome da cor (ex: Verde Menta, Azul Bebê, Salmão...)" style="max-width: 250px;">
+                                            <button type="button" class="btn btn-dark btn-sm fs-11 px-2.5 fw-bold" onclick="addCustomColor('quick')">
+                                                Adicionar
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm fs-11 px-2" onclick="toggleCustomColorPicker('quick')">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resumo em Pílulas das Cores Selecionadas -->
+                                    <div class="mt-2 pt-2 border-top">
+                                        <small class="text-muted fs-11 fw-bold text-uppercase d-block mb-1">Cores Selecionadas:</small>
+                                        <div id="quickSelectedColorsList" class="d-flex flex-wrap gap-1.5 align-items-center" style="min-height: 26px;">
+                                            <!-- Pílulas das cores selecionadas -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Inputs Hidden para envio no formulário -->
+                                <div id="quickHiddenColorInputs"></div>
+                                <input type="hidden" name="custom_colors_json" id="quickCustomColorsJson" value="[]">
+                            </div>
+
+                            <!-- Grade de Tamanhos & Fotos por Cor (Configuração Individual) -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <label class="form-label fw-bold fs-13 text-dark mb-0">📏 Grade de Tamanhos por Cor:</label>
+                                    <small class="text-muted fs-11">Selecione os tamanhos de cada cor individualmente</small>
+                                </div>
+                                
+                                <div id="quickColorSizeMatrixContainer" class="d-flex flex-column gap-2">
+                                    <!-- Injetado dinamicamente para cada cor selecionada -->
+                                </div>
+                                <input type="hidden" name="variants_matrix_json" id="quickVariantsMatrixJson" value="[]">
+                            </div>
+
+                            <!-- Tags e Destaques -->
+                            <div class="d-flex gap-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_exclusive" id="switchExclusive" value="1">
+                                    <label class="form-check-label fs-13" for="switchExclusive">✨ Peça Exclusiva</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="switchFeatured" value="1">
+                                    <label class="form-check-label fs-13" for="switchFeatured">🔥 Destaque na Vitrine</label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary fs-13 px-3" data-bs-dismiss="modal">
+                        <i class="bx bx-x me-1"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-dark fs-13 px-4 fw-semibold shadow-sm">
+                        <i class="bx bx-check me-1"></i> Publicar Peça
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL DE EDIÇÃO RÁPIDA DE PEÇA POSTADA (GRIFE HF ADMIN)        -->
+<!-- ============================================================== -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            
+            <div class="modal-header bg-dark text-white px-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary text-white p-2 rounded-circle"><i class="bx bx-edit fs-18"></i></span>
+                    <div>
+                        <h5 class="modal-title fs-16 fw-bold mb-0 text-white" id="editProductModalLabel">Editar Peça do Catálogo</h5>
+                        <small class="text-white-50 fs-12">Atualize foto, preço, estoque, cores e tamanhos</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="editProductForm" action="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" id="editProductId" value="">
+                
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        
+                        <!-- Coluna 1: Foto e Troca -->
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold fs-13 text-dark">📸 Foto Principal da Peça</label>
+                            <div class="border rounded-3 p-3 text-center position-relative bg-light mb-2" style="min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer;" onclick="document.getElementById('editCoverInput').click();">
+                                <img id="editImagePreview" src="{% static 'images/product/p-1.png' %}" alt="Preview" class="img-fluid rounded mb-2" style="max-height: 180px; object-fit: contain;">
+                                <div id="editUploadHint">
+                                    <span class="badge bg-dark text-white fs-11 px-2.5 py-1.5 rounded-pill shadow-sm"><i class="bx bx-camera me-1"></i> Trocar Capa</span>
+                                </div>
+                                <input type="file" id="editCoverInput" name="cover_image" accept="image/*" class="d-none">
+                            </div>
+
+                            <!-- Adicionar Fotos Extras à Galeria -->
+                            <div class="p-2 border rounded-2 bg-light">
+                                <label class="form-label fw-bold fs-12 text-dark mb-1 d-flex align-items-center justify-content-between">
+                                    <span>📸 Adicionar Mais Fotos</span>
+                                    <span class="badge bg-secondary fs-9">Galeria</span>
+                                </label>
+                                <input type="file" name="gallery_images" id="editGalleryInput" multiple accept="image/*" class="form-control form-control-sm fs-11">
+                                <small class="text-muted fs-10 d-block mt-1">Selecione fotos adicionais para compor a galeria.</small>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 2: Dados e Tamanhos -->
+                        <div class="col-md-7">
+                            
+                            <!-- Nome da Peça -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-13 text-dark">Título / Nome da Peça *</label>
+                                <input type="text" id="editTitleInput" name="title" class="form-control" required>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <!-- Preço -->
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Preço de Venda (R$) *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted fs-13">R$</span>
+                                        <input type="text" id="editPriceInput" name="price" class="form-control" required>
+                                    </div>
+                                </div>
+                                <!-- Marca -->
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Marca / Grife *</label>
+                                    <select id="editBrandSelect" name="brand" class="form-select fs-13">
+                                        {% for b in brands %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Gênero & Linha -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold fs-13 text-dark d-block mb-1">Gênero / Linha</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="gender" id="editGenderM" value="M">
+                                    <label class="btn btn-outline-primary btn-sm py-1.5" for="editGenderM"><i class="bx bx-male me-1"></i>Masculino</label>
+
+                                    <input type="radio" class="btn-check" name="gender" id="editGenderF" value="F">
+                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="editGenderF"><i class="bx bx-female me-1"></i>Feminino (Luiza Fit)</label>
+
+                                    <input type="radio" class="btn-check" name="gender" id="editGenderU" value="U">
+                                    <label class="btn btn-outline-secondary btn-sm py-1.5" for="editGenderU">Unissex</label>
+                                </div>
+                            </div>
+
+                            <!-- Categoria Pai e Subcategoria (Encadeadas) -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Categoria Principal *</label>
+                                    <select id="editParentCategorySelect" class="form-select fs-13" required>
+                                        <option value="">Selecione...</option>
+                                        {% for cat in parent_categories %}
+                                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold fs-13 text-dark">Subcategoria *</label>
+                                    <select id="editChildCategorySelect" name="category" class="form-select fs-13" required>
+                                        <option value="">Escolha a principal primeiro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Switch de Estoque (Disponível vs Esgotado) -->
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="form-check form-switch d-flex align-items-center justify-content-between p-0 mb-0">
+                                    <label class="form-check-label fw-bold fs-13 text-dark mb-0" for="editSwitchInStock" id="editStockLabel">
+                                        🟢 Peça Disponível em Estoque
+                                    </label>
+                                    <input class="form-check-input ms-0 fs-18" type="checkbox" name="is_in_stock" id="editSwitchInStock" value="1" checked style="cursor: pointer;">
+                                </div>
+                                <small class="text-muted fs-11 d-block mt-1">Ao desativar, a peça receberá a tarja de esgotado na vitrine.</small>
+                            </div>
+
+                            <!-- Seletor Inteligente de Cores na Edição (Paleta Luxury + Ferramenta de Cor Específica) -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <label class="form-label fw-bold fs-13 text-dark mb-0">🎨 Cores Disponíveis na Peça:</label>
+                                    <button type="button" class="btn btn-xs btn-outline-dark fs-11 py-0.5 px-2.5 rounded-pill d-flex align-items-center gap-1" onclick="toggleCustomColorPicker('edit')">
+                                        <i class="bx bx-colorize"></i> + Outra Cor / Tom
+                                    </button>
+                                </div>
+                                
+                                <div class="p-2.5 border rounded-3 bg-white shadow-xs">
+                                    <!-- Círculos de Cores Padrão -->
+                                    <div class="d-flex flex-wrap gap-2 align-items-center" id="editColorSwatchesContainer">
+                                        <!-- Injetado dinamicamente via JS -->
+                                    </div>
+
+                                    <!-- Campo Seletor de Cor Personalizada -->
+                                    <div id="editCustomColorBox" class="mt-2.5 pt-2 border-top d-none">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="color" id="editCustomColorPicker" class="form-control form-control-color border-0 p-0" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" value="#2563eb" title="Escolha o tom no espectro">
+                                            <input type="text" id="editCustomColorName" class="form-control form-control-sm fs-12" placeholder="Nome da cor (ex: Verde Menta, Azul Bebê, Salmão...)" style="max-width: 250px;">
+                                            <button type="button" class="btn btn-dark btn-sm fs-11 px-2.5 fw-bold" onclick="addCustomColor('edit')">
+                                                Adicionar
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm fs-11 px-2" onclick="toggleCustomColorPicker('edit')">
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resumo em Pílulas das Cores Selecionadas -->
+                                    <div class="mt-2 pt-2 border-top">
+                                        <small class="text-muted fs-11 fw-bold text-uppercase d-block mb-1">Cores Selecionadas:</small>
+                                        <div id="editSelectedColorsList" class="d-flex flex-wrap gap-1.5 align-items-center" style="min-height: 26px;">
+                                            <!-- Pílulas das cores selecionadas -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Inputs Hidden para envio no formulário -->
+                                <div id="editHiddenColorInputs"></div>
+                                <input type="hidden" name="custom_colors_json" id="editCustomColorsJson" value="[]">
+                            </div>
+
+                            <!-- Grade de Tamanhos & Fotos por Cor na Edição -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                    <label class="form-label fw-bold fs-13 text-dark mb-0">📏 Grade de Tamanhos por Cor:</label>
+                                    <small class="text-muted fs-11">Selecione os tamanhos de cada cor individualmente</small>
+                                </div>
+                                
+                                <div id="editColorSizeMatrixContainer" class="d-flex flex-column gap-2">
+                                    <!-- Injetado dinamicamente para cada cor selecionada -->
+                                </div>
+                                <input type="hidden" name="variants_matrix_json" id="editVariantsMatrixJson" value="[]">
+                            </div>
+
+                            <!-- Tags e Destaques -->
+                            <div class="d-flex gap-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_exclusive" id="editSwitchExclusive" value="1">
+                                    <label class="form-check-label fs-13" for="editSwitchExclusive">✨ Peça Exclusiva</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="is_featured" id="editSwitchFeatured" value="1">
+                                    <label class="form-check-label fs-13" for="editSwitchFeatured">🔥 Destaque na Vitrine</label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-danger fs-13 px-3" id="btnEditDeleteTrigger">
+                        <i class="bx bx-trash me-1"></i> Excluir Peça
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary fs-13 px-3" data-bs-dismiss="modal">
+                            <i class="bx bx-x me-1"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary fs-13 px-4 fw-semibold shadow-sm" id="btnSaveEditProduct">
+                            <i class="bx bx-check me-1"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE PEÇA (ADMIN)               -->
+<!-- ============================================================== -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-danger text-white border-0 px-4 py-3">
+                <h5 class="modal-title fs-16 fw-bold d-flex align-items-center gap-2 mb-0" id="deleteProductModalLabel">
+                    <i class="bx bx-error-circle fs-20"></i> Gerenciar Exclusão de Peça
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="avatar-lg bg-danger-subtle text-danger rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 54px; height: 54px;">
+                    <i class="bx bx-trash fs-28"></i>
+                </div>
+                <h5 class="fs-16 fw-bold text-dark mb-1" id="deleteProductTitle">Nome da Peça</h5>
+                <p class="text-muted fs-13 mb-4">
+                    Escolha como deseja remover esta peça da loja:
+                </p>
+
+                <div class="d-grid gap-2 text-start">
+                    <button type="button" class="btn btn-outline-dark p-3 rounded-3 text-start d-flex align-items-center justify-content-between" id="btnArchiveProduct">
+                        <div>
+                            <span class="d-block fw-bold fs-13">📦 Desativar / Ocultar da Vitrine</span>
+                            <small class="text-muted fs-11">Recomendado: Sai da vitrine mas preserva histórico de compras antigas.</small>
+                        </div>
+                        <i class="bx bx-hide fs-22 text-muted"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-outline-danger p-3 rounded-3 text-start d-flex align-items-center justify-content-between" id="btnHardDeleteProduct">
+                        <div>
+                            <span class="d-block fw-bold fs-13 text-danger">🗑️ Excluir Definitivamente</span>
+                            <small class="text-muted fs-11">Apaga permanentemente o produto e todas as fotos físicas do servidor.</small>
+                        </div>
+                        <i class="bx bx-trash-alt fs-22 text-danger"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer bg-light px-4 py-2.5 justify-content-end">
+                <button type="button" class="btn btn-sm btn-secondary fs-12 px-3" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ============================================================== -->
+<!-- MODAL DE VISUALIZAÇÃO AMPLIADA DA PEÇA (QUICK VIEW)             -->
+<!-- ============================================================== -->
+<div class="modal fade" id="quickViewProductModal" tabindex="-1" aria-labelledby="quickViewProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-lg overflow-hidden rounded-4">
+            
+            <div class="modal-header border-0 bg-light px-4 py-3 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span id="qvBrandBadge" class="badge bg-dark text-white px-2.5 py-1 fs-11 text-uppercase">Marca</span>
+                    <span id="qvGenderBadge" class="badge bg-primary text-white px-2.5 py-1 fs-11">Masculino</span>
+                    <span id="qvExclusiveBadge" class="badge bg-warning text-dark px-2.5 py-1 fs-11 fw-bold d-none">✨ Peça Exclusiva</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-3 p-md-4">
+                <div class="row g-4 align-items-center">
+                    
+                    <!-- Coluna da Foto Ampliada -->
+                    <div class="col-lg-6">
+                        <div class="position-relative overflow-hidden rounded-3 bg-light text-center border p-2" style="min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                            <img id="qvMainImage" src="{% static 'images/product/p-1.png' %}" alt="Foto da Peça" class="img-fluid rounded shadow-sm" style="max-height: 480px; width: auto; max-width: 100%; object-fit: contain;">
+                            
+                            <!-- Tarja de Esgotado no Modal Ampliado -->
+                            <div id="qvSoldOutOverlay" class="out-of-stock-overlay d-none">
+                                <div class="crime-tape-ribbon" style="font-size: 14px; padding: 8px 0;">
+                                    <span>⛔ ESGOTADO • CHEGARÁ EM BREVE ⛔</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Miniaturas de Galeria -->
+                        <div id="qvThumbsContainer" class="d-flex gap-2 mt-2 justify-content-center overflow-x-auto pb-1">
+                            <!-- Injetado dinamicamente via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Coluna de Informações e Compra -->
+                    <div class="col-lg-6 d-flex flex-column justify-content-center">
+                        <div class="mb-2">
+                            <small id="qvCategoryText" class="text-muted text-uppercase fs-12 fw-bold tracking-wider">Categoria</small>
+                            <h2 id="qvTitle" class="fs-22 fs-md-26 fw-bold text-dark mb-2 mt-1">Nome da Peça</h2>
+                        </div>
+
+                        <!-- Preço e Parcelamento -->
+                        <div class="p-3 bg-light rounded-3 mb-3 border">
+                            <div class="d-flex align-items-baseline gap-2">
+                                <span class="fs-14 text-muted">Preço:</span>
+                                <h3 id="qvPrice" class="fs-26 fw-bold text-dark mb-0">R$ 0,00</h3>
+                            </div>
+                            <small class="text-muted fs-12 d-block mt-1">💳 Dividimos em até 12x com acréscimo da máquina de cartão ou via Pix com envio imediato</small>
+                        </div>
+
+                        <!-- Status de Estoque -->
+                        <div class="mb-3" id="qvStockStatusContainer">
+                            <span id="qvStockBadge" class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fs-12 fw-semibold">
+                                🟢 Disponível para Envio Imediato
+                            </span>
+                        </div>
+
+                        <!-- Cores Disponíveis com Troca Dinâmica de Foto -->
+                        <div class="mb-3" id="qvColorsSection">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-bold fs-13 text-dark mb-0">Cores Disponíveis:</label>
+                                <small class="text-muted fs-11" id="qvSelectedColorNameText">Toque na cor para ver a foto</small>
+                            </div>
+                            <div id="qvColorsContainer" class="d-flex flex-wrap gap-2">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Tamanhos Disponíveis com Guia de Medidas -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-bold fs-13 text-dark mb-0">Tamanhos Disponíveis:</label>
+                                <button type="button" class="btn btn-link btn-sm p-0 fs-12 text-decoration-underline text-dark fw-semibold d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#fitGuideModal">
+                                    <i class="bx bx-ruler"></i> 📏 Guia de Medidas
+                                </button>
+                            </div>
+                            <div id="qvSizesContainer" class="d-flex flex-wrap gap-1.5">
+                                <!-- Injetado via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Descrição Curta -->
+                        <p id="qvDescription" class="text-muted fs-13 mb-4">
+                            Peça autêntica com corte e acabamento impecável da Grife HF.
+                        </p>
+
+                        <!-- Seção VIP de Reserva / Fila de Espera (Quando Esgotado) -->
+                        <div id="qvReservationSection" class="p-3 rounded-3 border border-warning bg-warning bg-opacity-10 mb-3 d-none">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <i class="bx bx-bell-ring fs-20 text-warning"></i>
+                                <div>
+                                    <h6 class="fs-13 fw-bold text-dark mb-0">Peça Esgotada? Entre na Fila VIP de Espera</h6>
+                                    <small class="text-muted fs-11">Avisamos você no WhatsApp assim que o próximo lote chegar, com reserva garantida por 24h.</small>
+                                </div>
+                            </div>
+                            <form id="qvReservationForm" onsubmit="submitReservationForm(event)" class="d-flex flex-column gap-2 mt-2">
+                                {% csrf_token %}
+                                <input type="hidden" id="resProductId" name="product_id" value="">
+                                <input type="hidden" id="resColor" name="color" value="">
+                                <input type="hidden" id="resSize" name="size" value="">
+                                
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-sm" id="resCustomerName" name="customer_name" placeholder="Seu Nome Completo" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="tel" class="form-control form-control-sm" id="resCustomerPhone" name="customer_phone" placeholder="WhatsApp (DDD + Número)" required>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" id="resSubmitBtn" class="btn btn-warning text-dark fw-bold btn-sm py-2 rounded-2 shadow-xs d-flex align-items-center justify-content-center gap-1.5 mt-1">
+                                    <i class="bx bx-bell"></i>
+                                    <span>📋 Garantir Reserva / Avise-me Quando Chegar</span>
+                                </button>
+                            </form>
+                            
+                            <div id="resSuccessMsg" class="alert alert-success d-none mt-2 mb-0 py-2 px-3 fs-12 d-flex align-items-center gap-2 rounded-2">
+                                <i class="bx bx-check-circle fs-18"></i>
+                                <span>🎉 Reserva confirmada! Entraremos em contato assim que o lote chegar.</span>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação: Sacola e Pedido Direto no WhatsApp -->
+                        <div class="d-flex flex-column flex-sm-row gap-2" id="qvPurchaseActionsContainer">
+                            <form id="qvCartForm" action="{% url 'orders:add_to_cart' %}" method="POST" class="ajax-add-cart-form flex-grow-1">
+                                {% csrf_token %}
+                                <input type="hidden" id="qvProductId" name="product_id" value="">
+                                <input type="hidden" id="qvSelectedColorInput" name="color" value="">
+                                <input type="hidden" id="qvSelectedSizeInput" name="size" value="">
+                                <button type="submit" id="qvBtnAddToCart" class="btn btn-dark w-100 py-2.5 fs-14 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                    <i class="bx bx-shopping-bag fs-18"></i>
+                                    <span>Adicionar à Sacola</span>
+                                </button>
+                            </form>
+
+                            <a id="qvWhatsAppBtn" href="#" target="_blank" class="btn btn-success py-2.5 px-3 fs-14 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                <i class="bx bxl-whatsapp fs-18"></i>
+                                <span>⚡ Pedir no WhatsApp</span>
+                            </a>
+                        </div>
+
+                        <!-- Links Secundários -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                            <button type="button" class="btn btn-sm btn-outline-secondary fs-12" id="qvBtnEditShortcut">
+                                <i class="bx bx-edit me-1"></i> Editar Peça
+                            </button>
+                            <a id="qvFullDetailLink" href="#" class="text-dark fs-12 fw-bold text-decoration-none">
+                                Ver Página Completa da Peça →
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- MODAL DE GUIA DE MEDIDAS (FIT GUIDE)                           -->
+<!-- ============================================================== -->
+<div class="modal fade" id="fitGuideModal" tabindex="-1" aria-labelledby="fitGuideModalLabel" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white px-4 py-3">
+                <h5 class="modal-title fs-16 fw-bold d-flex align-items-center gap-2 mb-0" id="fitGuideModalLabel">
+                    <i class="bx bx-ruler fs-20 text-warning"></i> 📏 Guia de Medidas &amp; Caimento — Grife HF
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted fs-13 mb-3">
+                    Encontre o tamanho ideal comparando com uma peça que você já tem ou utilizando uma fita métrica:
+                </p>
+
+                <ul class="nav nav-pills mb-3 nav-justified" id="pills-tab-guide" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold fs-13 py-2" id="pills-men-shirts-tab" data-bs-toggle="pill" data-bs-target="#pills-men-shirts" type="button" role="tab">
+                            👕 Camisas &amp; Polos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold fs-13 py-2" id="pills-men-pants-tab" data-bs-toggle="pill" data-bs-target="#pills-men-pants" type="button" role="tab">
+                            👖 Bermudas &amp; Calças
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold fs-13 py-2 text-danger" id="pills-women-fit-tab" data-bs-toggle="pill" data-bs-target="#pills-women-fit" type="button" role="tab">
+                            👗 Linha Luiza Fit
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold fs-13 py-2" id="pills-shoes-tab" data-bs-toggle="pill" data-bs-target="#pills-shoes" type="button" role="tab">
+                            👟 Calçados
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content border rounded-3 p-3 bg-light-subtle" id="pills-tabContent-guide">
+                    <!-- 1. Camisas -->
+                    <div class="tab-pane fade show active" id="pills-men-shirts" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle fs-13 mb-0 bg-white">
+                                <thead class="table-dark fs-12">
+                                    <tr>
+                                        <th>Tamanho</th>
+                                        <th>Tórax / Peito</th>
+                                        <th>Comprimento</th>
+                                        <th>Ombro a Ombro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong class="text-primary">P</strong></td><td>96 - 102 cm</td><td>70 cm</td><td>44 cm</td></tr>
+                                    <tr><td><strong class="text-primary">M</strong></td><td>102 - 108 cm</td><td>72 cm</td><td>46 cm</td></tr>
+                                    <tr><td><strong class="text-primary">G</strong></td><td>108 - 114 cm</td><td>74 cm</td><td>48 cm</td></tr>
+                                    <tr><td><strong class="text-primary">GG</strong></td><td>114 - 120 cm</td><td>76 cm</td><td>50 cm</td></tr>
+                                    <tr><td><strong class="text-primary">XGG</strong></td><td>120 - 128 cm</td><td>78 cm</td><td>52 cm</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 2. Bermudas & Calças -->
+                    <div class="tab-pane fade" id="pills-men-pants" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle fs-13 mb-0 bg-white">
+                                <thead class="table-dark fs-12">
+                                    <tr>
+                                        <th>Tamanho</th>
+                                        <th>Numeração</th>
+                                        <th>Cintura</th>
+                                        <th>Quadril</th>
+                                        <th>Comprimento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong>P</strong></td><td>38</td><td>76 - 80 cm</td><td>94 - 98 cm</td><td>48 cm (Bermuda) / 102 cm (Calça)</td></tr>
+                                    <tr><td><strong>M</strong></td><td>40</td><td>80 - 84 cm</td><td>98 - 102 cm</td><td>50 cm (Bermuda) / 104 cm (Calça)</td></tr>
+                                    <tr><td><strong>G</strong></td><td>42</td><td>84 - 88 cm</td><td>102 - 106 cm</td><td>52 cm (Bermuda) / 106 cm (Calça)</td></tr>
+                                    <tr><td><strong>GG</strong></td><td>44 - 46</td><td>88 - 96 cm</td><td>106 - 112 cm</td><td>54 cm (Bermuda) / 108 cm (Calça)</td></tr>
+                                    <tr><td><strong>XGG</strong></td><td>48 - 50</td><td>96 - 104 cm</td><td>112 - 120 cm</td><td>56 cm (Bermuda) / 110 cm (Calça)</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. Luiza Fit -->
+                    <div class="tab-pane fade" id="pills-women-fit" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle fs-13 mb-0 bg-white">
+                                <thead class="table-dark fs-12">
+                                    <tr>
+                                        <th>Tamanho</th>
+                                        <th>Veste Manequim</th>
+                                        <th>Busto</th>
+                                        <th>Cintura</th>
+                                        <th>Quadril</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td><strong class="text-danger">P / M</strong></td><td>36 ao 40</td><td>82 - 92 cm</td><td>64 - 74 cm</td><td>90 - 100 cm</td></tr>
+                                    <tr><td><strong class="text-danger">G / GG</strong></td><td>42 ao 46</td><td>94 - 106 cm</td><td>76 - 88 cm</td><td>102 - 114 cm</td></tr>
+                                    <tr><td><strong class="text-danger">Tamanho Único</strong></td><td>36 ao 42</td><td>Tecido com alta elasticidade e compressão</td><td>Modela o corpo</td><td>Adaptação anatômica</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. Calçados -->
+                    <div class="tab-pane fade" id="pills-shoes" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle fs-13 mb-0 bg-white">
+                                <thead class="table-dark fs-12">
+                                    <tr>
+                                        <th>Numeração (BR)</th>
+                                        <th>37 / 38</th>
+                                        <th>39 / 40</th>
+                                        <th>41 / 42</th>
+                                        <th>43 / 44</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Comprimento do Pé</td><td>24,5 - 25,5 cm</td><td>26,0 - 27,0 cm</td><td>27,5 - 28,5 cm</td><td>29,0 - 29,8 cm</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border d-flex align-items-center gap-2 mt-3 mb-0 p-2.5 fs-12 text-muted">
+                    <i class="bx bx-info-circle text-primary fs-18"></i>
+                    <span>Dúvidas sobre o tamanho? Nosso time ajuda na hora pelo WhatsApp VIP com fotos reais e medidas exatas.</span>
+                </div>
+            </div>
+            <div class="modal-footer bg-light px-4 py-2.5 justify-content-end">
+                <button type="button" class="btn btn-sm btn-dark fs-12 px-3" data-bs-dismiss="modal">
+                    Entendi, Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Flutuante de Confirmação -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="cartToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bx bxs-check-circle text-success fs-20"></i>
+                <span id="cartToastMessage" class="fs-13 fw-semibold">Operação realizada com sucesso!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    // Estrutura de categorias passada pelo Django
+    const categoriesData = {{ categories_json|safe|default:"[]" }};
+
+    // Função Global para Abrir Visualização Ampliada da Peça (Quick View)
+    function openQuickViewModal(productId) {
+        const modalEl = document.getElementById('quickViewProductModal');
+        const qvMainImg = document.getElementById('qvMainImage');
+        const qvSoldOut = document.getElementById('qvSoldOutOverlay');
+        const qvThumbs = document.getElementById('qvThumbsContainer');
+        const qvBrandBadge = document.getElementById('qvBrandBadge');
+        const qvGenderBadge = document.getElementById('qvGenderBadge');
+        const qvExclusiveBadge = document.getElementById('qvExclusiveBadge');
+        const qvCategory = document.getElementById('qvCategoryText');
+        const qvTitle = document.getElementById('qvTitle');
+        const qvPrice = document.getElementById('qvPrice');
+        const qvStockBadge = document.getElementById('qvStockBadge');
+        const qvColorsContainer = document.getElementById('qvColorsContainer');
+        const qvColorsSection = document.getElementById('qvColorsSection');
+        const qvSizesContainer = document.getElementById('qvSizesContainer');
+        const qvDescription = document.getElementById('qvDescription');
+        const qvProductId = document.getElementById('qvProductId');
+        const qvBtnAddToCart = document.getElementById('qvBtnAddToCart');
+        const qvWhatsAppBtn = document.getElementById('qvWhatsAppBtn');
+        const qvFullDetailLink = document.getElementById('qvFullDetailLink');
+        const qvBtnEditShortcut = document.getElementById('qvBtnEditShortcut');
+        const qvResSection = document.getElementById('qvReservationSection');
+        const resProductId = document.getElementById('resProductId');
+        const resColor = document.getElementById('resColor');
+        const resSize = document.getElementById('resSize');
+        const resSuccessMsg = document.getElementById('resSuccessMsg');
+        const qvResForm = document.getElementById('qvReservationForm');
+        const qvPurchaseActionsContainer = document.getElementById('qvPurchaseActionsContainer');
+
+        if (qvResForm) {
+            qvResForm.reset();
+            qvResForm.classList.remove('d-none');
+        }
+        if (resSuccessMsg) resSuccessMsg.classList.add('d-none');
+        if (resProductId) resProductId.value = productId;
+
+        qvProductId.value = productId;
+        qvThumbs.innerHTML = '';
+        qvColorsContainer.innerHTML = '';
+        qvSizesContainer.innerHTML = '';
+
+        let currentProductData = null;
+        let selectedColorName = '';
+        let selectedSizeName = '';
+
+        function updateWhatsAppDirectLink() {
+            if (!currentProductData) return;
+            let msg = `Olá! Gostei da peça *${currentProductData.title}* (${currentProductData.brand_name})`;
+            if (selectedColorName) msg += ` na cor *${selectedColorName}*`;
+            if (selectedSizeName) msg += ` no tamanho *${selectedSizeName}*`;
+            msg += ` (R$ ${parseFloat(currentProductData.price).toFixed(2).replace('.', ',')}) que vi na Grife HF: ${currentProductData.product_url}`;
+            
+            qvWhatsAppBtn.href = `https://wa.me/558391650137?text=${encodeURIComponent(msg)}`;
+            const colInput = document.getElementById('qvSelectedColorInput');
+            const sizeInput = document.getElementById('qvSelectedSizeInput');
+            if (colInput) colInput.value = selectedColorName;
+            if (sizeInput) sizeInput.value = selectedSizeName;
+            if (resColor) resColor.value = selectedColorName;
+            if (resSize) resSize.value = selectedSizeName;
+        }
+
+        function renderSizesForColor(colorName) {
+            qvSizesContainer.innerHTML = '';
+            let availableSizesForColor = [];
+
+            if (currentProductData.variants_matrix && currentProductData.variants_matrix.length > 0) {
+                const colorEntry = currentProductData.variants_matrix.find(c => c.name.trim().toLowerCase() === colorName.trim().toLowerCase());
+                if (colorEntry && colorEntry.sizes) {
+                    availableSizesForColor = colorEntry.sizes;
+                }
+            }
+
+            // Fallback se nao houver matriz especifica
+            if (!availableSizesForColor || availableSizesForColor.length === 0) {
+                if (currentProductData.sizes && currentProductData.sizes.length > 0) {
+                    availableSizesForColor = currentProductData.sizes.map(s => ({ size: s, stock: 10, in_stock: true }));
+                }
+            }
+
+            if (availableSizesForColor.length > 0) {
+                let firstSelected = false;
+                availableSizesForColor.forEach(sObj => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    const hasStock = sObj.stock > 0 && currentProductData.is_in_stock;
+
+                    if (hasStock) {
+                        btn.className = 'btn btn-sm btn-outline-dark px-3 py-1.5 fs-12 fw-bold rounded-2 size-pill-btn';
+                        btn.textContent = sObj.size;
+                        btn.onclick = function() {
+                            qvSizesContainer.querySelectorAll('.size-pill-btn').forEach(b => {
+                                b.classList.remove('btn-dark', 'text-white');
+                                b.classList.add('btn-outline-dark');
+                            });
+                            btn.classList.remove('btn-outline-dark');
+                            btn.classList.add('btn-dark', 'text-white');
+                            selectedSizeName = sObj.size;
+                            updateWhatsAppDirectLink();
+                        };
+
+                        if (!firstSelected) {
+                            btn.classList.remove('btn-outline-dark');
+                            btn.classList.add('btn-dark', 'text-white');
+                            selectedSizeName = sObj.size;
+                            firstSelected = true;
+                        }
+                    } else {
+                        btn.className = 'btn btn-sm btn-light border text-muted text-decoration-line-through px-3 py-1.5 fs-12 rounded-2 disabled opacity-50';
+                        btn.textContent = sObj.size;
+                        btn.title = 'Tamanho Esgotado nesta cor';
+                    }
+
+                    qvSizesContainer.appendChild(btn);
+                });
+            } else {
+                qvSizesContainer.innerHTML = '<span class="text-muted fs-12">Tamanho sob consulta no WhatsApp</span>';
+            }
+
+            updateWhatsAppDirectLink();
+        }
+
+        fetch(`/produtos/${productId}/dados-edicao/`)
+            .then(res => res.json())
+            .then(data => {
+                currentProductData = data;
+                qvTitle.textContent = data.title;
+                qvPrice.textContent = `R$ ${parseFloat(data.price).toFixed(2).replace('.', ',')}`;
+                qvBrandBadge.textContent = data.brand_name;
+                qvGenderBadge.textContent = data.gender_display;
+                qvCategory.textContent = data.category_name;
+                qvDescription.textContent = data.description;
+                qvFullDetailLink.href = data.product_url;
+
+                if (data.is_exclusive) {
+                    qvExclusiveBadge.classList.remove('d-none');
+                } else {
+                    qvExclusiveBadge.classList.add('d-none');
+                }
+
+                // Foto Principal
+                if (data.cover_image_url) {
+                    qvMainImg.src = data.cover_image_url;
+                }
+
+                // Esgotado ou em estoque
+                if (data.is_in_stock) {
+                    qvSoldOut.classList.add('d-none');
+                    qvMainImg.classList.remove('sold-out-img');
+                    qvStockBadge.className = 'badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fs-12 fw-semibold';
+                    qvStockBadge.innerHTML = '🟢 Disponível para Envio Imediato';
+                    qvBtnAddToCart.disabled = false;
+                    qvBtnAddToCart.innerHTML = '<i class="bx bx-shopping-bag fs-18"></i> <span>Adicionar à Sacola</span>';
+                    if (qvResSection) qvResSection.classList.add('d-none');
+                    if (qvPurchaseActionsContainer) qvPurchaseActionsContainer.classList.remove('d-none');
+                } else {
+                    qvSoldOut.classList.remove('d-none');
+                    qvMainImg.classList.add('sold-out-img');
+                    qvStockBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 fs-12 fw-semibold';
+                    qvStockBadge.innerHTML = '⛔ Peça Esgotada • Chegará em breve';
+                    qvBtnAddToCart.disabled = true;
+                    qvBtnAddToCart.innerHTML = '<i class="bx bx-x-circle fs-18"></i> <span>Esgotado</span>';
+                    if (qvResSection) qvResSection.classList.remove('d-none');
+                }
+
+                // Galeria de miniaturas de fotos
+                if (data.images && data.images.length > 1) {
+                    data.images.forEach((imgUrl, idx) => {
+                        const thumb = document.createElement('img');
+                        thumb.src = imgUrl;
+                        thumb.className = `rounded border ${idx === 0 ? 'border-dark' : 'border-light'} p-0.5`;
+                        thumb.style = 'width: 52px; height: 52px; object-fit: cover; cursor: pointer;';
+                        thumb.onclick = function() {
+                            qvMainImg.src = imgUrl;
+                            qvThumbs.querySelectorAll('img').forEach(t => t.className = 'rounded border border-light p-0.5');
+                            thumb.className = 'rounded border border-dark p-0.5';
+                        };
+                        qvThumbs.appendChild(thumb);
+                    });
+                }
+
+                // Cores Disponíveis na Peça com Troca Inteligente de Foto e Filtragem de Tamanhos
+                if (data.available_colors && data.available_colors.length > 0) {
+                    qvColorsSection.classList.remove('d-none');
+                    const colorLabelText = document.getElementById('qvSelectedColorNameText');
+
+                    data.available_colors.forEach((col, idx) => {
+                        const colBtn = document.createElement('button');
+                        colBtn.type = 'button';
+                        colBtn.className = `btn btn-sm ${idx === 0 ? 'btn-dark text-white' : 'btn-light border text-dark'} px-2.5 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs qv-color-btn`;
+                        colBtn.innerHTML = `<span style="width: 13px; height: 13px; background-color: ${col.hex}; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.3);"></span> <span class="fw-semibold">${col.name}</span>`;
+                        
+                        colBtn.onclick = function() {
+                            qvColorsContainer.querySelectorAll('.qv-color-btn').forEach(b => {
+                                b.className = 'btn btn-sm btn-light border text-dark px-2.5 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs qv-color-btn';
+                            });
+                            colBtn.className = 'btn btn-sm btn-dark text-white px-2.5 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs qv-color-btn';
+                            
+                            selectedColorName = col.name;
+                            if (colorLabelText) colorLabelText.textContent = `Cor selecionada: ${col.name}`;
+
+                            // Troca de Foto para a cor clicada se houver imagem vinculada
+                            if (data.variants_matrix) {
+                                const matrixEntry = data.variants_matrix.find(m => m.name.trim().toLowerCase() === col.name.trim().toLowerCase());
+                                if (matrixEntry && matrixEntry.image_url) {
+                                    qvMainImg.src = matrixEntry.image_url;
+                                }
+                            } else if (data.images_data) {
+                                const imgEntry = data.images_data.find(im => im.color && im.color.trim().toLowerCase() === col.name.trim().toLowerCase());
+                                if (imgEntry && imgEntry.url) {
+                                    qvMainImg.src = imgEntry.url;
+                                }
+                            }
+
+                            // Atualiza os tamanhos para esta cor específica
+                            renderSizesForColor(col.name);
+                        };
+
+                        qvColorsContainer.appendChild(colBtn);
+
+                        if (idx === 0) {
+                            selectedColorName = col.name;
+                            if (colorLabelText) colorLabelText.textContent = `Cor selecionada: ${col.name}`;
+                        }
+                    });
+
+                    renderSizesForColor(selectedColorName);
+                } else {
+                    qvColorsSection.classList.add('d-none');
+                    selectedColorName = '';
+                    renderSizesForColor('');
+                }
+
+                // Botão de atalho para editar
+                qvBtnEditShortcut.onclick = function() {
+                    const qvModalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (qvModalInstance) qvModalInstance.hide();
+                    openEditProductModal(productId);
+                };
+
+                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                bsModal.show();
+            })
+            .catch(err => {
+                alert('Erro ao carregar visualização da peça.');
+            });
+    }
+
+    // Submissão AJAX do Formulário de Reserva / Fila de Espera
+    function submitReservationForm(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('resSubmitBtn');
+        const successMsg = document.getElementById('resSuccessMsg');
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Registrando...';
+        }
+
+        fetch('/pedidos/reservar/', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                form.classList.add('d-none');
+                if (successMsg) {
+                    successMsg.classList.remove('d-none');
+                    const spanText = successMsg.querySelector('span');
+                    if (spanText) spanText.textContent = `🎉 ${data.message}`;
+                }
+                const cartToastEl = document.getElementById('cartToast');
+                const cartToastMsg = document.getElementById('cartToastMessage');
+                const cartToast = cartToastEl ? new bootstrap.Toast(cartToastEl, { delay: 4000 }) : null;
+                if (cartToast) {
+                    cartToastMsg.textContent = data.message;
+                    cartToast.show();
+                }
+            } else {
+                alert(data.message || 'Erro ao registrar reserva.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bx bx-bell"></i> <span>📋 Garantir Reserva / Avise-me Quando Chegar</span>';
+                }
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erro de conexão ao registrar reserva.');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bx bx-bell"></i> <span>📋 Garantir Reserva / Avise-me Quando Chegar</span>';
+            }
+        });
+    }
+
+    function populateChildCategories(parentId, targetSelectEl, selectedChildId = null) {
+        targetSelectEl.innerHTML = '';
+        const parent = categoriesData.find(c => c.id === parseInt(parentId));
+        if (parent) {
+            if (parent.children && parent.children.length > 0) {
+                const optParent = document.createElement('option');
+                optParent.value = parent.id;
+                optParent.textContent = `• TODAS (${parent.name})`;
+                targetSelectEl.appendChild(optParent);
+
+                parent.children.forEach(child => {
+                    const opt = document.createElement('option');
+                    opt.value = child.id;
+                    opt.textContent = child.name;
+                    if (selectedChildId && child.id === parseInt(selectedChildId)) {
+                        opt.selected = true;
+                    }
+                    targetSelectEl.appendChild(opt);
+                });
+            } else {
+                const opt = document.createElement('option');
+                opt.value = parent.id;
+                opt.textContent = parent.name;
+                targetSelectEl.appendChild(opt);
+            }
+        } else {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Escolha a principal primeiro';
+            targetSelectEl.appendChild(opt);
+        }
+    }
+
+    // Paleta de Cores Padrão de Alta Costura
+    const DEFAULT_LUXURY_PALETTE = [
+        { name: "Preto", hex: "#0f172a" },
+        { name: "Branco", hex: "#ffffff" },
+        { name: "Off-White", hex: "#f3f4f6" },
+        { name: "Azul Marinho", hex: "#1e3a8a" },
+        { name: "Azul Royal", hex: "#2563eb" },
+        { name: "Cinza Mescla", hex: "#6b7280" },
+        { name: "Bege/Cáqui", hex: "#d4b996" },
+        { name: "Verde Militar", hex: "#365314" },
+        { name: "Bordô/Vinho", hex: "#881337" },
+        { name: "Vermelho", hex: "#dc2626" },
+        { name: "Rosa/Nude", hex: "#f472b6" },
+        { name: "Terracota", hex: "#9a3412" },
+        { name: "Mostarda", hex: "#d97706" }
+    ];
+
+    // Estado de cores e tamanhos selecionados por modal
+    const modalColorState = {
+        quick: {
+            customPalette: [],
+            selected: new Map([["Preto", "#0f172a"]]),
+            colorSizes: { "Preto": ["P", "M", "G", "GG"] }
+        },
+        edit: {
+            customPalette: [],
+            selected: new Map(),
+            colorSizes: {}
+        }
+    };
+
+    function renderColorSwatches(modalType) {
+        const container = document.getElementById(`${modalType}ColorSwatchesContainer`);
+        const pillsContainer = document.getElementById(`${modalType}SelectedColorsList`);
+        const hiddenInputs = document.getElementById(`${modalType}HiddenColorInputs`);
+        const customJsonInput = document.getElementById(`${modalType}CustomColorsJson`);
+        if (!container || !pillsContainer) return;
+
+        container.innerHTML = '';
+        pillsContainer.innerHTML = '';
+        hiddenInputs.innerHTML = '';
+
+        const state = modalColorState[modalType];
+        const allColors = [...DEFAULT_LUXURY_PALETTE, ...state.customPalette];
+
+        // 1. Renderiza os Círculos de Cores
+        allColors.forEach(col => {
+            const isSelected = state.selected.has(col.name);
+            const isLightColor = ["#ffffff", "#f3f4f6", "#f472b6", "#d4b996"].includes(col.hex.toLowerCase());
+            
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `luxury-color-btn ${isSelected ? 'selected' : ''}`;
+            btn.style.backgroundColor = col.hex;
+            btn.title = col.name;
+            btn.innerHTML = `<span class="check-icon" style="color: ${isLightColor ? '#000000' : '#ffffff'};">✓</span>`;
+            
+            btn.onclick = function() {
+                toggleColorSelection(modalType, col.name, col.hex);
+            };
+            container.appendChild(btn);
+        });
+
+        // 2. Renderiza as Pílulas de Resumo das Cores Selecionadas
+        if (state.selected.size === 0) {
+            pillsContainer.innerHTML = '<span class="text-muted fs-11 fst-italic">Nenhuma cor selecionada (peça em cor única padrão)</span>';
+        } else {
+            state.selected.forEach((hex, name) => {
+                const pill = document.createElement('span');
+                pill.className = 'luxury-color-badge-pill';
+                pill.innerHTML = `
+                    <span style="width: 11px; height: 11px; border-radius: 50%; background-color: ${hex}; display: inline-block; border: 1px solid rgba(0,0,0,0.2);"></span>
+                    <span>${name}</span>
+                    <span class="btn-remove-color" title="Remover cor" onclick="toggleColorSelection('${modalType}', '${name}', '${hex}')">✕</span>
+                `;
+                pillsContainer.appendChild(pill);
+
+                // Input hidden para enviar no POST
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'colors';
+                input.value = name;
+                hiddenInputs.appendChild(input);
+            });
+        }
+
+        // Salva customPalette em JSON
+        if (customJsonInput) {
+            customJsonInput.value = JSON.stringify(state.customPalette);
+        }
+
+        // Sincroniza a Grade de Tamanhos por Cor
+        renderColorSizeMatrix(modalType);
+    }
+
+    function toggleColorSelection(modalType, name, hex) {
+        const state = modalColorState[modalType];
+        if (state.selected.has(name)) {
+            state.selected.delete(name);
+            delete state.colorSizes[name];
+        } else {
+            state.selected.set(name, hex);
+            const currentGender = document.querySelector(`input[name="gender"]:checked[id^="${modalType}"]`)?.value || 'M';
+            if (!state.colorSizes[name] || state.colorSizes[name].length === 0) {
+                state.colorSizes[name] = currentGender === 'F' ? ['P/M', 'G/GG', 'Tamanho Único'] : ['P', 'M', 'G', 'GG'];
+            }
+        }
+        renderColorSwatches(modalType);
+    }
+
+    function renderColorSizeMatrix(modalType) {
+        const container = document.getElementById(`${modalType}ColorSizeMatrixContainer`);
+        if (!container) return;
+
+        container.innerHTML = '';
+        const state = modalColorState[modalType];
+        const currentGender = document.querySelector(`input[name="gender"]:checked[id^="${modalType}"]`)?.value || 'M';
+
+        // Se nenhuma cor estiver selecionada, usa "Cor Padrão"
+        const colorsList = state.selected.size > 0 
+            ? Array.from(state.selected.entries())
+            : [["Cor Padrão", "#0f172a"]];
+
+        colorsList.forEach(([colorName, colorHex], idx) => {
+            if (!state.colorSizes[colorName]) {
+                state.colorSizes[colorName] = currentGender === 'F' ? ['P/M', 'G/GG', 'Tamanho Único'] : ['P', 'M', 'G', 'GG'];
+            }
+
+            const selectedSizes = state.colorSizes[colorName] || [];
+            const escapedColor = colorName.replace(/'/g, "\\'");
+
+            const card = document.createElement('div');
+            card.className = 'card border rounded-3 p-2.5 bg-light mb-2 shadow-xs';
+            card.innerHTML = `
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2 pb-1.5 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="width: 14px; height: 14px; border-radius: 50%; background-color: ${colorHex}; display: inline-block; border: 1px solid rgba(0,0,0,0.3);"></span>
+                        <strong class="fs-13 text-dark">${colorName}</strong>
+                        <span class="badge bg-dark-subtle text-dark fs-10 px-1.5">${selectedSizes.length} tamanho(s)</span>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-xs btn-outline-dark py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'PMG')">P/M/G/GG</button>
+                        <button type="button" class="btn btn-xs btn-outline-dark py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'NUM')">38 ao 44</button>
+                        <button type="button" class="btn btn-xs btn-outline-danger py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'LUIZA')">Luiza Fit</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'CLEAR')">Limpar</button>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-1 align-items-center">
+                    ${renderSizePillButtons(modalType, colorName, selectedSizes, currentGender)}
+                </div>
+
+                <div class="d-flex align-items-center gap-2 mt-2 pt-1.5 border-top fs-11 text-muted">
+                    <span><i class="bx bx-camera"></i> Foto desta cor (opcional):</span>
+                    <input type="file" name="color_image_${idx}" accept="image/*" class="form-control form-control-sm fs-11 py-0.5" style="max-width: 260px;">
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        compileVariantsMatrix(modalType);
+    }
+
+    function renderSizePillButtons(modalType, colorName, selectedSizes, currentGender) {
+        const escapedColor = colorName.replace(/'/g, "\\'");
+
+        if (currentGender === 'F') {
+            const groups = [
+                { label: 'Duplos', sizes: ['P/M', 'G/GG'] },
+                { label: 'Letras', sizes: ['P', 'M', 'G', 'GG', 'XGG'] },
+                { label: 'Numeração', sizes: ['36', '38', '40', '42', '44', '46', '48', '50'] },
+                { label: 'Calçados', sizes: ['35/36', '37/38', '39/40', '41/42', '43/44'] },
+                { label: 'Especial', sizes: ['Tamanho Único'] }
+            ];
+
+            return `
+                <div class="d-flex flex-column gap-1.5 w-100 mt-1">
+                    ${groups.map(grp => `
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <span class="text-muted fs-10 fw-semibold text-uppercase" style="min-width: 68px;">${grp.label}:</span>
+                            <div class="d-flex flex-wrap gap-1 align-items-center flex-grow-1">
+                                ${grp.sizes.map(sz => {
+                                    const isChecked = selectedSizes.includes(sz);
+                                    const btnClass = isChecked ? 'btn-dark text-white fw-bold shadow-xs' : 'btn-outline-secondary bg-white text-dark';
+                                    const icon = isChecked ? '✓' : '+';
+                                    return `<button type="button" class="btn btn-xs ${btnClass} px-2 py-0.5 fs-11 rounded-2" onclick="toggleMatrixSize('${modalType}', '${escapedColor}', '${sz}')">${icon} ${sz}</button>`;
+                                }).join(' ')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        let sizesToShow = [];
+        if (currentGender === 'M') {
+            sizesToShow = ['P', 'M', 'G', 'GG', 'XGG', '38', '40', '42', '44', '46', '48', '36', '50', '35/36', '37/38', '39/40', '41/42', '43/44', 'Único', 'Tamanho Único'];
+        } else {
+            sizesToShow = ['P', 'M', 'G', 'GG', 'XGG', '36', '38', '40', '42', '44', '46', '48', '50', 'P/M', 'G/GG', '35/36', '37/38', '39/40', '41/42', '43/44', 'Tamanho Único'];
+        }
+
+        return sizesToShow.map(sz => {
+            const isChecked = selectedSizes.includes(sz);
+            const btnClass = isChecked ? 'btn-dark text-white fw-bold shadow-xs' : 'btn-outline-secondary bg-white text-dark';
+            const icon = isChecked ? '✓' : '+';
+            return `<button type="button" class="btn btn-xs ${btnClass} px-2 py-0.5 fs-11 rounded-2" onclick="toggleMatrixSize('${modalType}', '${escapedColor}', '${sz}')">${icon} ${sz}</button>`;
+        }).join(' ');
+    }
+
+    function toggleMatrixSize(modalType, colorName, sz) {
+        const state = modalColorState[modalType];
+        if (!state.colorSizes[colorName]) {
+            state.colorSizes[colorName] = [];
+        }
+        const idx = state.colorSizes[colorName].indexOf(sz);
+        if (idx >= 0) {
+            state.colorSizes[colorName].splice(idx, 1);
+        } else {
+            state.colorSizes[colorName].push(sz);
+        }
+        renderColorSizeMatrix(modalType);
+    }
+
+    function applyMatrixPreset(modalType, colorName, preset) {
+        const state = modalColorState[modalType];
+        if (preset === 'PMG') {
+            state.colorSizes[colorName] = ['P', 'M', 'G', 'GG'];
+        } else if (preset === 'NUM') {
+            state.colorSizes[colorName] = ['38', '40', '42', '44'];
+        } else if (preset === 'LUIZA') {
+            state.colorSizes[colorName] = ['P/M', 'G/GG', 'Tamanho Único'];
+        } else if (preset === 'CLEAR') {
+            state.colorSizes[colorName] = [];
+        }
+        renderColorSizeMatrix(modalType);
+    }
+
+    function compileVariantsMatrix(modalType) {
+        const state = modalColorState[modalType];
+        const matrix = [];
+
+        if (state.selected.size === 0) {
+            const defaultSizes = state.colorSizes['Cor Padrão'] || ['P', 'M', 'G'];
+            matrix.push({
+                name: '',
+                hex: '',
+                sizes: defaultSizes.map(s => ({ size: s, stock: 10 }))
+            });
+        } else {
+            state.selected.forEach((hex, name) => {
+                const sizes = state.colorSizes[name] || [];
+                matrix.push({
+                    name: name,
+                    hex: hex,
+                    sizes: sizes.map(s => ({ size: s, stock: 10 }))
+                });
+            });
+        }
+
+        const jsonStr = JSON.stringify(matrix);
+        const hiddenInput = document.getElementById(`${modalType}VariantsMatrixJson`);
+        if (hiddenInput) {
+            hiddenInput.value = jsonStr;
+        }
+        return matrix;
+    }
+
+    function toggleCustomColorPicker(modalType) {
+        const box = document.getElementById(`${modalType}CustomColorBox`);
+        if (box) {
+            box.classList.toggle('d-none');
+            if (!box.classList.contains('d-none')) {
+                const nameInput = document.getElementById(`${modalType}CustomColorName`);
+                if (nameInput) nameInput.focus();
+            }
+        }
+    }
+
+    function addCustomColor(modalType) {
+        const picker = document.getElementById(`${modalType}CustomColorPicker`);
+        const nameInput = document.getElementById(`${modalType}CustomColorName`);
+        if (!picker || !nameInput) return;
+
+        const name = nameInput.value.trim();
+        const hex = picker.value;
+        if (!name) {
+            alert('Por favor, digite o nome da cor.');
+            nameInput.focus();
+            return;
+        }
+
+        const state = modalColorState[modalType];
+        if (!state.customPalette.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+            state.customPalette.push({ name: name, hex: hex });
+        }
+        state.selected.set(name, hex);
+        const currentGender = document.querySelector(`input[name="gender"]:checked[id^="${modalType}"]`)?.value || 'M';
+        if (!state.colorSizes[name] || state.colorSizes[name].length === 0) {
+            state.colorSizes[name] = currentGender === 'F' ? ['P/M', 'G/GG', 'Tamanho Único'] : ['P', 'M', 'G', 'GG'];
+        }
+
+        nameInput.value = '';
+        toggleCustomColorPicker(modalType);
+        renderColorSwatches(modalType);
+    }
+
+    // Gerenciador de Exclusão de Peça (Admin)
+    let currentDeleteProductId = null;
+
+    function openDeleteProductModal(productId, productTitle) {
+        currentDeleteProductId = productId;
+        const modalEl = document.getElementById('deleteProductModal');
+        const titleEl = document.getElementById('deleteProductTitle');
+        if (titleEl) titleEl.textContent = productTitle || `Peça #${productId}`;
+
+        if (modalEl) {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.show();
+        }
+    }
+
+    function executeProductDelete(action) {
+        if (!currentDeleteProductId) return;
+
+        const modalEl = document.getElementById('deleteProductModal');
+        const bsModal = bootstrap.Modal.getInstance(modalEl);
+        const editModalEl = document.getElementById('editProductModal');
+        const bsEditModal = bootstrap.Modal.getInstance(editModalEl);
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+
+        const formData = new FormData();
+        formData.append('action', action);
+        formData.append('ajax', '1');
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        fetch(`/produtos/${currentDeleteProductId}/excluir/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (bsModal) bsModal.hide();
+            if (bsEditModal) bsEditModal.hide();
+
+            if (data.success) {
+                // Remove suavemente o card da vitrine
+                const cardCol = document.getElementById(`product-card-col-${currentDeleteProductId}`);
+                if (cardCol) {
+                    cardCol.style.transition = 'all 0.4s ease';
+                    cardCol.style.opacity = '0';
+                    cardCol.style.transform = 'scale(0.8)';
+                    setTimeout(() => cardCol.remove(), 400);
+                }
+
+                // Exibe toast de confirmação
+                const cartToastEl = document.getElementById('cartToast');
+                const cartToastMsg = document.getElementById('cartToastMessage');
+                const cartToast = cartToastEl ? new bootstrap.Toast(cartToastEl, { delay: 3500 }) : null;
+                if (cartToast) {
+                    cartToastMsg.textContent = data.message;
+                    cartToast.show();
+                }
+            }
+        })
+        .catch(err => {
+            alert('Erro ao processar exclusão da peça.');
+        });
+    }
+
+    // Atualização Dinâmica do Modal por Gênero (Masculino vs Feminino Luiza Fit vs Unissex)
+    function updateModalByGender(modalType, gender) {
+        const parentSelect = document.getElementById(`${modalType}ParentCategorySelect`);
+        const childSelect = document.getElementById(`${modalType}ChildCategorySelect`);
+        const brandSelect = modalType === 'quick' 
+            ? document.querySelector('#quickProductModal select[name="brand"]') 
+            : document.getElementById('editBrandSelect');
+
+        if (gender === 'F') {
+            // 1. Categoria Principal: Luiza Fit
+            const luizaParent = categoriesData.find(c => c.slug === 'luiza-fit' || c.gender === 'F');
+            if (luizaParent && parentSelect) {
+                parentSelect.value = luizaParent.id;
+                populateChildCategories(luizaParent.id, childSelect);
+            }
+            // 2. Marca: Seleciona Luiza Fit se existir no select
+            if (brandSelect) {
+                for (let i = 0; i < brandSelect.options.length; i++) {
+                    if (brandSelect.options[i].text.toLowerCase().includes('luiza')) {
+                        brandSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        } else if (gender === 'M') {
+            // 1. Categoria Principal: se estiver em Luiza Fit, troca para primeira categoria masculina
+            if (parentSelect) {
+                const currentSelected = categoriesData.find(c => c.id === parseInt(parentSelect.value));
+                if (!currentSelected || currentSelected.slug === 'luiza-fit' || currentSelected.gender === 'F') {
+                    const firstMenParent = categoriesData.find(c => c.slug !== 'luiza-fit' && c.gender !== 'F');
+                    if (firstMenParent) {
+                        parentSelect.value = firstMenParent.id;
+                        populateChildCategories(firstMenParent.id, childSelect);
+                    }
+                }
+            }
+        }
+
+        renderColorSizeMatrix(modalType);
+    }
+
+    // Função Global para Abrir Modal de Edição de Peça
+    function openEditProductModal(productId) {
+        const modalEl = document.getElementById('editProductModal');
+        const formEl = document.getElementById('editProductForm');
+        if (!modalEl || !formEl) return;
+
+        // Limpa estado anterior
+        document.getElementById('editProductId').value = productId;
+        formEl.action = `/produtos/${productId}/editar-rapido/`;
+        currentDeleteProductId = productId;
+
+        // Busca dados da peça via JSON
+        fetch(`/produtos/${productId}/dados-edicao/`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('editTitleInput').value = data.title;
+                document.getElementById('editPriceInput').value = parseFloat(data.price).toFixed(2).replace('.', ',');
+                document.getElementById('editBrandSelect').value = data.brand_id;
+                
+                // Foto Atual
+                const previewImg = document.getElementById('editImagePreview');
+                if (data.cover_image_url) {
+                    previewImg.src = data.cover_image_url;
+                }
+
+                // Gênero
+                const genderVal = data.gender || 'M';
+                if (genderVal === 'F') {
+                    document.getElementById('editGenderF').checked = true;
+                } else if (genderVal === 'U') {
+                    document.getElementById('editGenderU').checked = true;
+                } else {
+                    document.getElementById('editGenderM').checked = true;
+                }
+
+                // Categoria Encadeada
+                const parentCatSelect = document.getElementById('editParentCategorySelect');
+                const childCatSelect = document.getElementById('editChildCategorySelect');
+                
+                let foundParentId = null;
+                for (const p of categoriesData) {
+                    if (p.id === data.category_id || (p.children && p.children.some(c => c.id === data.category_id))) {
+                        foundParentId = p.id;
+                        break;
+                    }
+                }
+
+                if (foundParentId) {
+                    parentCatSelect.value = foundParentId;
+                    populateChildCategories(foundParentId, childCatSelect, data.category_id);
+                }
+
+                // Switches
+                const stockSwitch = document.getElementById('editSwitchInStock');
+                stockSwitch.checked = data.is_in_stock;
+                updateStockLabel(data.is_in_stock);
+
+                document.getElementById('editSwitchExclusive').checked = data.is_exclusive;
+                document.getElementById('editSwitchFeatured').checked = data.is_featured;
+
+                // Sincroniza Cores e Grade de Tamanhos por Cor
+                modalColorState.edit.selected.clear();
+                modalColorState.edit.customPalette = [];
+                modalColorState.edit.colorSizes = {};
+
+                if (data.available_colors && data.available_colors.length > 0) {
+                    data.available_colors.forEach(col => {
+                        modalColorState.edit.selected.set(col.name, col.hex);
+                        if (!DEFAULT_LUXURY_PALETTE.some(c => c.name === col.name)) {
+                            modalColorState.edit.customPalette.push({ name: col.name, hex: col.hex });
+                        }
+                    });
+                }
+
+                if (data.variants_matrix && data.variants_matrix.length > 0) {
+                    data.variants_matrix.forEach(cEntry => {
+                        const cName = cEntry.name || 'Cor Padrão';
+                        if (cEntry.name && !modalColorState.edit.selected.has(cEntry.name)) {
+                            modalColorState.edit.selected.set(cEntry.name, cEntry.hex || '#0f172a');
+                        }
+                        modalColorState.edit.colorSizes[cName] = (cEntry.sizes || []).map(s => typeof s === 'object' ? s.size : s);
+                    });
+                } else if (data.sizes && data.sizes.length > 0) {
+                    if (modalColorState.edit.selected.size > 0) {
+                        modalColorState.edit.selected.forEach((hex, name) => {
+                            modalColorState.edit.colorSizes[name] = [...data.sizes];
+                        });
+                    } else {
+                        modalColorState.edit.colorSizes['Cor Padrão'] = [...data.sizes];
+                    }
+                }
+
+                renderColorSwatches('edit');
+
+                // Abre o Modal
+                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                bsModal.show();
+            })
+            .catch(err => {
+                alert('Erro ao carregar dados da peça para edição.');
+            });
+    }
+
+    function updateStockLabel(inStock) {
+        const label = document.getElementById('editStockLabel');
+        if (label) {
+            label.innerHTML = inStock 
+                ? '🟢 Peça Disponível em Estoque' 
+                : '🔴 <span class="text-danger">Peça ESGOTADA (Chegará em breve)</span>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const parentSelect = document.getElementById('quickParentCategorySelect');
+        const childSelect = document.getElementById('quickChildCategorySelect');
+        const coverInput = document.getElementById('quickCoverInput');
+        const imagePreview = document.getElementById('quickImagePreview');
+        const uploadPlaceholder = document.getElementById('quickUploadPlaceholder');
+
+        const editParentSelect = document.getElementById('editParentCategorySelect');
+        const editChildSelect = document.getElementById('editChildCategorySelect');
+        const editCoverInput = document.getElementById('editCoverInput');
+        const editImagePreview = document.getElementById('editImagePreview');
+        const editStockSwitch = document.getElementById('editSwitchInStock');
+
+        // Inicializa Swatches de Cores no Modal de Cadastro
+        renderColorSwatches('quick');
+
+        // Ouvintes de clique nos seletores de Gênero (Masculino / Feminino Luiza Fit / Unissex)
+        document.querySelectorAll('input[name="gender"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const modalType = this.id.startsWith('edit') ? 'edit' : 'quick';
+                updateModalByGender(modalType, this.value);
+            });
+        });
+
+        // Inicializa o modal de cadastro no gênero adequado da página
+        const urlParams = new URLSearchParams(window.location.search);
+        const isFeminineUrl = urlParams.get('category') === 'luiza-fit' || urlParams.get('gender') === 'F';
+        if (isFeminineUrl) {
+            const qgF = document.getElementById('quickGenderF');
+            if (qgF) qgF.checked = true;
+            updateModalByGender('quick', 'F');
+        } else {
+            updateModalByGender('quick', 'M');
+        }
+
+        // 1. Preview da Imagem no Cadastro
+        if (coverInput) {
+            coverInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imagePreview.classList.remove('d-none');
+                        uploadPlaceholder.classList.add('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // 2. Preview da Imagem na Edição
+        if (editCoverInput) {
+            editCoverInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        editImagePreview.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // 3. Switch de Estoque na Edição
+        if (editStockSwitch) {
+            editStockSwitch.addEventListener('change', function() {
+                updateStockLabel(this.checked);
+            });
+        }
+
+        // 4. Cascata Categoria Principal -> Subcategorias (Cadastro)
+        if (parentSelect && childSelect) {
+            parentSelect.addEventListener('change', function() {
+                populateChildCategories(this.value, childSelect);
+                const parent = categoriesData.find(c => c.id === parseInt(this.value));
+                if (parent) {
+                    const gF = document.getElementById('quickGenderF');
+                    const gM = document.getElementById('quickGenderM');
+                    if (parent.slug === 'luiza-fit' || parent.gender === 'F') {
+                        if (gF) { gF.checked = true; updateModalByGender('quick', 'F'); }
+                    } else if (parent.gender === 'M') {
+                        if (gM) { gM.checked = true; updateModalByGender('quick', 'M'); }
+                    }
+                }
+            });
+        }
+
+        // 5. Cascata Categoria Principal -> Subcategorias (Edição)
+        if (editParentSelect && editChildSelect) {
+            editParentSelect.addEventListener('change', function() {
+                populateChildCategories(this.value, editChildSelect);
+                const parent = categoriesData.find(c => c.id === parseInt(this.value));
+                if (parent) {
+                    const egF = document.getElementById('editGenderF');
+                    const egM = document.getElementById('editGenderM');
+                    if (parent.slug === 'luiza-fit' || parent.gender === 'F') {
+                        if (egF) { egF.checked = true; updateModalByGender('edit', 'F'); }
+                    } else if (parent.gender === 'M') {
+                        if (egM) { egM.checked = true; updateModalByGender('edit', 'M'); }
+                    }
+                }
+            });
+        }
+
+        // 6. Botões de Exclusão de Peça
+        const btnArchive = document.getElementById('btnArchiveProduct');
+        const btnHardDelete = document.getElementById('btnHardDeleteProduct');
+        const btnEditDelete = document.getElementById('btnEditDeleteTrigger');
+
+        if (btnArchive) {
+            btnArchive.addEventListener('click', () => executeProductDelete('archive'));
+        }
+        if (btnHardDelete) {
+            btnHardDelete.addEventListener('click', () => executeProductDelete('delete'));
+        }
+        if (btnEditDelete) {
+            btnEditDelete.addEventListener('click', () => {
+                const editModalEl = document.getElementById('editProductModal');
+                const titleInput = document.getElementById('editTitleInput');
+                const bsEditModal = bootstrap.Modal.getInstance(editModalEl);
+                if (bsEditModal) bsEditModal.hide();
+                openDeleteProductModal(currentDeleteProductId, titleInput ? titleInput.value : '');
+            });
+        }
+
+        // 7. Submit do Formulário de Cadastro Rápido
+        const quickForm = document.getElementById('quickProductForm');
+        if (quickForm) {
+            quickForm.addEventListener('submit', function() {
+                compileVariantsMatrix('quick');
+            });
+        }
+
+        // 8. Submit AJAX do Formulário de Edição
+        const editForm = document.getElementById('editProductForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                compileVariantsMatrix('edit');
+                const formData = new FormData(editForm);
+                formData.append('ajax', '1');
+
+                const saveBtn = document.getElementById('btnSaveEditProduct');
+                const origHtml = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i> Salvando...';
+
+                fetch(editForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origHtml;
+
+                    if (data.success) {
+                        const modalEl = document.getElementById('editProductModal');
+                        const bsModal = bootstrap.Modal.getInstance(modalEl);
+                        if (bsModal) bsModal.hide();
+
+                        const pId = data.product_id;
+                        const titleEl = document.querySelector(`.product-title-${pId}`);
+                        if (titleEl) titleEl.textContent = data.product_title;
+
+                        const priceEl = document.querySelector(`.product-price-${pId}`);
+                        if (priceEl) priceEl.textContent = `R$ ${data.product_price.toFixed(2).replace('.', ',')}`;
+
+                        const imgEl = document.querySelector(`.product-cover-img-${pId}`);
+                        if (imgEl && data.cover_url) {
+                            imgEl.src = data.cover_url;
+                        }
+
+                        const cartToastEl = document.getElementById('cartToast');
+                        const cartToastMsg = document.getElementById('cartToastMessage');
+                        const cartToast = cartToastEl ? new bootstrap.Toast(cartToastEl, { delay: 3500 }) : null;
+                        if (cartToast) {
+                            cartToastMsg.textContent = data.message || 'Peça atualizada com sucesso!';
+                            cartToast.show();
+                        }
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1200);
+                    }
+                })
+                .catch(err => {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origHtml;
+                    editForm.submit();
+                });
+            });
+        }
+
+        // 8. Adicionar à Sacola via AJAX com 1 clique direto no card
+        const cartForms = document.querySelectorAll('.ajax-add-cart-form');
+        const cartToastEl = document.getElementById('cartToast');
+        const cartToastMsg = document.getElementById('cartToastMessage');
+        const cartToast = cartToastEl ? new bootstrap.Toast(cartToastEl, { delay: 3500 }) : null;
+
+        cartForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                formData.append('ajax', '1');
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalHtml = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i>';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bx bx-check text-success fs-15"></i> <span class="d-none d-sm-inline fs-12">Adicionado</span>';
+                    
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalHtml;
+                    }, 2000);
+
+                    if (cartToast) {
+                        cartToastMsg.textContent = data.message || 'Peça adicionada à sacola!';
+                        cartToast.show();
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHtml;
+                    form.submit();
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

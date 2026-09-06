@@ -1,0 +1,741 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Gerenciador de Linktrees Oficiais | Grife HF & Luiza Fit{% endblock title %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex flex-wrap align-items-center justify-content-between my-3 gap-2">
+        <div>
+          <h4 class="mb-0 text-dark fw-bold">Gerenciador de Linktrees & Links da Bio</h4>
+          <p class="text-muted fs-13 mb-0">Gerencie os botões e links de atendimento das páginas públicas <strong>/links</strong> (Grife HF) e <strong>/tree</strong> (Luiza Fit).</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/links" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 shadow-xs d-flex align-items-center gap-1.5 fw-semibold">
+            <i class="bx bx-link-external text-warning"></i> Ver /links (Grife HF)
+          </a>
+          <a href="/tree" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-xs d-flex align-items-center gap-1.5 fw-semibold">
+            <i class="bx bx-link-external text-danger"></i> Ver /tree (Luiza Fit)
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 shadow-xs" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Brand Switcher Tabs -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-2">
+      <ul class="nav nav-pills nav-justified gap-2" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link rounded-3 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 {% if active_tab == 'grife_hf' %}active bg-dark text-white shadow-sm{% else %}text-muted bg-light{% endif %}" 
+             href="{% url 'pages:admin_linktree' %}?tab=grife_hf">
+            <i class="bx bx-store-alt fs-18 {% if active_tab == 'grife_hf' %}text-warning{% endif %}"></i>
+            <span>🌟 Grife HF Multimarcas</span>
+            <span class="badge {% if active_tab == 'grife_hf' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} rounded-pill fs-11">
+              {{ grife_links.count }} links (/links)
+            </span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link rounded-3 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 {% if active_tab == 'luiza_fit' %}active bg-danger text-white shadow-sm{% else %}text-muted bg-light{% endif %}" 
+             href="{% url 'pages:admin_linktree' %}?tab=luiza_fit">
+            <i class="bx bx-female fs-18"></i>
+            <span>🌸 Luiza Fit (Moda Fitness)</span>
+            <span class="badge {% if active_tab == 'luiza_fit' %}bg-white text-danger{% else %}bg-secondary text-white{% endif %} rounded-pill fs-11">
+              {{ luiza_links.count }} links (/tree)
+            </span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md rounded-circle {% if active_tab == 'luiza_fit' %}bg-danger bg-opacity-10 text-danger{% else %}bg-primary bg-opacity-10 text-primary{% endif %} d-flex align-items-center justify-content-center fs-24">
+            <i class="bx bx-link"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold mb-0 text-dark">{{ current_links.count }}</h3>
+            <small class="text-muted">Links nesta Página</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center fs-24">
+            <i class="bx bx-mouse"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold mb-0 text-dark">{{ total_clicks_tab }}</h3>
+            <small class="text-muted">Cliques nesta Página</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center fs-24">
+            <i class="bx bx-bar-chart-alt-2"></i>
+          </div>
+          <div>
+            <h3 class="fw-bold mb-0 text-dark">{{ total_clicks_all }}</h3>
+            <small class="text-muted">Total Geral de Cliques</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center gap-3">
+          <div class="avatar-md rounded-circle {% if active_tab == 'luiza_fit' %}bg-danger bg-opacity-10 text-danger{% else %}bg-warning bg-opacity-10 text-warning{% endif %} d-flex align-items-center justify-content-center fs-24">
+            <i class="bx bx-mobile-alt"></i>
+          </div>
+          <div>
+            <span class="badge bg-success text-white px-2 py-0.5 rounded-pill fs-10">Online 24h</span>
+            <div class="fw-bold text-dark fs-14 mt-0.5">{% if active_tab == 'luiza_fit' %}/tree{% else %}/links{% endif %}</div>
+            <small class="text-muted">Link Oficial na Bio</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    
+    <!-- Coluna Esquerda: Formulário e Lista de Links -->
+    <div class="col-lg-7">
+      
+      <!-- Formulário: Adicionar Novo Link -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bx bx-plus-circle {% if active_tab == 'luiza_fit' %}text-danger{% else %}text-primary{% endif %} fs-20"></i>
+            Adicionar Botão para {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Grife HF (/links)</span>{% endif %}
+          </h5>
+          <span class="badge {% if active_tab == 'luiza_fit' %}bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25{% else %}bg-dark text-white{% endif %} rounded-pill px-2.5 py-1 fs-11">
+            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit{% else %}🌟 Grife HF{% endif %}
+          </span>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Página de Destino</label>
+                <select name="page_type" class="form-select fs-13 rounded-3" id="createPageType" onchange="onPageTypeChange(this.value)">
+                  <option value="grife_hf" {% if active_tab == 'grife_hf' %}selected{% endif %}>🌟 Grife HF Multimarcas (/links)</option>
+                  <option value="luiza_fit" {% if active_tab == 'luiza_fit' %}selected{% endif %}>🌸 Luiza Fit Moda Fitness (/tree)</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Ordem de Exibição</label>
+                <input type="number" name="order" class="form-control fs-13 rounded-3" value="{{ current_links.count|add:1 }}" min="1">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Título do Botão</label>
+                <input type="text" name="title" class="form-control fs-13 rounded-3" placeholder="Ex: 📲 Atendimento VIP no WhatsApp" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Subtítulo Curto (Opcional)</label>
+              <input type="text" name="subtitle" class="form-control fs-13 rounded-3" placeholder="Ex: Fale com nossa equipe de consultoras">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">URL de Destino</label>
+              <input type="text" name="url" class="form-control fs-13 rounded-3" placeholder="https://wa.me/558399... ou /produtos/?category=..." required>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Estilo Visual do Botão</label>
+                <select name="style" class="form-select fs-13 rounded-3" id="createStyleSelect">
+                  <option value="dark">Preto Elegante (Padrão)</option>
+                  <option value="gold">Dourado / Champagne (Destaque VIP)</option>
+                  <option value="success" selected>Verde WhatsApp (Conversão)</option>
+                  <option value="rose">Rosa Luiza Fit (Moda Feminina)</option>
+                  <option value="champagne">Champagne Glamour</option>
+                  <option value="outline">Borda Fina Minimalista</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Ícone (Boxicons)</label>
+                <div class="input-group">
+                  <input type="text" name="icon" id="createIconInput" class="form-control fs-13 rounded-start-3" value="bx bxl-whatsapp" placeholder="bx bxl-whatsapp, bx bx-shopping-bag...">
+                </div>
+                <!-- Atalhos rápidos de ícones -->
+                <div class="d-flex gap-1.5 mt-1.5 flex-wrap">
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill fs-11 py-0.5 px-2" onclick="setIconValue('bx bxl-whatsapp')">
+                    <i class="bx bxl-whatsapp text-success"></i> WhatsApp
+                  </button>
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill fs-11 py-0.5 px-2" onclick="setIconValue('bx bxl-instagram')">
+                    <i class="bx bxl-instagram text-danger"></i> Instagram
+                  </button>
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill fs-11 py-0.5 px-2" onclick="setIconValue('bx bx-store-alt')">
+                    <i class="bx bx-store-alt text-primary"></i> Catálogo
+                  </button>
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill fs-11 py-0.5 px-2" onclick="setIconValue('bx bx-star')">
+                    <i class="bx bx-star text-warning"></i> Destaque
+                  </button>
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill fs-11 py-0.5 px-2" onclick="setIconValue('bx bx-map-pin')">
+                    <i class="bx bx-map-pin text-danger"></i> Localização
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4 form-check">
+              <input type="checkbox" name="is_highlighted" class="form-check-input" id="checkHighlight">
+              <label class="form-check-label fs-13 text-muted" for="checkHighlight">
+                ✨ <strong>Destacar com animação de pulso suave</strong> (ótimo para botão de WhatsApp ou novidades)
+              </label>
+            </div>
+
+            <button type="submit" class="btn {% if active_tab == 'luiza_fit' %}btn-danger{% else %}btn-dark{% endif %} w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+              <i class="bx bx-check-circle fs-18"></i> Salvar Link no Linktree
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tabela de Links Cadastrados -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 fw-bold text-dark">
+            Links Cadastrados em {% if active_tab == 'luiza_fit' %}<span class="text-danger">Luiza Fit (/tree)</span>{% else %}<span class="text-dark">Grife HF (/links)</span>{% endif %}
+          </h5>
+          <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 fs-11">
+            {{ current_links.count }} link(s)
+          </span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted fs-12 text-uppercase">
+                <tr>
+                  <th class="ps-4" style="width: 70px;">Ordem</th>
+                  <th>Botão / Link</th>
+                  <th>Estilo</th>
+                  <th class="text-center">Cliques</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-end pe-4">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for link in current_links %}
+                <tr>
+                  <td class="ps-4 fw-bold fs-13 text-dark">
+                    <span class="badge bg-light text-dark border rounded-pill px-2 py-1">#{{ link.order }}</span>
+                  </td>
+                  <td>
+                    <div class="d-flex align-items-center gap-2.5">
+                      <div class="avatar-xs rounded-circle bg-light d-flex align-items-center justify-content-center text-dark fs-16 border">
+                        <i class="{{ link.icon|default:'bx bx-link' }}"></i>
+                      </div>
+                      <div>
+                        <strong class="text-dark d-block fs-13">{{ link.title }}</strong>
+                        {% if link.subtitle %}
+                        <small class="text-muted fs-11 d-block">{{ link.subtitle|truncatechars:40 }}</small>
+                        {% endif %}
+                        <small class="text-primary fs-11 text-truncate d-block opacity-75" style="max-width: 200px;">{{ link.url }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge border rounded-pill px-2 py-0.5 fs-11 text-capitalize
+                      {% if link.style == 'success' %}bg-success-subtle text-success border-success-subtle
+                      {% elif link.style == 'gold' or link.style == 'champagne' %}bg-warning-subtle text-warning border-warning-subtle
+                      {% elif link.style == 'rose' %}bg-danger-subtle text-danger border-danger-subtle
+                      {% elif link.style == 'outline' %}bg-light text-dark border-secondary
+                      {% else %}bg-dark text-white{% endif %}">
+                      {{ link.get_style_display }}
+                    </span>
+                    {% if link.is_highlighted %}
+                    <span class="badge bg-warning text-dark rounded-pill fs-10 ms-0.5">✨ Pulso</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2.5 py-1 rounded-pill fs-12">
+                      {{ link.clicks_count }}
+                    </span>
+                  </td>
+                  <td class="text-center">
+                    {% if link.is_active %}
+                    <span class="badge bg-success text-white px-2.5 py-1 rounded-pill fs-11">Ativo</span>
+                    {% else %}
+                    <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill fs-11">Oculto</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill me-1" onclick="openEditLinkModal({{ link.pk }})" title="Editar Botão">
+                      <i class="bx bx-edit-alt"></i>
+                    </button>
+                    <a href="{% url 'pages:admin_linktree_toggle' pk=link.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill me-1" title="Alternar Visibilidade">
+                      <i class="bx bx-power-off"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteWithUndo(event, { url: '{% url 'pages:admin_linktree_delete' pk=link.pk %}', itemName: '{{ link.title|escapejs }}', itemType: 'Link', element: this.closest('tr') })" title="Remover">
+                      <i class="bx bx-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bx bx-link-external fs-36 text-muted mb-2 d-block"></i>
+                    Nenhum link cadastrado nesta página ainda.<br>
+                    <small>Utilize o formulário acima para adicionar o primeiro botão.</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Coluna Direita: Mockup Smartphone Live Preview -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 rounded-4 mb-4 sticky-top" style="top: 80px;">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bx bx-mobile-alt {% if active_tab == 'luiza_fit' %}text-danger{% else %}text-warning{% endif %} fs-20"></i>
+            Pré-Visualização ao Vivo
+          </h5>
+          <span class="badge {% if active_tab == 'luiza_fit' %}bg-danger text-white{% else %}bg-dark text-white{% endif %} rounded-pill px-2.5 py-1 fs-11">
+            {% if active_tab == 'luiza_fit' %}🌸 Luiza Fit (/tree){% else %}🌟 Grife HF (/links){% endif %}
+          </span>
+        </div>
+        <div class="card-body p-4 text-center bg-light">
+          
+          <!-- Smartphone Frame -->
+          <div class="mx-auto rounded-5 p-3 shadow-lg border border-3 border-dark" 
+               style="max-width: 330px; min-height: 560px; {% if active_tab == 'luiza_fit' %}background: radial-gradient(circle at 50% 0%, #ffffff 0%, #faf6f5 75%);{% else %}background: #f5f2eb;{% endif %}">
+            
+            <!-- Phone Notch -->
+            <div class="rounded-pill bg-dark mx-auto mb-3" style="width: 80px; height: 12px;"></div>
+
+            <!-- Logo & Cabeçalho -->
+            {% if active_tab == 'luiza_fit' %}
+              <div class="mb-2 text-center">
+                <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" style="max-height: 60px; max-width: 180px; object-fit: contain;">
+              </div>
+              <p class="text-dark fw-bold fs-12 mb-0.5">Moda Feminina Fitness & Casual</p>
+              <small class="text-muted fs-11 d-block mb-2">Cajazeiras - PB</small>
+              <div class="mb-3">
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-0.5 fs-10 rounded-pill">
+                  ● Atendimento WhatsApp Online
+                </span>
+              </div>
+            {% else %}
+              <div class="mb-2 text-center">
+                <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Grife HF" style="max-height: 70px; max-width: 190px; object-fit: contain;">
+              </div>
+              <p class="text-dark fw-bold fs-12 mb-0.5">Moda masculina & Moda feminina fitness</p>
+              <small class="text-muted fs-11 d-block mb-2">Cajazeiras - PB</small>
+              <div class="mb-3">
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 fs-10 rounded-pill">
+                  ● Loja & WhatsApp Online
+                </span>
+              </div>
+            {% endif %}
+
+            <!-- Links Preview List -->
+            <div class="d-flex flex-column gap-2 text-start">
+              {% for link in current_links %}
+                {% if link.is_active %}
+                <div class="p-2.5 rounded-3 fs-12 fw-semibold d-flex align-items-center justify-content-between shadow-xs"
+                     style="
+                      {% if link.style == 'success' %}background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+                      {% elif link.style == 'gold' or link.style == 'champagne' %}background: linear-gradient(135deg, #c5a059, #a9843c); color: #fff;
+                      {% elif link.style == 'rose' %}background: linear-gradient(135deg, #d97787, #b85d6e); color: #fff;
+                      {% elif link.style == 'outline' %}background: #ffffff; color: #1e293b !important; border: 1px solid #cbd5e1;
+                      {% else %}background: #0f172a; color: #fff;{% endif %}
+                     ">
+                  <span class="text-truncate d-flex align-items-center gap-2">
+                    <span class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; min-width: 24px;">
+                      <i class="{{ link.icon|default:'bx bx-link' }} fs-14 {% if link.style == 'outline' %}text-dark{% else %}text-white{% endif %}"></i>
+                    </span>
+                    <span class="text-truncate" style="max-width: 200px;">{{ link.title }}</span>
+                  </span>
+                  <i class="bx bx-chevron-right fs-16 opacity-75"></i>
+                </div>
+                {% endif %}
+              {% empty %}
+                <div class="p-2.5 rounded-3 text-white fs-12 fw-semibold bg-dark text-center">
+                  Nenhum link ativo
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Footer Preview -->
+            <div class="mt-4 pt-2 border-top border-secondary border-opacity-10 text-center">
+              <small class="text-muted fs-10 d-block">&copy; {% now "Y" %} {% if active_tab == 'luiza_fit' %}Luiza Fit{% else %}Grife HF Multimarcas{% endif %}</small>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal: Edição Rápida de Link -->
+<div class="modal fade" id="editLinkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow">
+      <div class="modal-header bg-dark text-white border-bottom py-3">
+        <h5 class="modal-title fs-15 fw-bold text-white d-flex align-items-center gap-2">
+          <i class="bx bx-edit text-warning fs-18"></i> Editar Link do Linktree
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" id="editLinkForm">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="pk" id="editLinkPk">
+
+        <div class="modal-body p-4">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Página do Linktree</label>
+              <select name="page_type" class="form-select fs-13 rounded-3" id="editPageType">
+                <option value="grife_hf">🌟 Grife HF Multimarcas (/links)</option>
+                <option value="luiza_fit">🌸 Luiza Fit Moda Fitness (/tree)</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Ordem</label>
+              <input type="number" name="order" class="form-control fs-13 rounded-3" id="editOrder" min="1" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold fs-13 text-dark">Título do Botão</label>
+            <input type="text" name="title" class="form-control fs-13 rounded-3" id="editTitle" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold fs-13 text-dark">Subtítulo (Opcional)</label>
+            <input type="text" name="subtitle" class="form-control fs-13 rounded-3" id="editSubtitle">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold fs-13 text-dark">URL de Destino</label>
+            <input type="text" name="url" class="form-control fs-13 rounded-3" id="editUrl" required>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Estilo Visual</label>
+              <select name="style" class="form-select fs-13 rounded-3" id="editStyle">
+                <option value="dark">Preto Elegante</option>
+                <option value="gold">Dourado / Champagne VIP</option>
+                <option value="success">Verde WhatsApp</option>
+                <option value="rose">Rosa Luiza Fit</option>
+                <option value="champagne">Champagne Glamour</option>
+                <option value="outline">Borda Fina Minimalista</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Ícone</label>
+              <input type="text" name="icon" class="form-control fs-13 rounded-3" id="editIcon" placeholder="bx bxl-whatsapp...">
+            </div>
+          </div>
+
+          <div class="form-check mb-2">
+            <input type="checkbox" name="is_highlighted" class="form-check-input" id="editHighlight">
+            <label class="form-check-label fs-13 text-muted" for="editHighlight">
+              Destacar com animação de pulso
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light border-top py-2.5 px-4">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING UNDO TOAST (5 SEGUNDOS) -->
+<div id="hfUndoToastContainer" class="position-fixed bottom-0 start-50 translate-middle-x p-3" style="z-index: 9999; display: none; min-width: 320px; max-width: 95vw;">
+  <div class="card bg-dark text-white border-0 shadow-lg rounded-4 overflow-hidden" style="background: rgba(24, 24, 28, 0.97) !important; backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 12px 35px rgba(0,0,0,0.45) !important;">
+    <div class="card-body p-3 d-flex align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+        <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+          <i class="bx bx-trash fs-18"></i>
+        </div>
+        <div class="text-truncate">
+          <span class="fs-13 fw-bold text-white d-block text-truncate" id="hfUndoToastTitle">Item excluído</span>
+          <small class="text-white-50 fs-11" id="hfUndoToastSubtitle">Exclusão permanente em <strong class="text-warning fw-bold" id="hfUndoCountdownNum">5s</strong></small>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 flex-shrink-0">
+        <button type="button" id="hfUndoBtn" class="btn btn-warning text-dark btn-sm rounded-pill px-3 py-1.5 fw-bold fs-12 d-flex align-items-center gap-1 shadow-sm">
+          <i class="bx bx-undo fs-16"></i> <span>DESFAZER</span>
+        </button>
+        <button type="button" id="hfUndoDismissBtn" class="btn btn-link text-white-50 p-1 btn-sm" title="Confirmar exclusão agora">
+          <i class="bx bx-x fs-20"></i>
+        </button>
+      </div>
+    </div>
+    <div class="progress" style="height: 4px; background: rgba(255,255,255,0.12); border-radius: 0;">
+      <div id="hfUndoProgressBar" class="progress-bar bg-warning" role="progressbar" style="width: 100%;"></div>
+    </div>
+  </div>
+</div>
+
+{% endblock page_content %}
+
+{% block extra_javascript %}
+<script>
+  function setIconValue(val) {
+    document.getElementById('createIconInput').value = val;
+  }
+
+  function onPageTypeChange(pageType) {
+    const styleSelect = document.getElementById('createStyleSelect');
+    if (pageType === 'luiza_fit' && styleSelect.value === 'dark') {
+      styleSelect.value = 'rose';
+    }
+  }
+
+  function openEditLinkModal(pk) {
+    fetch(`/dashboard/admin/linktree/${pk}/data/`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById('editLinkPk').value = data.id;
+          document.getElementById('editPageType').value = data.page_type;
+          document.getElementById('editTitle').value = data.title;
+          document.getElementById('editSubtitle').value = data.subtitle || '';
+          document.getElementById('editUrl').value = data.url;
+          document.getElementById('editStyle').value = data.style;
+          document.getElementById('editIcon').value = data.icon;
+          document.getElementById('editOrder').value = data.order;
+          document.getElementById('editHighlight').checked = !!data.is_highlighted;
+
+          const modal = new bootstrap.Modal(document.getElementById('editLinkModal'));
+          modal.show();
+        } else {
+          alert('Erro ao carregar dados do link.');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+      });
+  }
+
+  // ==============================================================
+  // SISTEMA DE EXCLUSÃO COM BOTÃO DESFAZER (5 SEGUNDOS)
+  // ==============================================================
+  let currentUndoAction = null;
+
+  function deleteWithUndo(event, options) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const {
+      url,
+      itemName = 'Item',
+      itemType = 'Item',
+      element = null,
+      onUndo = null,
+      onConfirmed = null
+    } = options;
+
+    if (currentUndoAction && currentUndoAction.timer) {
+      commitUndoAction(currentUndoAction);
+    }
+
+    if (element) {
+      element.dataset.prevOpacity = element.style.opacity || '1';
+      element.dataset.prevDisplay = element.style.display || '';
+      element.style.transition = 'all 0.35s ease';
+      element.style.opacity = '0';
+      element.style.transform = 'scale(0.95)';
+      element.style.pointerEvents = 'none';
+      setTimeout(() => {
+        if (element && element.style.opacity === '0') {
+          element.style.display = 'none';
+        }
+      }, 350);
+    }
+
+    const container = document.getElementById('hfUndoToastContainer');
+    const titleEl = document.getElementById('hfUndoToastTitle');
+    const subtitleEl = document.getElementById('hfUndoToastSubtitle');
+    const countdownNum = document.getElementById('hfUndoCountdownNum');
+    const progressBar = document.getElementById('hfUndoProgressBar');
+    const undoBtn = document.getElementById('hfUndoBtn');
+    const dismissBtn = document.getElementById('hfUndoDismissBtn');
+
+    if (!container) return;
+
+    titleEl.textContent = `${itemType} "${itemName}" excluído`;
+    subtitleEl.innerHTML = `Você pode desfazer em <strong class="text-warning fw-bold" id="hfUndoCountdownNum">5s</strong>`;
+    undoBtn.style.display = 'inline-flex';
+    progressBar.style.display = 'block';
+
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '100%';
+    container.style.display = 'block';
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progressBar.style.transition = 'width 5s linear';
+        progressBar.style.width = '0%';
+      });
+    });
+
+    let secondsLeft = 5;
+    const intervalId = setInterval(() => {
+      secondsLeft -= 1;
+      const counterEl = document.getElementById('hfUndoCountdownNum');
+      if (counterEl && secondsLeft >= 0) {
+        counterEl.textContent = `${secondsLeft}s`;
+      }
+      if (secondsLeft <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 1000);
+
+    const timerId = setTimeout(() => {
+      clearInterval(intervalId);
+      commitUndoAction(currentUndoAction);
+    }, 5000);
+
+    currentUndoAction = {
+      url,
+      itemName,
+      itemType,
+      element,
+      timer: timerId,
+      interval: intervalId,
+      onUndo,
+      onConfirmed,
+      isCancelled: false
+    };
+
+    undoBtn.onclick = function() {
+      if (!currentUndoAction || currentUndoAction.isCancelled) return;
+      currentUndoAction.isCancelled = true;
+      clearTimeout(currentUndoAction.timer);
+      clearInterval(currentUndoAction.interval);
+
+      if (currentUndoAction.element) {
+        currentUndoAction.element.style.display = currentUndoAction.element.dataset.prevDisplay || '';
+        requestAnimationFrame(() => {
+          currentUndoAction.element.style.opacity = '1';
+          currentUndoAction.element.style.transform = 'scale(1)';
+          currentUndoAction.element.style.pointerEvents = 'auto';
+        });
+      }
+
+      if (currentUndoAction.onUndo) {
+        currentUndoAction.onUndo();
+      }
+
+      titleEl.innerHTML = `✅ <span class="text-success fw-bold">Exclusão desfeita com sucesso!</span>`;
+      subtitleEl.textContent = `"${itemName}" foi mantido.`;
+      undoBtn.style.display = 'none';
+      progressBar.style.display = 'none';
+
+      setTimeout(() => {
+        container.style.display = 'none';
+        currentUndoAction = null;
+      }, 1800);
+    };
+
+    dismissBtn.onclick = function() {
+      if (currentUndoAction && !currentUndoAction.isCancelled) {
+        clearTimeout(currentUndoAction.timer);
+        clearInterval(currentUndoAction.interval);
+        commitUndoAction(currentUndoAction);
+      }
+    };
+  }
+
+  function commitUndoAction(action) {
+    if (!action || action.isCancelled) return;
+    action.isCancelled = true;
+    clearTimeout(action.timer);
+    clearInterval(action.interval);
+
+    const container = document.getElementById('hfUndoToastContainer');
+    if (container) container.style.display = 'none';
+
+    fetch(action.url, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (action.element) {
+        action.element.remove();
+      }
+      if (action.onConfirmed) {
+        action.onConfirmed(data);
+      }
+    })
+    .catch(err => {
+      console.error('Erro ao efetivar exclusão no servidor:', err);
+    });
+
+    currentUndoAction = null;
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (currentUndoAction && !currentUndoAction.isCancelled) {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(currentUndoAction.url);
+      } else {
+        fetch(currentUndoAction.url, { keepalive: true });
+      }
+    }
+  });
+</script>
+{% endblock extra_javascript %}

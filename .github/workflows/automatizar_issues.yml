@@ -1,0 +1,149 @@
+name: Automatizar Criação de Issues
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Executar Automação de Issues via GitHub CLI
+        run: |
+          create_issue_if_not_exists() {
+            local title="$1"
+            local labels="$2"
+            local body="$3"
+
+            echo "Verificando se a issue já existe: '$title'..."
+            existing=$(gh issue list --search "\"$title\" in:title" --state all --json number --jq '. | length')
+
+            if [ "$existing" -eq 0 ]; then
+              echo "➕ Criando nova Issue: '$title'"
+              gh issue create --title "$title" --body "$body" --label "$labels"
+            else
+              echo "ℹ️ Issue já existe ($existing encontrada). Pulando criação."
+            fi
+          }
+
+          echo "🚀 Iniciando automação de cadastro de Issues..."
+
+          # 1. Boilerplate MCP
+          create_issue_if_not_exists \
+            "[FEAT] Implementar Boilerplate e Templates de Servidores MCP (Model Context Protocol)" \
+            "enhancement" \
+            "### 📌 Descrição
+          Implementar receitas e boilerplates para criação e extensão de servidores MCP (Model Context Protocol) em Python (FastMCP/SDK) e Node.js no diretório \`mcp/\`.
+
+          ### 📑 Documentos de Referência
+          - [docs/plano_personalizacao.md](./docs/plano_personalizacao.md)
+          - [docs/diretrizes_documentacao.md](./docs/diretrizes_documentacao.md)
+          - [README.md](./README.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Criar template de servidor MCP básico em Python com ferramentas de exemplo.
+          - [ ] Criar template de servidor MCP básico em Node.js / TypeScript.
+          - [ ] Adicionar documentação em \`mcp/README.md\` explicando como rodar e testar no Claude Desktop ou Antigravity.
+          - [ ] Atualizar a tabela de receitas no \`README.md\` principal com links relativos."
+
+          # 2. Agentes Autônomos
+          create_issue_if_not_exists \
+            "[FEAT] Implementar Frameworks e Loops de Agentes Autônomos" \
+            "enhancement" \
+            "### 📌 Descrição
+          Desenvolver receitas de loops de agentes autônomos minimalistas (Tool Use, ReAct loop, suporte a LangChain/LlamaIndex) no diretório \`agents/\`.
+
+          ### 📑 Documentos de Referência
+          - [docs/plano_personalizacao.md](./docs/plano_personalizacao.md)
+          - [docs/prompt_ia.md](./docs/prompt_ia.md)
+          - [README.md](./README.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Implementar receita de Agent Loop em Python puro (Vanilla) com suporte a chamadas de função (Tool Calling).
+          - [ ] Criar exemplo de integração de agente com memória e execução de tarefas simples.
+          - [ ] Adicionar orientações de segurança contra loops infinitos e limites de execução em \`agents/README.md\`.
+          - [ ] Atualizar o \`README.md\` principal."
+
+          # 3. UI Prototipagem
+          create_issue_if_not_exists \
+            "[FEAT] Criar Templates Rápidos de UI para Prototipagem de Aplicações de IA" \
+            "enhancement" \
+            "### 📌 Descrição
+          Criar receitas de interface visual rápida para prototipar aplicações de IA no diretório \`ui/\` usando Streamlit, Gradio e HTML/CSS moderno.
+
+          ### 📑 Documentos de Referência
+          - [docs/plano_personalizacao.md](./docs/plano_personalizacao.md)
+          - [docs/ajuda_infra.md](./docs/ajuda_infra.md)
+          - [README.md](./README.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Criar template de chat interativo com Streamlit integrado à API do Gemini/LLMs.
+          - [ ] Criar interface minimalista em HTML/CSS Vanilla para testes de prompt.
+          - [ ] Documentar instruções de inicialização rápida em \`ui/README.md\`.
+          - [ ] Atualizar a tabela no \`README.md\` principal."
+
+          # 4. APIs Adicionais (Claude & OpenAI)
+          create_issue_if_not_exists \
+            "[FEAT] Adicionar Quickstarts para APIs Anthropic Claude e OpenAI" \
+            "enhancement" \
+            "### 📌 Descrição
+          Expandir o diretório \`api/\` adicionando receitas em Python e TypeScript para integração com as APIs da Anthropic Claude e OpenAI.
+
+          ### 📑 Documentos de Referência
+          - [docs/ajuda_infra.md](./docs/ajuda_infra.md)
+          - [docs/diretrizes_documentacao.md](./docs/diretrizes_documentacao.md)
+          - [README.md](./README.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Criar \`api/claude_quickstart.py\` com suporte a streaming e tool calling.
+          - [ ] Criar \`api/openai_quickstart.py\` com suporte a Structured Outputs e JSON mode.
+          - [ ] Garantir sanitização total com \`os.getenv()\` para chaves de API.
+          - [ ] Atualizar o \`README.md\` principal com as novas receitas."
+
+          # 5. Workflow de Segurança e CI/CD
+          create_issue_if_not_exists \
+            "[CONFIG] Implementar Workflow de CI/CD para Auditoria Automática de Segredos e Links" \
+            "documentation" \
+            "### 📌 Descrição
+          Configurar automação via GitHub Actions em \`.github/workflows/audit.yml\` para validar automaticamente se nenhum commit insere credenciais expostas ou links absolutos locais (\`file:///\`).
+
+          ### 📑 Documentos de Referência
+          - [docs/diretrizes_documentacao.md](./docs/diretrizes_documentacao.md)
+          - [docs/prompt_ia.md](./docs/prompt_ia.md)
+          - [docs/troubleshooting.md](./docs/troubleshooting.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Criar fluxo GitHub Actions disparado em Pull Requests e Pushes.
+          - [ ] Adicionar checagem automática de regex para detectar API keys e senhas reais.
+          - [ ] Adicionar checagem de links de arquivos para garantir compatibilidade com o GitHub.
+          - [ ] Documentar o fluxo de CI/CD em \`docs/estrategia_execucao.md\`."
+
+          # 6. Alertas e Governança
+          create_issue_if_not_exists \
+            "[ARCH] Consolidar Matriz de Alertas Mattermost e Healthchecks de Backups Rclone" \
+            "documentation" \
+            "### 📌 Descrição
+          Expandir a governança de infraestrutura documentando os padrões de payload e webhooks de erro do Mattermost integrados ao Rclone.
+
+          ### 📑 Documentos de Referência
+          - [docs/politica_backup.md](./docs/politica_backup.md)
+          - [infra/estrategia_backup_rclone_gdrive.md](./infra/estrategia_backup_rclone_gdrive.md)
+          - [docs/ajuda_infra.md](./docs/ajuda_infra.md)
+
+          ### ✅ Critérios de Aceite
+          - [ ] Criar modelo estagial de notificações de status de backup no Mattermost.
+          - [ ] Documentar rotina de rotação de chaves e verificação de checksum SHA-256.
+          - [ ] Registrar teste de restore no histórico incremental de \`docs/politica_backup.md\`."
+
+          echo "✨ Processo de criação de Issues concluído com sucesso!"

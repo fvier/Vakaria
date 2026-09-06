@@ -1,0 +1,402 @@
+/* ==========================================================================
+   Grife HF ERP - Modern Navigation System (Desktop & Mobile First)
+   - Retractable icon rail (72px) with 1.5s hover delay & Glowing micro-indicator
+   - Mobile Bottom Navigation Bar (App style)
+   - Mobile Touch Drawer with Close Button & Gesture Support
+   - Hamburger Toggle & Pin Controls
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Hamburger & Control Buttons
+   ========================================================================== */
+.button-toggle-menu,
+.topbar .button-toggle-menu {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  background-color: transparent;
+  color: #334155;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.button-toggle-menu:hover,
+.topbar .button-toggle-menu:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: #0f172a;
+}
+
+[data-bs-theme="dark"] .button-toggle-menu {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .button-toggle-menu:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff;
+}
+
+.sidebar-pin-btn {
+  color: #64748b;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-pin-btn:hover {
+  color: #0f172a;
+  transform: rotate(-30deg);
+}
+
+[data-bs-theme="dark"] .sidebar-pin-btn {
+  color: #94a3b8;
+  background-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] .sidebar-pin-btn:hover {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Logo Dark vs Light Strict Single-Display
+   ========================================================================== */
+.main-nav .logo-box .logo-dark {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.main-nav .logo-box .logo-light {
+  display: none !important;
+  align-items: center;
+}
+
+[data-bs-theme="dark"] .main-nav .logo-box .logo-dark,
+[data-menu-color="dark"] .main-nav .logo-box .logo-dark {
+  display: none !important;
+}
+
+[data-bs-theme="dark"] .main-nav .logo-box .logo-light,
+[data-menu-color="dark"] .main-nav .logo-box .logo-light {
+  display: inline-flex !important;
+}
+
+/* ==========================================================================
+   2. Desktop Compact Icon Rail (72px) & Hover Delay
+   ========================================================================== */
+.main-nav {
+  position: relative;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s ease, transform 0.28s ease !important;
+}
+
+/* Micro-Progress Bar Indicator during 1.5s hover */
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 0%;
+  background: linear-gradient(180deg, #d97706, #3b82f6);
+  transition: height 1.5s linear;
+  opacity: 0;
+  z-index: 1060;
+  border-radius: 2px;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded):hover::after {
+  height: 100%;
+  opacity: 1;
+}
+
+html[data-menu-size="sm-hover"] .topbar {
+  padding-left: 72px !important;
+  transition: padding-left 0.28s ease;
+}
+
+html[data-menu-size="sm-hover"] .page-content {
+  margin-left: 72px !important;
+  transition: margin-left 0.28s ease;
+}
+
+/* Compact Icon-only Mode */
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) {
+  width: 72px !important;
+  min-width: 72px !important;
+  overflow: hidden !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .logo-box {
+  text-align: center !important;
+  padding: 12px 0 !important;
+  justify-content: center !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .logo-box .logo-sm {
+  display: inline-block !important;
+  margin: 0 auto;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .logo-box .logo-lg,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .sidebar-pin-btn {
+  display: none !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .nav-item .nav-link {
+  justify-content: center !important;
+  padding: 12px 0 !important;
+  text-align: center !important;
+  position: relative;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .nav-item .nav-link .nav-icon {
+  margin-right: 0 !important;
+  font-size: 22px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .nav-item .nav-link .nav-text,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .nav-item .nav-link .badge,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .nav-item .nav-link.menu-arrow::after,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .menu-title,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .collapse,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .collapsing,
+html[data-menu-size="sm-hover"] .main-nav:not(.hover-expanded) .button-sm-hover {
+  display: none !important;
+}
+
+/* ==========================================================================
+   3. Hover-Expanded State (Triggered after 1.5s delay)
+   ========================================================================== */
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded {
+  width: 260px !important;
+  min-width: 260px !important;
+  z-index: 1050 !important;
+  box-shadow: 6px 0 30px rgba(0, 0, 0, 0.2) !important;
+  background-color: var(--bs-body-bg, #ffffff) !important;
+}
+
+[data-bs-theme="dark"] html[data-menu-size="sm-hover"] .main-nav.hover-expanded {
+  background-color: #1e293b !important;
+  box-shadow: 6px 0 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .logo-box {
+  padding: 12px 16px !important;
+  justify-content: space-between !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .logo-box .logo-lg {
+  display: flex !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .sidebar-pin-btn {
+  display: inline-flex !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .nav-item .nav-link {
+  justify-content: flex-start !important;
+  padding: 10px 18px !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .nav-item .nav-link .nav-icon {
+  margin-right: 12px !important;
+  font-size: 20px !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .nav-item .nav-link .nav-text {
+  display: inline-block !important;
+  opacity: 1 !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .nav-item .nav-link.menu-arrow::after {
+  display: block !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .nav-item .collapse.show {
+  display: block !important;
+}
+
+html[data-menu-size="sm-hover"] .main-nav.hover-expanded .menu-title {
+  display: block !important;
+  opacity: 1 !important;
+  height: auto !important;
+  padding: 12px 18px 6px !important;
+}
+
+/* ==========================================================================
+   4. Mobile Bottom Navigation Bar (App Native Style < 992px)
+   ========================================================================== */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  z-index: 1040;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+[data-bs-theme="dark"] .mobile-bottom-nav {
+  background: rgba(15, 23, 42, 0.96);
+  border-top-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.mobile-bottom-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 4px;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  position: relative;
+  border-radius: 8px;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item:focus {
+  color: #0f172a;
+}
+
+.mobile-nav-item.active {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+[data-bs-theme="dark"] .mobile-nav-item {
+  color: #94a3b8;
+}
+
+[data-bs-theme="dark"] .mobile-nav-item.active {
+  color: #60a5fa;
+}
+
+.mobile-nav-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+.mobile-nav-label {
+  line-height: 1;
+  font-size: 10.5px;
+  letter-spacing: -0.2px;
+}
+
+/* Highlighted Center Action Item (+ PDV) */
+.mobile-nav-item-highlight .highlight-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  margin-top: -12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-nav-item-highlight:active .highlight-icon {
+  transform: scale(0.92);
+}
+
+[data-bs-theme="dark"] .mobile-nav-item-highlight .highlight-icon {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+/* ==========================================================================
+   5. Mobile Responsive Layout & Offcanvas Drawer (< 992px)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .topbar {
+    padding-left: 0 !important;
+  }
+  
+  .page-content {
+    margin-left: 0 !important;
+    padding-bottom: 80px !important; /* Space for Mobile Bottom Nav */
+  }
+
+  .main-nav {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 1060 !important;
+    background: #ffffff !important;
+    box-shadow: none;
+  }
+
+  [data-bs-theme="dark"] .main-nav {
+    background: #1e293b !important;
+  }
+
+  html.sidebar-enable .main-nav {
+    transform: translateX(0) !important;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  html.sidebar-enable .main-nav .logo-box .logo-lg {
+    display: flex !important;
+  }
+
+  /* Large touch targets on mobile drawer */
+  .main-nav .nav-item .nav-link {
+    min-height: 46px !important;
+    justify-content: flex-start !important;
+    padding: 12px 18px !important;
+    font-size: 14.5px !important;
+  }
+
+  .main-nav .nav-item .nav-link .nav-icon {
+    margin-right: 14px !important;
+    font-size: 22px !important;
+  }
+
+  .main-nav .nav-item .nav-link .nav-text {
+    display: inline-block !important;
+  }
+
+  .main-nav .menu-title {
+    display: block !important;
+    padding: 14px 18px 6px !important;
+    font-size: 11px !important;
+  }
+
+  .main-nav .sub-nav-link {
+    min-height: 42px !important;
+    padding: 10px 18px 10px 48px !important;
+    font-size: 13.5px !important;
+  }
+}

@@ -1,0 +1,899 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}PDV WhatsApp & Balcão — Lançar Pedido | Grife HF{% endblock title %}
+
+{% block extra_css %}
+<style>
+  .product-pos-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+  }
+  .product-pos-card:hover {
+    border-color: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .pos-cart-table th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .pos-qty-btn {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+  .crm-autocomplete-box {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .crm-item {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+  }
+  .crm-item:hover {
+    background: #f8fafc;
+  }
+</style>
+{% endblock extra_css %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex flex-column flex-md-row align-items-md-center justify-content-between my-3 gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success text-white px-2.5 py-1 fs-12 fw-bold">PDV VIP</span>
+            <h4 class="mb-0 text-dark fw-bold">Lançamento de Pedidos (WhatsApp &amp; Balcão)</h4>
+          </div>
+          <p class="text-muted fs-13 mb-0 mt-1">
+            Registre rapidamente pedidos fechados no WhatsApp, Direct ou loja física com baixa automática de estoque, Smart CRM e emissão de recibo digital VIP.
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/dashboard/pages/order-list/" class="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1">
+            <i class="bx bx-list-ul"></i> Ver Pedidos
+          </a>
+          <a href="{% url 'orders:admin_reservations' %}" class="btn btn-outline-warning text-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1">
+            <i class="bx bx-list-check"></i> Fila de Reservas
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Banner de Reserva Pré-Carregada (se houver) -->
+  {% if preloaded_reservation %}
+  <div class="alert alert-warning border-warning d-flex align-items-center justify-content-between p-3 rounded-4 shadow-sm mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bx bx-bell-ring fs-24 text-warning"></i>
+      <div>
+        <h6 class="fs-13 fw-bold mb-0">Convertendo Reserva #{{ preloaded_reservation.id }} em Pedido</h6>
+        <small class="text-muted fs-11">
+          Cliente: <strong>{{ preloaded_reservation.customer_name }}</strong> • Peça: <strong>{{ preloaded_reservation.product.title }}</strong> ({% if preloaded_reservation.color %}Cor: {{ preloaded_reservation.color }}, {% endif %}Tam: {{ preloaded_reservation.size }})
+        </small>
+      </div>
+    </div>
+    <span class="badge bg-dark text-white px-2.5 py-1 fs-11">Reserva Ativa</span>
+  </div>
+  {% endif %}
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form id="posOrderForm" onsubmit="submitPosOrder(event)">
+    {% csrf_token %}
+    <input type="hidden" id="posItemsJson" name="items_json" value="[]">
+    <input type="hidden" id="posReservationId" name="reservation_id" value="{% if preloaded_reservation %}{{ preloaded_reservation.id }}{% endif %}">
+
+    <div class="row g-3">
+      
+      <!-- Coluna Esquerda: Carrinho do PDV + Dados do Cliente & Pagamento (7 colunas) -->
+      <div class="col-xl-7 col-lg-6">
+        
+        <!-- Card 1: Itens do Pedido -->
+        <div class="card shadow-sm border-0 rounded-4 mb-3">
+          <div class="card-header bg-dark text-white rounded-top-4 py-2.5 px-3 d-flex align-items-center justify-content-between">
+            <span class="fs-13 fw-bold text-uppercase letter-spacing-1">
+              <i class="bx bx-shopping-bag text-warning me-1"></i> 1. Peças Selecionadas (<span id="posItemsCount">0</span>)
+            </span>
+            <button type="button" class="btn btn-outline-light btn-sm py-0.5 px-2 fs-11 rounded-pill" onclick="clearPosCart()">
+              Limpar Itens
+            </button>
+          </div>
+
+          <div class="card-body p-0">
+            <div class="table-responsive" style="min-height: 180px;">
+              <table class="table table-hover align-middle mb-0 fs-13 pos-cart-table">
+                <thead class="table-light text-muted">
+                  <tr>
+                    <th style="min-width: 180px;">Peça</th>
+                    <th class="text-center" style="width: 120px;">Cor / Tam</th>
+                    <th class="text-center" style="width: 110px;">Qtd</th>
+                    <th class="text-end" style="width: 100px;">Preço Unit.</th>
+                    <th class="text-end" style="width: 100px;">Subtotal</th>
+                    <th class="text-center" style="width: 40px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="posCartTableBody">
+                  <tr id="posEmptyRow">
+                    <td colspan="6" class="text-center py-4 text-muted">
+                      <i class="bx bx-cart-add fs-36 text-secondary opacity-50 mb-1 d-block"></i>
+                      <span class="fs-12">Nenhuma peça adicionada ainda.<br>Clique nas peças do catálogo ao lado para incluir na venda.</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Resumo Financeiro do Carrinho -->
+            <div class="p-3 bg-light-subtle border-top rounded-bottom-4">
+              <div class="row g-2 align-items-center">
+                <div class="col-sm-4">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">Taxa de Frete (R$)</label>
+                  <input type="text" class="form-control form-control-sm" id="posShippingCost" name="shipping_cost" value="0,00" oninput="recalculateTotals()">
+                </div>
+                <div class="col-sm-4">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">Desconto Especial (R$)</label>
+                  <input type="text" class="form-control form-control-sm" id="posDiscount" name="discount" value="0,00" oninput="recalculateTotals()">
+                </div>
+                <div class="col-sm-4 text-sm-end">
+                  <small class="text-muted fs-11 d-block">Total Geral:</small>
+                  <h3 class="fw-bold text-dark mb-0 fs-22" id="posGrandTotalText">R$ 0,00</h3>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Card 2: Dados do Cliente e Entrega com Smart CRM -->
+        <div class="card shadow-sm border-0 rounded-4 mb-3">
+          <div class="card-header bg-white border-bottom py-2.5 px-3 d-flex justify-content-between align-items-center">
+            <span class="fs-13 fw-bold text-dark text-uppercase letter-spacing-1">
+              <i class="bx bx-user-check text-primary me-1"></i> 2. Dados do Cliente &amp; Entrega
+            </span>
+            <span id="posCrmBadge" class="badge bg-primary-subtle text-primary border border-primary-subtle fs-11 d-none">
+              ✨ Cliente VIP Reconhecido
+            </span>
+          </div>
+          <div class="card-body p-3">
+            
+            <div class="row g-2 mb-2">
+              <div class="col-sm-6 position-relative">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">Nome do Cliente *</label>
+                <input type="text" class="form-control form-control-sm" id="posCustomerName" name="customer_name" placeholder="Ex: Rodrigo Oliveira" oninput="onCustomerInput(this.value)" autocomplete="off" required>
+                <div id="crmNameResults" class="crm-autocomplete-box d-none"></div>
+              </div>
+              <div class="col-sm-6 position-relative">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">WhatsApp do Cliente *</label>
+                <input type="tel" class="form-control form-control-sm" id="posCustomerPhone" name="customer_phone" placeholder="(83) 99999-9999" oninput="onCustomerInput(this.value)" autocomplete="off" required>
+                <div id="crmPhoneResults" class="crm-autocomplete-box d-none"></div>
+              </div>
+            </div>
+
+            <div class="row g-2 mb-2">
+              <div class="col-sm-6">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">Forma de Entrega</label>
+                <select class="form-select form-select-sm" id="posDeliveryMethod" name="delivery_method" onchange="toggleDeliveryFields()">
+                  <option value="pickup" selected>🏪 Retirada na Loja (Grife HF)</option>
+                  <option value="motoboy">🛵 Entrega Rápida (Motoboy Cajazeiras)</option>
+                  <option value="shipping">✈️ Envio Correios / Sedex / PAC</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">Forma de Pagamento</label>
+                <select class="form-select form-select-sm" id="posPaymentMethod" name="payment_method">
+                  <option value="pix" selected>⚡ Pix (Envio Imediato)</option>
+                  <option value="credit_card">💳 Cartão de Crédito (até 12x)</option>
+                  <option value="debit_card">💳 Cartão de Débito</option>
+                  <option value="cash">💵 Dinheiro / Espécie</option>
+                  <option value="on_delivery">📦 Pagar na Entrega</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Campos de Endereço (condicionais) -->
+            <div id="posAddressSection" class="p-2.5 bg-light rounded-3 border mb-2 d-none">
+              <div class="row g-2">
+                <div class="col-12">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">Endereço Completo (Rua, Número, Bairro, Ponto de Ref.)</label>
+                  <input type="text" class="form-control form-control-sm" id="posShippingAddress" name="shipping_address" placeholder="Ex: Rua Cel. Juvêncio Carneiro, 150 - Centro">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">Cidade</label>
+                  <input type="text" class="form-control form-control-sm" id="posCity" name="city" value="Cajazeiras">
+                </div>
+                <div class="col-sm-3 col-6">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">Estado (UF)</label>
+                  <input type="text" class="form-control form-control-sm" id="posState" name="state" value="PB">
+                </div>
+                <div class="col-sm-3 col-6">
+                  <label class="form-label fs-11 text-muted fw-semibold mb-1">CEP</label>
+                  <input type="text" class="form-control form-control-sm" id="posPostalCode" name="postal_code" value="58900-000">
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-2">
+              <div class="col-sm-6">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">Status do Pedido</label>
+                <select class="form-select form-select-sm" id="posStatus" name="status">
+                  <option value="confirmed" selected>✅ Confirmado / Pago</option>
+                  <option value="preparing">📦 Em Separação</option>
+                  <option value="pending">⏳ Aguardando Pagamento</option>
+                </select>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label fs-12 fw-semibold text-dark mb-1">Origem da Venda</label>
+                <select class="form-select form-select-sm" id="posOrigin" name="origin">
+                  <option value="whatsapp" selected>📱 WhatsApp VIP</option>
+                  <option value="counter">🏬 Balcão / Loja Física</option>
+                  <option value="store_online">🌐 Loja Online</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <label class="form-label fs-11 text-muted fw-semibold mb-1">Observações Internas (Opcional)</label>
+              <textarea class="form-control form-control-sm" id="posNotes" name="notes" rows="2" placeholder="Ex: Cliente vai passar para retirar às 17h / Embalar para presente"></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Botão de Finalização -->
+        <div class="d-grid mb-4">
+          <button type="submit" id="posSubmitBtn" class="btn btn-success btn-lg py-3 rounded-4 fw-bold fs-15 shadow-sm d-flex align-items-center justify-content-center gap-2">
+            <i class="bx bxl-whatsapp fs-22"></i>
+            <span>💾 Salvar Pedido &amp; Abrir Comprovante no WhatsApp</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Coluna Direita: Catálogo Rápido com Busca Instantânea (5 colunas) -->
+      <div class="col-xl-5 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top: 80px; z-index: 10;">
+          
+          <div class="card-header bg-white border-bottom p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fs-13 fw-bold text-dark text-uppercase letter-spacing-1">
+                <i class="bx bx-search text-primary me-1"></i> Catálogo Rápido
+              </span>
+              <span class="badge bg-light text-muted border fs-10 fw-semibold" id="posProductsCountBadge">0 peças</span>
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light border-end-0"><i class="bx bx-search"></i></span>
+              <input type="text" class="form-control border-start-0" id="posSearchInput" placeholder="Buscar por título, marca ou categoria..." oninput="filterCatalog()">
+              <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('posSearchInput').value=''; filterCatalog();" title="Limpar">
+                <i class="bx bx-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body p-2" style="max-height: 650px; overflow-y: auto;">
+            <div class="row g-2" id="posCatalogGrid">
+              <!-- Injetado dinamicamente via JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+</div>
+
+<!-- Modal Rápido de Escolha de Cor & Tamanho ao Clicar na Peça -->
+<div class="modal fade" id="posVariantPickerModal" tabindex="-1" aria-labelledby="posVariantPickerModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-dark text-white px-3 py-2.5">
+        <h6 class="modal-title fs-13 fw-bold" id="posPickerTitle">Escolha a Variação</h6>
+        <button type="button" class="btn-close btn-close-white fs-10" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-3">
+        
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+          <img id="posPickerImg" src="" alt="" class="rounded border" style="width: 44px; height: 44px; object-fit: cover;">
+          <div class="overflow-hidden">
+            <span class="fw-bold text-dark fs-12 text-truncate d-block" id="posPickerProductTitle">Nome da Peça</span>
+            <span class="text-success fw-bold fs-12" id="posPickerPrice">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="mb-2.5" id="posPickerColorSection">
+          <label class="form-label fs-11 fw-bold text-muted text-uppercase mb-1">Cor:</label>
+          <div class="d-flex flex-wrap gap-1" id="posPickerColorsContainer">
+            <!-- Cores -->
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fs-11 fw-bold text-muted text-uppercase mb-1">Tamanho:</label>
+          <div class="d-flex flex-wrap gap-1.5" id="posPickerSizesContainer">
+            <!-- Tamanhos -->
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-3 pt-2 border-top">
+          <label class="form-label fs-11 fw-bold text-muted text-uppercase mb-0">Quantidade:</label>
+          <div class="d-flex align-items-center gap-1.5">
+            <button type="button" class="btn btn-outline-secondary btn-sm pos-qty-btn" onclick="adjustPickerQty(-1)">-</button>
+            <span class="fw-bold fs-13 px-2" id="posPickerQty">1</span>
+            <button type="button" class="btn btn-outline-secondary btn-sm pos-qty-btn" onclick="adjustPickerQty(1)">+</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-dark w-100 py-2 fs-13 fw-bold rounded-3 shadow-xs d-flex align-items-center justify-content-center gap-1.5" onclick="confirmAddProductToPosCart()">
+          <i class="bx bx-plus-circle"></i> Adicionar ao Pedido
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Sucesso com Link Direto do Comprovante VIP & Impressão -->
+<div class="modal fade" id="posSuccessModal" tabindex="-1" aria-labelledby="posSuccessModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+      <div class="avatar-lg rounded-circle bg-success bg-opacity-10 text-success mx-auto d-flex align-items-center justify-content-center fs-36 mb-3">
+        <i class="bx bx-check-circle"></i>
+      </div>
+      <h4 class="fw-bold text-dark mb-1">Pedido Registrado com Sucesso!</h4>
+      <p class="text-muted fs-13 mb-3" id="posSuccessOrderNumber">Pedido #GHF-XXXXX</p>
+      
+      <div class="alert alert-light border rounded-3 p-3 text-start fs-12 mb-3">
+        <p class="mb-1"><strong>👤 Cliente:</strong> <span id="posSuccessCustomer"></span></p>
+        <p class="mb-0"><strong>💰 Total:</strong> <span id="posSuccessTotal"></span></p>
+      </div>
+
+      <div class="d-flex flex-column gap-2">
+        <a href="#" id="posSuccessWhatsAppBtn" target="_blank" class="btn btn-success py-2.5 fs-14 fw-bold rounded-pill shadow-xs d-flex align-items-center justify-content-center gap-2">
+          <i class="bx bxl-whatsapp fs-20"></i> Abrir Comprovante no WhatsApp
+        </a>
+        
+        <div class="row g-2">
+          <div class="col-6">
+            <button type="button" id="posCopyMsgBtn" class="btn btn-light border py-2 w-100 fs-12 fw-semibold rounded-pill d-flex align-items-center justify-content-center gap-1" onclick="copyReceiptMessage()">
+              <i class="bx bx-copy"></i> <span>Copiar Mensagem</span>
+            </button>
+          </div>
+          <div class="col-6">
+            <a href="#" id="posPrintLabelBtn" target="_blank" class="btn btn-dark py-2 w-100 fs-12 fw-semibold rounded-pill d-flex align-items-center justify-content-center gap-1">
+              <i class="bx bx-printer"></i> <span>Imprimir Sacola</span>
+            </a>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-dark py-2 fs-13 rounded-pill mt-1" onclick="window.location.reload();">
+          + Lançar Outro Pedido
+        </button>
+        <a href="/dashboard/pages/order-list/" class="btn btn-link text-muted fs-12 text-decoration-none">
+          Ver Lista Geral de Pedidos →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}
+
+{% block extra_javascript %}
+<script>
+  const catalogProducts = {{ products_json|safe|default:"[]" }};
+  const preloadedData = {{ preloaded_data_json|safe|default:"{}" }};
+
+  let posCart = [];
+  let currentPickerProduct = null;
+  let selectedPickerColor = '';
+  let selectedPickerSize = '';
+  let selectedPickerQty = 1;
+  let currentRawReceiptText = '';
+  let crmSearchTimeout = null;
+
+  function renderCatalog(items) {
+    const grid = document.getElementById('posCatalogGrid');
+    const badge = document.getElementById('posProductsCountBadge');
+    grid.innerHTML = '';
+    badge.textContent = `${items.length} peças`;
+
+    if (items.length === 0) {
+      grid.innerHTML = `
+        <div class="col-12 text-center py-4 text-muted">
+          <i class="bx bx-search-alt fs-32 opacity-50 mb-1 d-block"></i>
+          <span class="fs-12">Nenhuma peça encontrada com esse termo.</span>
+        </div>
+      `;
+      return;
+    }
+
+    items.forEach(p => {
+      const col = document.createElement('div');
+      col.className = 'col-6';
+      
+      const imgHtml = p.cover_url 
+        ? `<img src="${p.cover_url}" alt="${p.title}" class="rounded-3 w-100" style="height: 110px; object-fit: cover;">`
+        : `<div class="rounded-3 w-100 bg-light border d-flex align-items-center justify-content-center text-muted" style="height: 110px;"><i class="bx bx-image fs-24"></i></div>`;
+
+      col.innerHTML = `
+        <div class="card product-pos-card rounded-3 p-2 h-100 bg-white" onclick="openProductPicker(${p.id})">
+          ${imgHtml}
+          <div class="mt-1.5">
+            <span class="fw-bold text-dark fs-11 text-truncate d-block" title="${p.title}">${p.title}</span>
+            <small class="text-muted fs-10 d-block text-truncate">${p.brand_name || 'Grife HF'}</small>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fw-bold text-dark fs-12">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+              <span class="badge ${p.in_stock ? 'bg-dark' : 'bg-danger'} px-1.5 py-0.5 fs-9">${p.in_stock ? '+ Adicionar' : 'Esgotado'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(col);
+    });
+  }
+
+  function filterCatalog() {
+    const query = document.getElementById('posSearchInput').value.trim().toLowerCase();
+    if (!query) {
+      renderCatalog(catalogProducts);
+      return;
+    }
+    const filtered = catalogProducts.filter(p => 
+      p.title.toLowerCase().includes(query) ||
+      p.brand_name.toLowerCase().includes(query) ||
+      p.category_name.toLowerCase().includes(query)
+    );
+    renderCatalog(filtered);
+  }
+
+  function openProductPicker(productId, defaultColor = '', defaultSize = '') {
+    const product = catalogProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    currentPickerProduct = product;
+    selectedPickerQty = 1;
+    document.getElementById('posPickerQty').textContent = '1';
+    document.getElementById('posPickerProductTitle').textContent = product.title;
+    document.getElementById('posPickerPrice').textContent = `R$ ${product.price.toFixed(2).replace('.', ',')}`;
+    
+    const pickerImg = document.getElementById('posPickerImg');
+    if (product.cover_url) {
+      pickerImg.src = product.cover_url;
+      pickerImg.classList.remove('d-none');
+    } else {
+      pickerImg.classList.add('d-none');
+    }
+
+    // Cores
+    const colorSection = document.getElementById('posPickerColorSection');
+    const colorsContainer = document.getElementById('posPickerColorsContainer');
+    colorsContainer.innerHTML = '';
+
+    if (product.available_colors && product.available_colors.length > 0) {
+      colorSection.classList.remove('d-none');
+      product.available_colors.forEach((col, idx) => {
+        const isMatch = defaultColor ? (col.name.toLowerCase() === defaultColor.toLowerCase()) : (idx === 0);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `btn btn-sm ${isMatch ? 'btn-dark text-white' : 'btn-light border'} px-2 py-1 fs-11 rounded-pill picker-col-btn`;
+        btn.innerHTML = `<span style="width: 10px; height: 10px; background-color: ${col.hex}; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.2);"></span> ${col.name}`;
+        btn.onclick = () => {
+          colorsContainer.querySelectorAll('.picker-col-btn').forEach(b => {
+            b.className = 'btn btn-sm btn-light border px-2 py-1 fs-11 rounded-pill picker-col-btn';
+          });
+          btn.className = 'btn btn-sm btn-dark text-white px-2 py-1 fs-11 rounded-pill picker-col-btn';
+          selectedPickerColor = col.name;
+          renderPickerSizes(product, col.name, defaultSize);
+        };
+        colorsContainer.appendChild(btn);
+        if (isMatch) selectedPickerColor = col.name;
+      });
+      renderPickerSizes(product, selectedPickerColor, defaultSize);
+    } else {
+      colorSection.classList.add('d-none');
+      selectedPickerColor = '';
+      renderPickerSizes(product, '', defaultSize);
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('posVariantPickerModal'));
+    modal.show();
+  }
+
+  function renderPickerSizes(product, colorName, defaultSize = '') {
+    const sizesContainer = document.getElementById('posPickerSizesContainer');
+    sizesContainer.innerHTML = '';
+
+    let sizes = [];
+    if (product.variants_matrix && product.variants_matrix.length > 0) {
+      const entry = product.variants_matrix.find(c => c.name.trim().toLowerCase() === colorName.trim().toLowerCase());
+      if (entry && entry.sizes) {
+        sizes = entry.sizes.map(s => s.size);
+      }
+    }
+
+    if (sizes.length === 0) {
+      if (product.variants && product.variants.length > 0) {
+        sizes = [...new Set(product.variants.map(v => v.size))];
+      } else {
+        sizes = ['Único'];
+      }
+    }
+
+    sizes.forEach((s, idx) => {
+      const isMatch = defaultSize ? (s.toLowerCase() === defaultSize.toLowerCase()) : (idx === 0);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `btn btn-sm ${isMatch ? 'btn-dark text-white' : 'btn-outline-dark'} px-2.5 py-1 fs-11 rounded-2 picker-size-btn`;
+      btn.textContent = s;
+      btn.onclick = () => {
+        sizesContainer.querySelectorAll('.picker-size-btn').forEach(b => {
+          b.className = 'btn btn-sm btn-outline-dark px-2.5 py-1 fs-11 rounded-2 picker-size-btn';
+        });
+        btn.className = 'btn btn-sm btn-dark text-white px-2.5 py-1 fs-11 rounded-2 picker-size-btn';
+        selectedPickerSize = s;
+      };
+      sizesContainer.appendChild(btn);
+      if (isMatch) selectedPickerSize = s;
+    });
+  }
+
+  function adjustPickerQty(delta) {
+    selectedPickerQty = Math.max(1, selectedPickerQty + delta);
+    document.getElementById('posPickerQty').textContent = selectedPickerQty;
+  }
+
+  function confirmAddProductToPosCart() {
+    if (!currentPickerProduct) return;
+
+    const existingIndex = posCart.findIndex(item => 
+      item.product_id === currentPickerProduct.id &&
+      item.color === selectedPickerColor &&
+      item.size === selectedPickerSize
+    );
+
+    if (existingIndex > -1) {
+      posCart[existingIndex].quantity += selectedPickerQty;
+    } else {
+      let variantId = null;
+      if (currentPickerProduct.variants) {
+        const v = currentPickerProduct.variants.find(va => 
+          va.size === selectedPickerSize && 
+          (!selectedPickerColor || va.color === selectedPickerColor)
+        );
+        if (v) variantId = v.id;
+      }
+
+      posCart.push({
+        product_id: currentPickerProduct.id,
+        variant_id: variantId,
+        title: currentPickerProduct.title,
+        brand_name: currentPickerProduct.brand_name,
+        cover_url: currentPickerProduct.cover_url,
+        color: selectedPickerColor,
+        size: selectedPickerSize,
+        quantity: selectedPickerQty,
+        unit_price: currentPickerProduct.price,
+      });
+    }
+
+    const modalEl = document.getElementById('posVariantPickerModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+
+    renderPosCartTable();
+  }
+
+  function renderPosCartTable() {
+    const tbody = document.getElementById('posCartTableBody');
+    const countBadge = document.getElementById('posItemsCount');
+    
+    countBadge.textContent = posCart.reduce((sum, item) => sum + item.quantity, 0);
+
+    if (posCart.length === 0) {
+      tbody.innerHTML = `
+        <tr id="posEmptyRow">
+          <td colspan="6" class="text-center py-4 text-muted">
+            <i class="bx bx-cart-add fs-36 text-secondary opacity-50 mb-1 d-block"></i>
+            <span class="fs-12">Nenhuma peça adicionada ainda.<br>Clique nas peças do catálogo ao lado para incluir na venda.</span>
+          </td>
+        </tr>
+      `;
+      recalculateTotals();
+      return;
+    }
+
+    tbody.innerHTML = '';
+    posCart.forEach((item, idx) => {
+      const sub = item.unit_price * item.quantity;
+      const imgTag = item.cover_url 
+        ? `<img src="${item.cover_url}" alt="" class="rounded border me-2" style="width: 36px; height: 36px; object-fit: cover;">`
+        : `<div class="rounded border bg-light d-inline-flex align-items-center justify-content-center me-2 text-muted" style="width: 36px; height: 36px;"><i class="bx bx-image"></i></div>`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="d-flex align-items-center">
+            ${imgTag}
+            <div class="overflow-hidden">
+              <span class="fw-bold text-dark fs-12 text-truncate d-block">${item.title}</span>
+              <small class="text-muted fs-10">${item.brand_name || 'Grife HF'}</small>
+            </div>
+          </div>
+        </td>
+        <td class="text-center">
+          <div class="d-flex flex-column align-items-center gap-0.5">
+            ${item.color ? `<span class="badge bg-light text-dark border fs-10 px-1.5 py-0.5">${item.color}</span>` : ''}
+            <span class="badge bg-dark text-white fs-10 px-1.5 py-0.5">${item.size}</span>
+          </div>
+        </td>
+        <td class="text-center">
+          <div class="d-flex align-items-center justify-content-center gap-1">
+            <button type="button" class="btn btn-light border pos-qty-btn fs-10" onclick="updateItemQty(${idx}, -1)">-</button>
+            <span class="fw-bold fs-12 px-1">${item.quantity}</span>
+            <button type="button" class="btn btn-light border pos-qty-btn fs-10" onclick="updateItemQty(${idx}, 1)">+</button>
+          </div>
+        </td>
+        <td class="text-end">
+          <input type="text" class="form-control form-control-sm text-end p-1 fs-12" 
+                 value="${item.unit_price.toFixed(2).replace('.', ',')}" 
+                 style="width: 80px; display: inline-block;"
+                 onchange="updateItemPrice(${idx}, this.value)">
+        </td>
+        <td class="text-end fw-bold text-dark fs-12">
+          R$ ${sub.toFixed(2).replace('.', ',')}
+        </td>
+        <td class="text-center">
+          <button type="button" class="btn btn-link text-danger p-0 fs-16" onclick="removePosItem(${idx})" title="Remover item">
+            <i class="bx bx-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    recalculateTotals();
+  }
+
+  function updateItemQty(index, delta) {
+    if (posCart[index]) {
+      posCart[index].quantity = Math.max(1, posCart[index].quantity + delta);
+      renderPosCartTable();
+    }
+  }
+
+  function updateItemPrice(index, valStr) {
+    const val = parseFloat(valStr.replace(',', '.'));
+    if (!isNaN(val) && val >= 0) {
+      posCart[index].unit_price = val;
+      renderPosCartTable();
+    }
+  }
+
+  function removePosItem(index) {
+    posCart.splice(index, 1);
+    renderPosCartTable();
+  }
+
+  function clearPosCart() {
+    posCart = [];
+    renderPosCartTable();
+  }
+
+  function recalculateTotals() {
+    const subtotal = posCart.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+    
+    const shippingStr = document.getElementById('posShippingCost').value.replace(',', '.');
+    const shipping = parseFloat(shippingStr) || 0;
+
+    const discountStr = document.getElementById('posDiscount').value.replace(',', '.');
+    const discount = parseFloat(discountStr) || 0;
+
+    const grandTotal = Math.max(0, subtotal + shipping - discount);
+    document.getElementById('posGrandTotalText').textContent = `R$ ${grandTotal.toFixed(2).replace('.', ',')}`;
+  }
+
+  function toggleDeliveryFields() {
+    const method = document.getElementById('posDeliveryMethod').value;
+    const addressSec = document.getElementById('posAddressSection');
+    if (method === 'pickup') {
+      addressSec.classList.add('d-none');
+    } else {
+      addressSec.classList.remove('d-none');
+    }
+  }
+
+  // Smart CRM Autocomplete
+  function onCustomerInput(query) {
+    clearTimeout(crmSearchTimeout);
+    if (!query || query.length < 2) {
+      document.getElementById('crmNameResults').classList.add('d-none');
+      document.getElementById('crmPhoneResults').classList.add('d-none');
+      return;
+    }
+
+    crmSearchTimeout = setTimeout(() => {
+      fetch(`/pedidos/clientes/busca/?q=${encodeURIComponent(query)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        renderCrmDropdown(data.customers);
+      })
+      .catch(err => console.error(err));
+    }, 250);
+  }
+
+  function renderCrmDropdown(customers) {
+    const nameBox = document.getElementById('crmNameResults');
+    const phoneBox = document.getElementById('crmPhoneResults');
+
+    if (!customers || customers.length === 0) {
+      nameBox.classList.add('d-none');
+      phoneBox.classList.add('d-none');
+      return;
+    }
+
+    const html = customers.map(c => `
+      <div class="crm-item" onclick="selectCrmCustomer(${JSON.stringify(c).replace(/"/g, '&quot;')})">
+        <div class="d-flex justify-content-between align-items-center">
+          <strong class="fs-12 text-dark">${c.name}</strong>
+          <span class="badge bg-success-subtle text-success fs-10">${c.total_orders} pedido(s)</span>
+        </div>
+        <small class="text-muted fs-11">${c.phone} ${c.city ? '• ' + c.city + '-' + c.state : ''}</small>
+      </div>
+    `).join('');
+
+    nameBox.innerHTML = html;
+    phoneBox.innerHTML = html;
+    nameBox.classList.remove('d-none');
+    phoneBox.classList.remove('d-none');
+  }
+
+  function selectCrmCustomer(c) {
+    document.getElementById('posCustomerName').value = c.name;
+    document.getElementById('posCustomerPhone').value = c.phone;
+    if (c.shipping_address) document.getElementById('posShippingAddress').value = c.shipping_address;
+    if (c.city) document.getElementById('posCity').value = c.city;
+    if (c.state) document.getElementById('posState').value = c.state;
+    if (c.postal_code) document.getElementById('posPostalCode').value = c.postal_code;
+
+    const badge = document.getElementById('posCrmBadge');
+    badge.textContent = `✨ Cliente VIP: ${c.total_orders} compra(s) • Total: R$ ${c.total_spent.toFixed(2).replace('.', ',')}`;
+    badge.classList.remove('d-none');
+
+    document.getElementById('crmNameResults').classList.add('d-none');
+    document.getElementById('crmPhoneResults').classList.add('d-none');
+  }
+
+  function submitPosOrder(e) {
+    e.preventDefault();
+    if (posCart.length === 0) {
+      alert('Por favor, adicione ao menos uma peça ao pedido antes de salvar.');
+      return;
+    }
+
+    const form = e.target;
+    document.getElementById('posItemsJson').value = JSON.stringify(posCart);
+    const formData = new FormData(form);
+    const submitBtn = document.getElementById('posSubmitBtn');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Salvando Pedido e Gerando Recibo...';
+
+    fetch('/pedidos/novo/', {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bx bxl-whatsapp fs-22"></i> <span>💾 Salvar Pedido &amp; Abrir Comprovante no WhatsApp</span>';
+
+      if (data.success) {
+        document.getElementById('posSuccessOrderNumber').textContent = `Código do Pedido: #${data.order_number}`;
+        document.getElementById('posSuccessCustomer').textContent = document.getElementById('posCustomerName').value;
+        document.getElementById('posSuccessTotal').textContent = document.getElementById('posGrandTotalText').textContent;
+        
+        const waBtn = document.getElementById('posSuccessWhatsAppBtn');
+        waBtn.href = data.receipt_whatsapp_link;
+
+        const printBtn = document.getElementById('posPrintLabelBtn');
+        printBtn.href = `/pedidos/${data.order_number}/etiqueta/`;
+
+        // Extrai o texto limpo para o botão copiar
+        try {
+          const urlObj = new URL(data.receipt_whatsapp_link);
+          currentRawReceiptText = decodeURIComponent(urlObj.searchParams.get('text') || '');
+        } catch(e) {
+          currentRawReceiptText = '';
+        }
+
+        const successModal = new bootstrap.Modal(document.getElementById('posSuccessModal'));
+        successModal.show();
+
+        window.open(data.receipt_whatsapp_link, '_blank');
+      } else {
+        alert(data.message || 'Erro ao processar pedido.');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bx bxl-whatsapp fs-22"></i> <span>💾 Salvar Pedido &amp; Abrir Comprovante no WhatsApp</span>';
+      alert('Erro de conexão ao salvar pedido.');
+    });
+  }
+
+  function copyReceiptMessage() {
+    if (!currentRawReceiptText) return;
+    navigator.clipboard.writeText(currentRawReceiptText).then(() => {
+      const btn = document.getElementById('posCopyMsgBtn');
+      btn.classList.remove('btn-light');
+      btn.classList.add('btn-success', 'text-white');
+      btn.innerHTML = '<i class="bx bx-check"></i> <span>Copiado!</span>';
+      setTimeout(() => {
+        btn.classList.remove('btn-success', 'text-white');
+        btn.classList.add('btn-light');
+        btn.innerHTML = '<i class="bx bx-copy"></i> <span>Copiar Mensagem</span>';
+      }, 2500);
+    });
+  }
+
+  // Inicialização & Auto-carregamento de dados pré-carregados
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCatalog(catalogProducts);
+
+    if (preloadedData && preloadedData.customer_name) {
+      document.getElementById('posCustomerName').value = preloadedData.customer_name;
+    }
+    if (preloadedData && preloadedData.customer_phone) {
+      document.getElementById('posCustomerPhone').value = preloadedData.customer_phone;
+    }
+    if (preloadedData && preloadedData.product_id) {
+      const pId = parseInt(preloadedData.product_id);
+      openProductPicker(pId, preloadedData.color, preloadedData.size);
+    }
+
+    // Fechar dropdown CRM ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#posCustomerName') && !e.target.closest('#posCustomerPhone')) {
+        document.getElementById('crmNameResults').classList.add('d-none');
+        document.getElementById('crmPhoneResults').classList.add('d-none');
+      }
+    });
+  });
+</script>
+{% endblock extra_javascript %}

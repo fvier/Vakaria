@@ -1,0 +1,10 @@
+.git
+.env
+.env.vps
+venv
+__pycache__
+*.py[cod]
+*.sqlite3
+.pytest_cache
+node_modules
+postgres-backups

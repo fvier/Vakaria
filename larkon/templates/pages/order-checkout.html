@@ -1,0 +1,107 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Finalizar Pedido VIP | Grife HF{% endblock %}
+
+{% block page_content %}
+<div class="row">
+    <!-- Formulário de Checkout -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom">
+                <h4 class="card-title mb-0 fs-18"><i class="bx bx-user-pin me-1 text-primary"></i> Dados para Entrega & Contato</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{% url 'orders:checkout' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nome Completo *</label>
+                        <input type="text" name="customer_name" class="form-control" placeholder="Seu nome completo" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">WhatsApp / Telefone *</label>
+                            <input type="tel" name="customer_phone" class="form-control" placeholder="(DDD) 99999-9999" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">E-mail (Opcional)</label>
+                            <input type="email" name="customer_email" class="form-control" placeholder="seuemail@exemplo.com">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Endereço de Entrega (Rua, Número, Complemento)</label>
+                        <input type="text" name="shipping_address" class="form-control" placeholder="Av. Principal, 100, Apto 501">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label fw-semibold">Cidade</label>
+                            <input type="text" name="city" class="form-control" placeholder="João Pessoa">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold">Estado (UF)</label>
+                            <input type="text" name="state" class="form-control" placeholder="PB" maxlength="2">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">CEP</label>
+                            <input type="text" name="postal_code" class="form-control" placeholder="58000-000">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Observações / Preferências</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Instruções para embalagem de presente, horário de entrega, etc."></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-dark btn-lg d-flex align-items-center justify-content-center gap-2">
+                            <i class="bx bx-check-circle fs-20"></i> Confirmar Pedido & Gerar Link VIP
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo dos Itens no Checkout -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-bottom">
+                <h5 class="card-title mb-0 fs-16"><i class="bx bx-shopping-bag me-1"></i> Peças na Sacola ({{ cart.total_items }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-3 mb-4">
+                    {% for item in cart_items %}
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="badge bg-dark text-white fs-10 text-uppercase">{{ item.variant.product.brand.name }}</span>
+                            <h6 class="fs-14 fw-semibold mb-0 mt-1">{{ item.variant.product.title }}</h6>
+                            <small class="text-muted">Tam: {{ item.variant.size }} | Qtd: {{ item.quantity }}</small>
+                        </div>
+                        <span class="fw-bold text-dark fs-14">R$ {{ item.total_price|floatformat:2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-semibold text-dark">R$ {{ cart.subtotal|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Atendimento Exclusivo:</span>
+                        <span class="text-success fw-semibold">Incluso ✨</span>
+                    </div>
+                    <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                        <span class="fs-16 fw-bold text-dark">Total:</span>
+                        <span class="fs-22 fw-bold text-dark">R$ {{ cart.subtotal|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

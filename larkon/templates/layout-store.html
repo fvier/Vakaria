@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-bs-theme="light">
+<head>
+  {% load static i18n %}
+  <meta charset="utf-8"/>
+  <title>{% block title %}Vitrine de Peças Exclusivas | Grife HF{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Grife HF — Loja de moda multimarcas com peças exclusivas femininas e masculinas em Cajazeiras-PB."/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+  <!-- Favicons -->
+  <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+
+  <!-- CSS Framework & Icons -->
+  <link href="{% static 'css/vendor.min.css' %}" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'css/icons.min.css' %}" rel="stylesheet" type="text/css"/>
+  <link href="{% static 'css/app.min.css' %}" rel="stylesheet" type="text/css"/>
+
+  <!-- Solar Icons CDN -->
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+  <style>
+    :root {
+      --hf-gold: #c5a059;
+      --hf-gold-dark: #a9843c;
+      --hf-dark: #111827;
+      --hf-light-bg: #f8f9fa;
+      --hf-border: #ede8e1;
+    }
+    
+    body {
+      font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--hf-light-bg);
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navbar Loja */
+    .store-navbar {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--hf-border);
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+    }
+
+    .store-nav-link {
+      color: #1e293b !important;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 8px 14px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .store-nav-link:hover, .store-nav-link.active {
+      color: var(--hf-gold-dark) !important;
+    }
+
+    .store-main-container {
+      flex: 1;
+      padding-top: 24px;
+      padding-bottom: 48px;
+    }
+
+    /* Category Accordion */
+    .category-toggle {
+      transition: all 0.2s ease;
+      border-radius: 8px;
+    }
+    .category-toggle:hover {
+      background-color: #f1f3f5;
+    }
+    .category-toggle .chevron-icon {
+      transition: transform 0.25s ease-in-out;
+    }
+    .category-toggle:not(.collapsed) .chevron-icon {
+      transform: rotate(180deg);
+    }
+    .category-subitem {
+      font-size: 13px;
+      padding: 7px 12px;
+      border-radius: 6px;
+      color: #334155;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.15s ease;
+    }
+    .category-subitem:hover {
+      background-color: #e2e8f0;
+      color: #000;
+      padding-left: 16px;
+    }
+    .category-subitem.active {
+      background-color: #0f172a;
+      color: #ffc107 !important;
+      font-weight: 600;
+      padding-left: 16px;
+    }
+    .chips-scroll-container {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      gap: 8px;
+      padding-bottom: 6px;
+      scrollbar-width: thin;
+    }
+    .chips-scroll-container::-webkit-scrollbar {
+      height: 4px;
+    }
+    .chips-scroll-container::-webkit-scrollbar-thumb {
+      background: #ced4da;
+      border-radius: 4px;
+    }
+    .luiza-fit-card {
+      background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    /* Rodapé com Alto Contraste e Legibilidade */
+    .store-footer {
+      background-color: #0f172a;
+      color: #e2e8f0;
+      border-top: 1px solid #1e293b;
+    }
+    .store-footer h6 {
+      color: #f59e0b;
+      letter-spacing: 1px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .store-footer p, .store-footer span {
+      color: #cbd5e1;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .store-footer-link {
+      color: #cbd5e1;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
+      font-size: 13.5px;
+    }
+    .store-footer-link:hover {
+      color: #fbbf24 !important;
+      transform: translateX(4px);
+    }
+    .store-social-btn {
+      width: 38px;
+      height: 38px;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    /* Barra de Navegação Inferior Fixa (App-like Mobile Bottom Nav) */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+      z-index: 1040;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 4px;
+    }
+    .mobile-bottom-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      text-decoration: none !important;
+      font-size: 10.5px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      position: relative;
+      padding: 6px 0;
+    }
+    .mobile-bottom-nav-item i {
+      font-size: 21px;
+      margin-bottom: 2px;
+      transition: transform 0.2s ease;
+    }
+    .mobile-bottom-nav-item.active,
+    .mobile-bottom-nav-item:active,
+    .mobile-bottom-nav-item:hover {
+      color: #0f172a;
+    }
+    .mobile-bottom-nav-item.active i {
+      color: #0f172a;
+      transform: translateY(-2px);
+    }
+    .mobile-nav-badge {
+      position: absolute;
+      top: 2px;
+      right: calc(50% - 18px);
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 1px 5px;
+      min-width: 16px;
+      text-align: center;
+    }
+    @media (max-width: 991px) {
+      body {
+        padding-bottom: 65px;
+      }
+      .mobile-bottom-nav {
+        display: flex;
+      }
+      .whatsapp-float-btn {
+        bottom: 74px !important;
+        right: 16px !important;
+      }
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Notification Bar -->
+  <div class="bg-dark text-white text-center py-1.5 fs-12 fw-medium letter-spacing-1">
+    ✨ GRIFE HF MULTIMARCAS • NOVIDADES TODA SEMANA • CAJAZEIRAS - PB • ENVIAMOS PARA TODO O BRASIL ✈️
+  </div>
+
+  <!-- Store Header Navbar -->
+  <nav class="navbar navbar-expand-lg store-navbar py-2">
+    <div class="container-fluid px-lg-4">
+      <!-- Logo Oficial -->
+      <a class="navbar-brand d-flex align-items-center me-4" href="/">
+        <img src="{% static 'images/logo-dark.png' %}" alt="Grife HF" height="36" class="me-2">
+      </a>
+
+      <!-- Botão Mobile -->
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStoreMenu" aria-controls="offcanvasStoreMenu" aria-label="Abrir Menu">
+        <i class="bx bx-menu fs-24"></i>
+      </button>
+
+      <!-- Menu Principal de Navegação (Desktop) -->
+      <div class="collapse navbar-collapse" id="navbarStore">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
+          <li class="nav-item">
+            <a class="store-nav-link" href="/"><i class="bx bx-home-alt me-1"></i> Início</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link active" href="{% url 'catalog:product_grid' %}"><i class="bx bx-grid-alt me-1"></i> Vitrine</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?gender=M">👔 Masculino</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=luiza-fit">👗 Luiza Fit</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link" href="{% url 'catalog:brand_list' %}">🏷️ Marcas</a>
+          </li>
+          {% if request.user.is_authenticated and request.user.is_staff %}
+          <li class="nav-item">
+            <a class="store-nav-link text-warning fw-bold" href="/reservas/"><i class="bx bx-list-check me-1 text-warning"></i> 📋 Reservas</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link text-success fw-bold" href="/pedidos/novo/"><i class="bx bx-plus-circle me-1 text-success"></i> 🛍️ Novo Pedido</a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <!-- Ações do Topo: Sacola e WhatsApp VIP -->
+        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+          <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558391650137' }}" target="_blank" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold">
+            <i class="bx bxl-whatsapp me-1 fs-16"></i> Atendimento VIP
+          </a>
+          <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 rounded-pill position-relative fw-semibold">
+            <i class="bx bx-shopping-bag me-1 fs-16"></i> Sacola
+            {% if cart.total_items > 0 %}
+            <span class="badge bg-danger rounded-pill ms-1">{{ cart.total_items }}</span>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Gaveta Lateral Deslizante para Celulares (Offcanvas Mobile) -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasStoreMenu" aria-labelledby="offcanvasStoreMenuLabel">
+    <div class="offcanvas-header bg-dark text-white border-bottom border-secondary px-3 py-2.5">
+      <div class="d-flex align-items-center gap-2">
+        <img src="{% static 'images/logo-dark.png' %}" alt="Grife HF" height="30" style="filter: brightness(0) invert(1);">
+      </div>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-3">
+      <!-- Busca rápida no mobile -->
+      <form method="get" action="{% url 'catalog:product_grid' %}" class="mb-3">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="Buscar peça, marca...">
+          <button class="btn btn-dark btn-sm" type="submit"><i class="bx bx-search-alt"></i></button>
+        </div>
+      </form>
+
+      <!-- Links principais -->
+      <h6 class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">Departamentos &amp; Categorias</h6>
+      <div class="d-flex flex-column gap-1 mb-3">
+        <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark text-start fs-13 fw-semibold py-2 px-3 rounded-3 d-flex align-items-center justify-content-between">
+          <span>✨ Ver Todas as Peças</span>
+          <i class="bx bx-chevron-right text-white"></i>
+        </a>
+        
+        <div class="mt-2 mb-1">
+          <small class="text-uppercase text-muted fs-10 fw-bold px-1">👔 Moda Masculina</small>
+        </div>
+        <a href="{% url 'catalog:product_grid' %}?gender=M" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>• Todas Masculinas</span>
+          <i class="bx bx-chevron-right text-muted fs-12"></i>
+        </a>
+        {% for cat in men_categories %}
+        <a href="{% url 'catalog:product_grid' %}?category={{ cat.slug }}" class="btn btn-white border text-start fs-12 py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>{{ cat.name }}</span>
+          <i class="bx bx-chevron-right text-muted fs-11"></i>
+        </a>
+        {% endfor %}
+
+        <div class="mt-2 mb-1">
+          <small class="text-uppercase text-danger fs-10 fw-bold px-1">👗 Moda Feminina</small>
+        </div>
+        <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" class="btn btn-danger-subtle text-danger border border-danger-subtle text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Luiza Fit (Coleção Feminina)</span>
+          <i class="bx bx-chevron-right text-danger fs-12"></i>
+        </a>
+
+        <div class="mt-2 mb-1">
+          <small class="text-uppercase text-muted fs-10 fw-bold px-1">🏷️ Curadoria de Marcas</small>
+        </div>
+        <a href="{% url 'catalog:brand_list' %}" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Showroom de Marcas</span>
+          <i class="bx bx-chevron-right text-muted fs-12"></i>
+        </a>
+      </div>
+
+      <!-- Atendimento e redes -->
+      <h6 class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">Atendimento Direto</h6>
+      <div class="d-flex flex-column gap-2 mb-3">
+        {% if request.user.is_authenticated and request.user.is_staff %}
+        <a href="/pedidos/novo/" class="btn btn-success text-white fs-13 fw-bold py-2 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-xs">
+          <i class="bx bx-plus-circle fs-18"></i> 🛍️ Lançar Pedido (WhatsApp / Balcão)
+        </a>
+        <a href="/reservas/" class="btn btn-warning text-dark fs-13 fw-bold py-2 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-xs">
+          <i class="bx bx-list-check fs-18"></i> 📋 Gerenciar Reservas & Fila
+        </a>
+        {% endif %}
+        <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558391650137' }}" target="_blank" class="btn btn-success fs-13 fw-semibold py-2 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-xs">
+          <i class="bx bxl-whatsapp fs-18"></i> Atendimento VIP no WhatsApp
+        </a>
+        <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/grifehfmultimarcascz/' }}" target="_blank" class="btn btn-outline-dark fs-13 py-2 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2">
+          <i class="bx bxl-instagram fs-18 text-danger"></i> Instagram Oficial
+        </a>
+        <a href="/links" target="_blank" class="btn btn-outline-secondary fs-13 py-2 px-3 rounded-3 d-flex align-items-center justify-content-center gap-2">
+          <i class="bx bx-link fs-18"></i> Linktree & Redes
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal da Loja -->
+  <main class="store-main-container">
+    <div class="container-fluid px-lg-4">
+      {% block store_content %}{% endblock %}
+    </div>
+  </main>
+
+  <!-- Rodapé Oficial da Loja com Alto Contraste -->
+  <footer class="store-footer pt-5 pb-4">
+    <div class="container-fluid px-lg-5">
+      <div class="row g-4">
+        
+        <!-- Coluna 1: Sobre a Loja -->
+        <div class="col-lg-4 col-md-6">
+          <img src="{% static 'images/logo-dark.png' %}" alt="Grife HF" height="36" class="mb-3" style="filter: brightness(0) invert(1);">
+          <p class="mb-3 text-light opacity-90">
+            Sua loja de moda multimarcas premium em Cajazeiras - PB. Peças selecionadas das maiores grifes nacionais e importadas com atendimento exclusivo.
+          </p>
+          <div class="d-flex gap-2 pt-1">
+            <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/grifehfmultimarcascz/' }}" target="_blank" class="store-social-btn" title="Instagram Oficial">
+              <i class="bx bxl-instagram text-danger fs-18"></i>
+            </a>
+            <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558391650137' }}" target="_blank" class="store-social-btn" title="Atendimento WhatsApp">
+              <i class="bx bxl-whatsapp text-success fs-18"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Atendimento e Localização -->
+        <div class="col-lg-4 col-md-6">
+          <h6 class="text-uppercase fs-13">📍 Atendimento &amp; Localização</h6>
+          <p class="mb-2 d-flex align-items-start text-light">
+            <i class="bx bx-map me-2 text-warning fs-18 mt-0.5"></i>
+            <span>{{ STORE_ADDRESS|default:"Rua José Pires Braga 120, Cajazeiras PB, 58900-000, Brasil" }}</span>
+          </p>
+          <p class="mb-2 d-flex align-items-center text-light">
+            <i class="bx bx-phone me-2 text-warning fs-18"></i>
+            <span>{{ STORE_PHONE|default:"+55 83 9165-0137" }}</span>
+          </p>
+          <p class="mb-0 d-flex align-items-center text-light">
+            <i class="bx bx-time-five me-2 text-warning fs-18"></i>
+            <span>Segunda a Sábado: 09h às 19h</span>
+          </p>
+        </div>
+
+        <!-- Coluna 3: Navegação Rápida -->
+        <div class="col-lg-4 col-md-12">
+          <h6 class="text-uppercase fs-13">⚡ Navegação Rápida</h6>
+          <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+            <li>
+              <a href="{% url 'catalog:product_grid' %}" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Catálogo de Peças &amp; Novidades
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Linha Feminina Luiza Fit
+              </a>
+            </li>
+            <li>
+              <a href="{% url 'catalog:brand_list' %}" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Marcas &amp; Curadorias Parceiras
+              </a>
+            </li>
+            <li>
+              <a href="/links" target="_blank" class="store-footer-link">
+                <i class="bx bx-chevron-right text-warning me-1"></i> Linktree &amp; Redes Oficiais
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Linha de Copyright -->
+      <div class="border-top border-secondary border-opacity-25 mt-4 pt-3 text-center text-light opacity-75 fs-12">
+        &copy; {% now "Y" %} Grife HF Multimarcas — Todos os direitos reservados. Cajazeiras - PB.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Barra de Navegação Inferior Fixa para Smartphones (App Mobile Nav) -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="mobile-bottom-nav-item {% if request.path == '/' %}active{% endif %}">
+      <i class="bx bx-home-alt"></i>
+      <span>Início</span>
+    </a>
+    <a href="#offcanvasStoreMenu" data-bs-toggle="offcanvas" class="mobile-bottom-nav-item">
+      <i class="bx bx-grid-alt"></i>
+      <span>Categorias</span>
+    </a>
+    <a href="{% url 'catalog:product_grid' %}" class="mobile-bottom-nav-item {% if '/produtos/' in request.path %}active{% endif %}">
+      <i class="bx bx-store-alt"></i>
+      <span>Vitrine</span>
+    </a>
+    <a href="{% url 'orders:cart' %}" class="mobile-bottom-nav-item position-relative {% if '/pedidos/carrinho/' in request.path %}active{% endif %}">
+      <i class="bx bx-shopping-bag"></i>
+      <span>Sacola</span>
+      {% if cart.total_items > 0 %}
+      <span class="mobile-nav-badge">{{ cart.total_items }}</span>
+      {% endif %}
+    </a>
+    <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558391650137' }}" target="_blank" class="mobile-bottom-nav-item">
+      <i class="bx bxl-whatsapp text-success"></i>
+      <span>WhatsApp</span>
+    </a>
+  </nav>
+
+  <!-- Botão Flutuante do WhatsApp -->
+  {% include 'partials/whatsapp-floating.html' %}
+
+  <!-- Vendor Scripts -->
+  <script src="{% static 'js/vendor.js' %}"></script>
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

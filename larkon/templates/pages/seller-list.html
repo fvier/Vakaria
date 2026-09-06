@@ -1,0 +1,54 @@
+{% extends 'layout-store.html' %}
+{% load static i18n %}
+
+{% block title %}Marcas Multimarcas Parceiras | Grife HF{% endblock %}
+
+{% block store_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-light-subtle mb-4">
+            <div class="card-body p-4">
+                <h3 class="fw-bold text-dark mb-1">🏷️ Marcas & Curadorias Exclusivas</h3>
+                <p class="text-muted fs-14 mb-0">
+                    A Grife HF seleciona criteriosamente as marcas mais prestigiadas do cenário nacional e internacional para compor nossas coleções feminina e masculina.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for seller in sellers %}
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-dark text-white px-2 py-1 fs-11 text-uppercase">Marca Oficial</span>
+                        <span class="badge bg-light text-muted fs-12">{{ seller.products.count }} peça(s)</span>
+                    </div>
+
+                    <h4 class="fs-18 fw-bold text-dark mb-2">{{ seller.name }}</h4>
+                    <p class="text-muted fs-13 mb-3">{{ seller.description|default:"Curadoria de alta moda e design autêntico." }}</p>
+                </div>
+
+                <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                    <a href="{% url 'catalog:product_grid' %}?brand={{ seller.slug }}" class="btn btn-dark btn-sm d-flex align-items-center gap-1">
+                        <i class="bx bx-grid-alt"></i> Ver Peças da Marca
+                    </a>
+                    {% if seller.website %}
+                    <a href="{{ seller.website }}" target="_blank" class="text-muted fs-13 text-decoration-none">
+                        <i class="bx bx-globe me-1"></i> Site
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 py-5 text-center">
+        <p class="text-muted">Nenhuma marca parceira cadastrada no momento.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

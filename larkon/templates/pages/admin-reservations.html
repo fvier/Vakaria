@@ -1,0 +1,505 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Módulo de Reservas & Fila de Espera (CRM) | Grife HF{% endblock title %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex flex-column flex-md-row align-items-md-center justify-content-between my-3 gap-2">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-warning text-dark px-2.5 py-1 fs-12 fw-bold">CRM VIP</span>
+            <h4 class="mb-0 text-dark fw-bold">Fila de Espera & Reservas de Peças</h4>
+          </div>
+          <p class="text-muted fs-13 mb-0 mt-1">
+            Controle os clientes que pediram aviso/reserva quando peças esgotadas chegarem, garantindo atendimento VIP e zero vendas perdidas.
+          </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <button type="button" class="btn btn-warning text-dark btn-sm rounded-pill px-3.5 fw-bold d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#addReservationModal">
+            <i class="bx bx-plus-circle fs-16"></i> Nova Reserva Manual
+          </button>
+          <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1">
+            <i class="bx bx-store-alt"></i> Ver Loja Vitrine
+          </a>
+          <button type="button" class="btn btn-dark btn-sm rounded-pill px-3 d-flex align-items-center gap-1" onclick="window.location.reload();">
+            <i class="bx bx-refresh"></i> Atualizar Lista
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <div class="avatar-sm rounded-circle bg-dark bg-opacity-10 text-dark d-flex align-items-center justify-content-center fs-18">
+            <i class="bx bx-list-check"></i>
+          </div>
+          <small class="text-muted fw-semibold">Total Reservas</small>
+        </div>
+        <h3 class="fw-bold mb-0 text-dark mt-1">{{ total_count }}</h3>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100 border-start border-warning border-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <div class="avatar-sm rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center fs-18">
+            <i class="bx bx-time-five"></i>
+          </div>
+          <small class="text-muted fw-semibold">Aguardando Aviso</small>
+        </div>
+        <h3 class="fw-bold mb-0 text-warning mt-1">{{ pending_count }}</h3>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100 border-start border-primary border-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fs-18">
+            <i class="bx bxl-whatsapp"></i>
+          </div>
+          <small class="text-muted fw-semibold">Clientes Avisados</small>
+        </div>
+        <h3 class="fw-bold mb-0 text-primary mt-1">{{ notified_count }}</h3>
+      </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 col-6">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100 border-start border-success border-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <div class="avatar-sm rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center fs-18">
+            <i class="bx bx-check-double"></i>
+          </div>
+          <small class="text-muted fw-semibold">Vendas Fechadas</small>
+        </div>
+        <h3 class="fw-bold mb-0 text-success mt-1">{{ converted_count }}</h3>
+      </div>
+    </div>
+
+    <div class="col-xl-4 col-md-8 col-12">
+      <div class="card shadow-sm border-0 rounded-4 p-3 bg-dark text-white h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <small class="text-white text-opacity-75 fw-semibold text-uppercase fs-11">Demanda Financeira em Espera</small>
+            <h3 class="fw-bold mb-0 text-warning mt-1">R$ {{ pipeline_value|floatformat:2 }}</h3>
+            <small class="text-white text-opacity-75 fs-11">Potencial de receita imediata ao repor estoque</small>
+          </div>
+          <div class="avatar-md rounded-circle bg-white bg-opacity-10 text-warning d-flex align-items-center justify-content-center fs-24">
+            <i class="bx bx-dollar-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha de Conteúdo Principal -->
+  <div class="row g-3">
+    
+    <!-- Tabela Principal de Reservas -->
+    <div class="col-xl-9 col-lg-8">
+      <div class="card shadow-sm border-0 rounded-4">
+        
+        <!-- Header com Busca e Filtros de Status -->
+        <div class="card-header bg-white border-bottom p-3">
+          <div class="row g-2 align-items-center">
+            
+            <div class="col-md-6">
+              <form method="get" class="d-flex gap-2">
+                {% if status_filter %}
+                  <input type="hidden" name="status" value="{{ status_filter }}">
+                {% endif %}
+                <div class="input-group input-group-sm">
+                  <input type="text" name="q" class="form-control" placeholder="Buscar por cliente, telefone, peça ou cor..." value="{{ search_query }}">
+                  <button class="btn btn-dark" type="submit"><i class="bx bx-search-alt"></i></button>
+                  {% if search_query %}
+                    <a href="?{% if status_filter %}status={{ status_filter }}{% endif %}" class="btn btn-outline-secondary" title="Limpar busca"><i class="bx bx-x"></i></a>
+                  {% endif %}
+                </div>
+              </form>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex flex-wrap gap-1 justify-content-md-end">
+                <a href="?{% if search_query %}q={{ search_query }}{% endif %}" class="btn btn-sm {% if not status_filter %}btn-dark{% else %}btn-outline-secondary{% endif %} rounded-pill px-2.5 fs-11">
+                  Todos ({{ total_count }})
+                </a>
+                <a href="?status=pending{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning text-dark fw-bold{% else %}btn-outline-warning text-dark{% endif %} rounded-pill px-2.5 fs-11">
+                  ⏳ Pendentes ({{ pending_count }})
+                </a>
+                <a href="?status=notified{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm {% if status_filter == 'notified' %}btn-primary fw-bold{% else %}btn-outline-primary{% endif %} rounded-pill px-2.5 fs-11">
+                  📱 Avisados ({{ notified_count }})
+                </a>
+                <a href="?status=converted{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm {% if status_filter == 'converted' %}btn-success fw-bold{% else %}btn-outline-success{% endif %} rounded-pill px-2.5 fs-11">
+                  ✅ Vendidos ({{ converted_count }})
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-13">
+              <thead class="table-light text-muted fs-11 text-uppercase">
+                <tr>
+                  <th style="width: 50px;" class="text-center">#</th>
+                  <th>Cliente &amp; Contato</th>
+                  <th>Peça Solicitada</th>
+                  <th class="text-center">Cor / Tamanho</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Data</th>
+                  <th class="text-center" style="width: 180px;">Ação VIP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for res in reservations %}
+                <tr id="reservation-row-{{ res.id }}">
+                  <td class="text-center fw-bold text-muted">#{{ res.id }}</td>
+                  
+                  <td>
+                    <div class="d-flex flex-column">
+                      <span class="fw-bold text-dark fs-13">{{ res.customer_name }}</span>
+                      <a href="https://wa.me/{{ res.customer_phone|cut:' '|cut:'-'|cut:'('|cut:')' }}" target="_blank" class="text-success fs-12 text-decoration-none d-flex align-items-center gap-1 mt-0.5">
+                        <i class="bx bxl-whatsapp"></i> {{ res.customer_phone }}
+                      </a>
+                      {% if res.notes %}
+                        <small class="text-muted fst-italic mt-1" style="max-width: 220px; font-size: 11px;">"{{ res.notes }}"</small>
+                      {% endif %}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      {% if res.product.cover_image %}
+                        <img src="{{ res.product.cover_image.url }}" alt="{{ res.product.title }}" class="rounded border shadow-xs" style="width: 44px; height: 44px; object-fit: cover;">
+                      {% else %}
+                        <div class="rounded border bg-light d-flex align-items-center justify-content-center text-muted" style="width: 44px; height: 44px;">
+                          <i class="bx bx-image fs-20"></i>
+                        </div>
+                      {% endif %}
+                      <div>
+                        <a href="{% url 'catalog:product_detail' res.product.slug %}" target="_blank" class="fw-semibold text-dark text-decoration-none d-block">
+                          {{ res.product.title|truncatechars:35 }}
+                        </a>
+                        <small class="text-muted">
+                          {% if res.product.brand %}{{ res.product.brand.name }} • {% endif %}R$ {{ res.product.price|floatformat:2 }}
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    <div class="d-flex flex-column align-items-center gap-1">
+                      {% if res.color %}
+                        <span class="badge bg-light text-dark border px-2 py-0.5 fs-11">
+                          🎨 {{ res.color }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted fs-11">-</span>
+                      {% endif %}
+                      {% if res.size %}
+                        <span class="badge bg-dark text-white px-2 py-0.5 fs-11">
+                          📏 {{ res.size }}
+                        </span>
+                      {% endif %}
+                    </div>
+                  </td>
+
+                  <td class="text-center">
+                    <select class="form-select form-select-sm status-select shadow-xs" 
+                            data-reservation-id="{{ res.id }}"
+                            onchange="updateReservationStatus({{ res.id }}, this.value)"
+                            style="font-size: 11.5px; font-weight: 600; min-width: 140px; border-radius: 8px;">
+                      {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if res.status == val %}selected{% endif %}>
+                          {{ label }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <td class="text-center">
+                    <span class="text-muted fs-11 d-block">{{ res.created_at|date:"d/m/Y" }}</span>
+                    <small class="text-muted fs-10">{{ res.created_at|date:"H:i" }}</small>
+                  </td>
+
+                  <td class="text-center">
+                    <div class="d-flex flex-column gap-1">
+                      <a href="{{ res.generate_whatsapp_vip_link }}" 
+                         target="_blank" 
+                         onclick="onWhatsAppNotifyClicked({{ res.id }})"
+                         class="btn btn-sm btn-success w-100 rounded-pill px-2.5 py-1.5 fw-semibold fs-11 shadow-xs d-flex align-items-center justify-content-center gap-1">
+                        <i class="bx bxl-whatsapp fs-14"></i>
+                        <span>Avisar Chegada</span>
+                      </a>
+                      <a href="{% url 'orders:manual_order_create' %}?reservation_id={{ res.id }}" 
+                         class="btn btn-sm btn-dark w-100 rounded-pill px-2.5 py-1 fs-11 fw-semibold d-flex align-items-center justify-content-center gap-1">
+                        <i class="bx bx-cart fs-13"></i>
+                        <span>🛒 Converter em Venda</span>
+                      </a>
+                    </div>
+                  </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-5">
+                    <div class="text-muted">
+                      <i class="bx bx-check-circle fs-48 text-success opacity-50 mb-2"></i>
+                      <h6 class="fw-bold mb-1">Nenhuma reserva encontrada</h6>
+                      <p class="fs-12 mb-3">Todas as reservas foram atendidas ou não há cadastros com os filtros aplicados.</p>
+                      <button type="button" class="btn btn-warning text-dark btn-sm rounded-pill px-3.5 fw-bold" data-bs-toggle="modal" data-bs-target="#addReservationModal">
+                        <i class="bx bx-plus-circle"></i> Cadastrar Nova Reserva
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Barra Lateral: Peças Mais Desejadas (Inteligência de Compras) -->
+    <div class="col-xl-3 col-lg-4">
+      
+      <div class="card shadow-sm border-0 rounded-4 mb-3">
+        <div class="card-header bg-dark text-white rounded-top-4 py-2.5 px-3 d-flex align-items-center justify-content-between">
+          <span class="fs-13 fw-bold text-uppercase letter-spacing-1">
+            <i class="bx bx-trending-up text-warning me-1"></i> Peças Mais Pedidas
+          </span>
+          <span class="badge bg-warning text-dark fs-10 fw-bold">Reposição</span>
+        </div>
+        <div class="card-body p-2">
+          <p class="text-muted fs-11 px-2 mb-2">
+            Peças com maior fila de espera. Priorize na hora de comprar novos lotes com fornecedores:
+          </p>
+
+          {% if top_wanted_products %}
+            <div class="d-flex flex-column gap-2">
+              {% for p in top_wanted_products %}
+                <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-light-subtle border">
+                  <div class="d-flex align-items-center gap-2 overflow-hidden">
+                    {% if p.cover_image %}
+                      <img src="{{ p.cover_image.url }}" alt="{{ p.title }}" class="rounded" style="width: 36px; height: 36px; object-fit: cover;">
+                    {% else %}
+                      <div class="rounded bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                        <i class="bx bx-tag text-muted"></i>
+                      </div>
+                    {% endif %}
+                    <div class="text-truncate">
+                      <a href="{% url 'catalog:product_detail' p.slug %}" target="_blank" class="fs-12 fw-semibold text-dark text-decoration-none d-block text-truncate">
+                        {{ p.title }}
+                      </a>
+                      <small class="text-muted fs-10">R$ {{ p.price|floatformat:2 }}</small>
+                    </div>
+                  </div>
+                  <span class="badge bg-danger rounded-pill px-2 py-1 fs-11 ms-2">
+                    {{ p.reservations_count }} na fila
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-3 text-muted fs-12">
+              Sem dados de reposição no momento.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Dica de Atendimento VIP Grife HF -->
+      <div class="card shadow-sm border-0 rounded-4 bg-primary bg-opacity-10 border-primary border-opacity-25 p-3">
+        <div class="d-flex align-items-start gap-2">
+          <i class="bx bx-bulb fs-22 text-primary mt-0.5"></i>
+          <div>
+            <h6 class="fs-13 fw-bold text-primary mb-1">Como Funciona a Regra das 24 Horas:</h6>
+            <p class="text-dark fs-11 mb-0 leading-relaxed">
+              Ao clicar no botão <strong>"Avisar Peça Chegou"</strong>, o cliente recebe uma mensagem VIP no WhatsApp informando que a reserva dele está garantida pelas próximas 24 horas. Esse senso de urgência gera altas taxas de conversão imediata!
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+<!-- Modal: Adicionar Reserva Manualmente -->
+<div class="modal fade" id="addReservationModal" tabindex="-1" aria-labelledby="addReservationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <form method="post" action="{% url 'orders:admin_reservations' %}">
+        {% csrf_token %}
+        <div class="modal-header bg-dark text-white px-4 py-3 border-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="avatar-xs rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center fw-bold fs-14">
+              <i class="bx bx-bookmark-plus"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fs-15 fw-bold text-white mb-0" id="addReservationModalLabel">Nova Reserva / Fila VIP</h5>
+              <small class="text-warning text-opacity-75 fs-11">Cadastre um cliente aguardando reposição de peça</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            
+            <!-- Seleção da Peça -->
+            <div class="col-12">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">Peça / Produto Desejado <span class="text-danger">*</span></label>
+              <select name="product_id" class="form-select form-select-sm rounded-3 fs-13 py-2" required>
+                <option value="" disabled selected>Selecione o produto do catálogo...</option>
+                {% for p in all_products %}
+                  <option value="{{ p.id }}">
+                    {{ p.title }} {% if p.brand %}({{ p.brand.name }}){% endif %} - R$ {{ p.price|floatformat:2 }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Nome do Cliente -->
+            <div class="col-md-6">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">Nome do Cliente <span class="text-danger">*</span></label>
+              <input type="text" name="customer_name" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: Lucas Gabriel" required>
+            </div>
+
+            <!-- WhatsApp / Telefone -->
+            <div class="col-md-6">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">WhatsApp / Telefone <span class="text-danger">*</span></label>
+              <input type="text" name="customer_phone" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: (83) 99999-9999" required>
+            </div>
+
+            <!-- Tamanho Desejado -->
+            <div class="col-md-6">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">Tamanho Desejado</label>
+              <input type="text" name="size" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: M, 42, G/GG, Único">
+            </div>
+
+            <!-- Cor Desejada -->
+            <div class="col-md-6">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">Cor / Variação</label>
+              <input type="text" name="color" class="form-control form-control-sm rounded-3 fs-13 py-2" placeholder="Ex: Preto, Azul Marinho">
+            </div>
+
+            <!-- Observações / Pedido VIP -->
+            <div class="col-12">
+              <label class="form-label fs-12 fw-bold text-dark mb-1">Observações Internas (Opcional)</label>
+              <textarea name="notes" rows="2" class="form-control form-control-sm rounded-3 fs-13" placeholder="Ex: Pediu para avisar assim que chegar o lote novo da Reserva..."></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light px-4 py-3 border-0 d-flex justify-content-between">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning text-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
+            <i class="bx bx-check-circle"></i> Salvar na Fila VIP
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Flutuante de Atualização de Status -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+  <div id="reservationToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2">
+        <i class="bx bxs-check-circle text-success fs-20"></i>
+        <span id="reservationToastMsg" class="fs-13 fw-semibold">Status atualizado com sucesso!</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}
+
+{% block extra_javascript %}
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function showReservationToast(msg, isSuccess = true) {
+    const toastEl = document.getElementById('reservationToast');
+    const msgEl = document.getElementById('reservationToastMsg');
+    if (!toastEl || !msgEl) return;
+    
+    msgEl.textContent = msg;
+    const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    toast.show();
+  }
+
+  function updateReservationStatus(reservationId, newStatus) {
+    const formData = new FormData();
+    formData.append('status', newStatus);
+
+    fetch(`/reservas/${reservationId}/status/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        showReservationToast(data.message);
+      } else {
+        alert(data.message || 'Erro ao atualizar status.');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro de conexão ao atualizar status.');
+    });
+  }
+
+  function onWhatsAppNotifyClicked(reservationId) {
+    // Ao clicar em avisar, atualiza o status para "notified" automaticamente
+    const selectEl = document.querySelector(`.status-select[data-reservation-id="${reservationId}"]`);
+    if (selectEl && selectEl.value === 'pending') {
+      selectEl.value = 'notified';
+      updateReservationStatus(reservationId, 'notified');
+    }
+  }
+</script>
+{% endblock extra_javascript %}

@@ -1,0 +1,116 @@
+{% load static i18n %}
+
+<header class="topbar sticky-top bg-white border-bottom border-light-subtle shadow-xs z-3">
+  <div class="container-fluid">
+    <div class="navbar-header d-flex align-items-center justify-content-between py-1">
+
+      <!-- ================= Left: Toggle & ERP / Linktree Badges ================= -->
+      <div class="d-flex align-items-center gap-2 h-100">
+        <div class="topbar-item">
+          <button type="button" class="topbar-button button-toggle-menu" title="Alternar menu lateral" aria-label="Alternar menu lateral">
+            <i class="bx bx-menu fs-24 align-middle"></i>
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <!-- ERP Pill Badge -->
+          <span class="badge bg-primary rounded-pill px-3 py-1.5 fw-bold fs-12">Grife HF ERP</span>
+
+          <!-- Linktree Pill Button -->
+          <a href="/links" target="_blank" class="btn btn-sm rounded-pill fw-bold text-white px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" title="Abrir Linktree Oficial em nova aba" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #3b82f6;">
+            <i class="bx bx-link fs-16 text-warning"></i>
+            <span>Linktree</span>
+            <i class="bx bx-link-external fs-12 text-muted ms-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- ================= Right: Icons & User Profile ================= -->
+      <div class="d-flex align-items-center gap-1 h-100">
+
+        <!-- 1. Light/Dark Mode Toggle (Moon Icon) -->
+        <div class="topbar-item">
+          <button type="button" class="topbar-button" id="light-dark-mode" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+            <i class="bx bx-moon fs-22 align-middle"></i>
+          </button>
+        </div>
+
+        <!-- 2. Palette Icon (Desktop/Tablet) -->
+        <div class="dropdown topbar-item d-none d-sm-flex">
+          <button type="button" class="topbar-button" id="theme-palette-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Escolher cor do tema" aria-label="Escolher cor do tema">
+            <i class="bx bx-palette fs-22 align-middle"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3 p-2" style="min-width: 190px;">
+            <small class="text-secondary text-uppercase fw-bold px-2 d-block mb-1 fs-11">Cor do sistema</small>
+            <button type="button" class="dropdown-item rounded-2 d-flex align-items-center gap-2" onclick="document.documentElement.setAttribute('data-bs-theme', 'light')"><span class="rounded-circle" style="width:12px;height:12px;background:#2563eb"></span>Azul</button>
+            <button type="button" class="dropdown-item rounded-2 d-flex align-items-center gap-2" onclick="document.documentElement.setAttribute('data-bs-theme', 'light')"><span class="rounded-circle" style="width:12px;height:12px;background:#d97706"></span>Dourado</button>
+            <button type="button" class="dropdown-item rounded-2 d-flex align-items-center gap-2" onclick="document.documentElement.setAttribute('data-bs-theme', 'light')"><span class="rounded-circle" style="width:12px;height:12px;background:#15803d"></span>Verde</button>
+            <button type="button" class="dropdown-item rounded-2 d-flex align-items-center gap-2" onclick="document.documentElement.setAttribute('data-bs-theme', 'light')"><span class="rounded-circle" style="width:12px;height:12px;background:#7c3aed"></span>Roxo</button>
+            <button type="button" class="dropdown-item rounded-2 d-flex align-items-center gap-2" onclick="document.documentElement.setAttribute('data-bs-theme', 'dark')"><span class="rounded-circle" style="width:12px;height:12px;background:#475569"></span>Grafite</button>
+          </div>
+        </div>
+
+        <!-- 3. Fullscreen Button -->
+        <div class="topbar-item d-none d-md-flex">
+          <button type="button" class="topbar-button" data-toggle="fullscreen" title="Tela cheia" aria-label="Tela cheia">
+            <i class="bx bx-fullscreen fs-22 align-middle"></i>
+          </button>
+        </div>
+
+        <!-- 4. Theme Settings Gear Button -->
+        <div class="topbar-item d-none d-sm-flex">
+          <button type="button" class="topbar-button" id="theme-settings-btn" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" aria-controls="theme-settings-offcanvas" title="Personalizar painel" aria-label="Personalizar painel">
+            <i class="bx bx-cog fs-22 align-middle"></i>
+          </button>
+        </div>
+
+        <!-- 5. Home Icon (Site Público) -->
+        <div class="topbar-item">
+          <a href="{% url 'catalog:home' %}" class="topbar-button d-flex align-items-center justify-content-center" title="Ver site público" aria-label="Ver site público">
+            <i class="bx bx-home fs-22 align-middle"></i>
+          </a>
+        </div>
+
+        <!-- 6. User Profile Dropdown com Foto + Nome + Ponto de Status -->
+        <div class="dropdown topbar-item ms-1">
+          {% if request.user.is_authenticated %}
+          <button type="button" class="topbar-button d-flex align-items-center gap-2 p-1 rounded-pill" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Minha conta">
+            <img src="{% static 'images/users/avatar-1.jpg' %}" alt="Avatar" width="32" height="32" class="rounded-circle object-fit-cover shadow-sm">
+            <span class="fw-semibold fs-13 text-dark d-none d-sm-inline">{{ request.user.name|default:request.user.email|default:"admin"|truncatechars:12 }}</span>
+            <span class="rounded-circle border border-2 border-white shadow-sm" style="width: 10px; height: 10px; background: #0f172a;" title="Status Online"></span>
+          </button>
+
+          <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" style="min-width: 240px;">
+            <div class="px-3 py-2 border-bottom">
+              <small class="text-muted d-block fs-11">Conta conectada</small>
+              <strong class="text-dark fs-13 text-truncate d-block">{{ request.user.email }}</strong>
+            </div>
+
+            <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-13" href="{% url 'catalog:home' %}">
+              <i class="bx bx-store text-primary fs-16"></i>
+              <span>Ver Vitrine da Loja</span>
+            </a>
+
+            <a class="dropdown-item d-flex align-items-center gap-2 py-2 fs-13" href="/admin/">
+              <i class="bx bx-slider-alt text-primary fs-16"></i>
+              <span>Django Admin Central</span>
+            </a>
+
+            <div class="dropdown-divider my-1"></div>
+
+            <a class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger fw-bold fs-13" href="{% url 'account_logout' %}">
+              <i class="bx bx-log-out fs-16"></i>
+              <span>Sair do Sistema</span>
+            </a>
+          </div>
+          {% else %}
+          <a href="{% url 'account_login' %}" class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-semibold fs-12 d-inline-flex align-items-center gap-1">
+            <i class="bx bx-user fs-15"></i> <span>Entrar</span>
+          </a>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</header>

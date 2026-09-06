@@ -1,0 +1,73 @@
+services:
+  app:
+    container_name: grifehf-app
+    build:
+      context: .
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grifehf-http.rule=Host(`grifehf.com.br`) || Host(`www.grifehf.com.br`)"
+      - "traefik.http.routers.grifehf-http.entrypoints=http"
+      - "traefik.http.routers.grifehf-http.middlewares=grifehf-https"
+      - "traefik.http.middlewares.grifehf-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.grifehf.rule=Host(`grifehf.com.br`)"
+      - "traefik.http.routers.grifehf.entrypoints=https"
+      - "traefik.http.routers.grifehf.tls=true"
+      - "traefik.http.routers.grifehf.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.grifehf-www.rule=Host(`www.grifehf.com.br`)"
+      - "traefik.http.routers.grifehf-www.entrypoints=https"
+      - "traefik.http.routers.grifehf-www.tls=true"
+      - "traefik.http.routers.grifehf-www.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grifehf.loadbalancer.server.port=8000"
+      - "traefik.docker.network=coolify"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Configure DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-grifehf.com.br,www.grifehf.com.br,147.79.110.132,localhost,127.0.0.1}
+      DATABASE_URL: postgres://${POSTGRES_USER:-grifehf}:${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-grifehf}
+    command:
+      - /bin/sh
+      - -c
+      - python manage.py migrate --noinput && python manage.py collectstatic --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --threads 2 --access-logfile - --error-logfile - --timeout 60
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8000"
+    volumes:
+      - grifehf_media:/app/larkon/media
+      - grifehf_static:/app/staticfiles
+    networks:
+      - coolify
+      - default
+
+  postgres:
+    container_name: grifehf-postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-grifehf}
+      POSTGRES_USER: ${POSTGRES_USER:-grifehf}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: grifehf_postgres_data
+  grifehf_media:
+    name: grifehf_media
+  grifehf_static:
+    name: grifehf_static
+
+networks:
+  coolify:
+    external: true
+  default:

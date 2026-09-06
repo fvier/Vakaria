@@ -1,0 +1,223 @@
+{% load static i18n %}
+
+<div class="main-nav">
+  <!-- Sidebar Logo & Controls -->
+  <div class="logo-box px-3 py-2 d-flex align-items-center justify-content-between">
+    <a href="{% url 'pages:dashboard' %}" class="logo-dark align-items-center gap-2 text-decoration-none">
+      <img src="{% static 'images/logo-sm.png' %}" class="logo-sm" alt="Grife HF" style="height: 36px; width: auto; object-fit: contain;">
+      <span class="logo-lg d-flex flex-column text-start">
+        <span class="fw-bold text-dark fs-16" style="letter-spacing: -0.3px; line-height: 1.1;">Grife HF</span>
+        <span class="text-muted text-uppercase fw-semibold" style="font-size: 9px; letter-spacing: 0.8px;">ERP COMERCIAL</span>
+      </span>
+    </a>
+
+    <a href="{% url 'pages:dashboard' %}" class="logo-light align-items-center gap-2 text-decoration-none">
+      <img src="{% static 'images/logo-sm.png' %}" class="logo-sm" alt="Grife HF" style="height: 36px; width: auto; object-fit: contain;">
+      <span class="logo-lg d-flex flex-column text-start">
+        <span class="fw-bold text-white fs-16" style="letter-spacing: -0.3px; line-height: 1.1;">Grife HF</span>
+        <span class="text-white-50 text-uppercase fw-semibold" style="font-size: 9px; letter-spacing: 0.8px;">ERP COMERCIAL</span>
+      </span>
+    </a>
+
+    <!-- Mobile Close Button (X) -->
+    <button type="button" class="btn-close d-lg-none ms-auto text-dark" id="btn-close-sidebar-mobile" aria-label="Fechar menu"></button>
+
+    <!-- Desktop Pin Button (📌) -->
+    <button type="button" class="btn btn-sm btn-light border-0 d-none d-lg-inline-flex align-items-center justify-content-center p-1 rounded-circle ms-auto sidebar-pin-btn" id="btn-pin-sidebar-desktop" title="Fixar / Destravar Menu Lateral" aria-label="Fixar menu">
+      <i class="bx bx-pin fs-16"></i>
+    </button>
+  </div>
+
+  <!-- Menu Toggle Button (sm-hover) -->
+  <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
+    <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="button-sm-hover-icon"></iconify-icon>
+  </button>
+
+  <div class="scrollbar" data-simplebar>
+    <ul class="navbar-nav" id="navbar-nav">
+
+      <!-- ========== VISÃO GERAL ========== -->
+      <li class="menu-title">VISÃO GERAL</li>
+
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'pages:dashboard' %}">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:home-2-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Início </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='charts-apex-area' %}">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:chart-2-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Dashboard Analytics </span>
+        </a>
+      </li>
+
+      <!-- ========== MÓDULOS DE NEGÓCIO ========== -->
+      <li class="menu-title">MÓDULOS</li>
+
+      <!-- Vendas -->
+      <li class="nav-item">
+        <a class="nav-link menu-arrow" href="#sidebarVendas" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarVendas">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:cart-large-2-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Vendas </span>
+        </a>
+        <div class="collapse" id="sidebarVendas">
+          <ul class="nav sub-navbar-nav">
+            <li class="sub-nav-item">
+              <a class="sub-nav-link text-success fw-bold" href="/pedidos/novo/"><i class="bx bx-plus-circle me-1"></i> + Novo Pedido (PDV)</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link text-warning fw-semibold" href="/reservas/"><i class="bx bx-list-check me-1"></i> Reservas & Fila VIP</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link text-info fw-bold" href="{% url 'catalog:admin_inventory' %}"><i class="bx bx-package me-1"></i> Controle de Estoque (E/S)</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='order-list' %}">Pedidos & WhatsApp VIP</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'orders:cart' %}">Sacolas Ativas</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='invoice-list' %}">Faturamento / Recibos</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Catálogo & Moda -->
+      <li class="nav-item">
+        <a class="nav-link menu-arrow" href="#sidebarModa" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarModa">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:t-shirt-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Catálogo & Moda </span>
+        </a>
+        <div class="collapse" id="sidebarModa">
+          <ul class="nav sub-navbar-nav">
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'catalog:product_grid' %}">Vitrine de Peças</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link fw-semibold" href="{% url 'catalog:admin_inventory' %}">Controle de Estoque (PP–GG)</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="/admin/catalog/drop/">Drops Bi-semanais</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'catalog:brand_list' %}">Marcas Parceiras</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="/admin/catalog/product/add/">+ Cadastrar Nova Peça</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Consultores & Comissões -->
+      <li class="nav-item">
+        <a class="nav-link menu-arrow" href="#sidebarComissoes" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarComissoes">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:users-group-two-rounded-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Consultoras & Metas </span>
+        </a>
+        <div class="collapse" id="sidebarComissoes">
+          <ul class="nav sub-navbar-nav">
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dashboard' %}">Ranking ao Vivo</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='customer-list' %}">Base de Clientes VIP</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='coupons-list' %}">Campanhas & Cupons</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Financeiro -->
+      <li class="nav-item">
+        <a class="nav-link menu-arrow" href="#sidebarFinanceiro" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarFinanceiro">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:wad-of-money-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Financeiro </span>
+        </a>
+        <div class="collapse" id="sidebarFinanceiro">
+          <ul class="nav sub-navbar-nav">
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='invoice-list' %}">Fluxo de Caixa</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='charts-apex-column' %}">Relatório de Faturamento</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Administração -->
+      <li class="nav-item">
+        <a class="nav-link menu-arrow" href="#sidebarAdmin" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAdmin">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:settings-bold-duotone" class="text-warning"></iconify-icon>
+          </span>
+          <span class="nav-text"> Administração </span>
+        </a>
+        <div class="collapse" id="sidebarAdmin">
+          <ul class="nav sub-navbar-nav">
+            <li class="sub-nav-item">
+              <a class="sub-nav-link fw-bold text-warning" href="{% url 'pages:admin_home_cms' %}">
+                <i class="bx bx-home-circle me-1 fs-16"></i> Gerenciar Início (Home)
+              </a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link fw-semibold text-success" href="{% url 'pages:admin_linktree' %}">
+                <i class="bx bx-link me-1"></i> Gerenciar Linktree
+              </a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="/admin/users/user/">Equipe & Vendedores</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="{% url 'pages:dynamic_pages' template_name='permissions' %}">Privilégios & Acessos</a>
+            </li>
+            <li class="sub-nav-item">
+              <a class="sub-nav-link" href="/admin/">Django Admin Central</a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- ========== ATALHOS ========== -->
+      <li class="menu-title">ATALHOS & INTEGRAÇÕES</li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'pages:dynamic_pages' template_name='pages-timeline' %}">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:history-bold-duotone"></iconify-icon>
+          </span>
+          <span class="nav-text"> Logs de Atividades </span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ STORE_WHATSAPP_URL }}" target="_blank">
+          <span class="nav-icon">
+            <iconify-icon icon="solar:chat-round-line-bold-duotone" class="text-success"></iconify-icon>
+          </span>
+          <span class="nav-text text-success"> WhatsApp API Loja </span>
+        </a>
+      </li>
+
+    </ul>
+  </div>
+</div>

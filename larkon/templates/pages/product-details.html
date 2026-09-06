@@ -1,0 +1,356 @@
+{% extends 'layout-store.html' %}
+{% load static i18n %}
+
+{% block title %}{{ product.title }} — {{ product.brand.name }} | Grife HF{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Tarja Diagonal de Crime / Caution - Produto Esgotado */
+  .details-stock-wrap {
+    position: relative;
+    overflow: hidden;
+  }
+  .details-out-of-stock-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.25);
+    border-radius: 8px;
+  }
+  .details-crime-tape {
+    position: absolute;
+    width: 160%;
+    background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #7f1d1d 100%);
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 10px 0;
+    transform: rotate(-25deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    border-top: 3px dashed rgba(255, 255, 255, 0.8);
+    border-bottom: 3px dashed rgba(255, 255, 255, 0.8);
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+  }
+  .details-sold-out-img {
+    filter: grayscale(70%) brightness(0.85);
+  }
+</style>
+{% endblock %}
+
+{% block store_content %}
+<div class="row">
+    <!-- Imagens da Peça -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div id="productCarousel" class="carousel slide details-stock-wrap position-relative" data-bs-ride="carousel">
+                    {% if not product.in_stock %}
+                    <div class="details-out-of-stock-overlay">
+                        <div class="details-crime-tape">
+                            <span>⛔ ESGOTADO • CHEGARÁ EM BREVE ⛔</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="carousel-inner rounded" style="max-height: 520px; background-color: #f8f9fa;">
+                        {% for img in product.images.all %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %} text-center">
+                            <img src="{{ img.url }}" alt="{{ img.alt_text|default:product.title }}" class="img-fluid rounded w-100 object-fit-cover {% if not product.in_stock %}details-sold-out-img{% endif %}" style="height: 480px;">
+                        </div>
+                        {% empty %}
+                        <div class="carousel-item active text-center">
+                            <img src="{% static 'images/product/p-1.png' %}" alt="{{ product.title }}" class="img-fluid rounded">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if product.images.count > 1 %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+                        <span class="visually-hidden">Próxima</span>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações da Peça & Ações de Compra -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <!-- Marca e Badges -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-dark text-white px-3 py-2 fs-12 text-uppercase">
+                        {{ product.brand.name }}
+                    </span>
+                    <div>
+                        <span class="badge {% if product.gender == 'F' %}bg-danger{% elif product.gender == 'M' %}bg-primary{% else %}bg-secondary{% endif %} text-white fs-12">
+                            {{ product.get_gender_display }}
+                        </span>
+                        {% if product.is_exclusive %}
+                        <span class="badge bg-warning text-dark fs-12">✨ Peça Exclusiva</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Título -->
+                <h3 class="fs-22 fw-bold text-dark mb-2">{{ product.title }}</h3>
+                <p class="text-muted fs-13 mb-3">Categoria: <strong>{{ product.category.name }}</strong> {% if product.drop %}| Drop: <strong>{{ product.drop.title }}</strong>{% endif %}</p>
+
+                <!-- Preço -->
+                <div class="d-flex align-items-baseline gap-3 my-3 p-3 bg-light rounded">
+                    {% if product.compare_at_price %}
+                    <span class="text-muted text-decoration-line-through fs-16">R$ {{ product.compare_at_price|floatformat:2 }}</span>
+                    {% endif %}
+                    <h2 class="fs-28 fw-bold text-dark mb-0">R$ {{ product.price|floatformat:2 }}</h2>
+                    {% if product.in_stock %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 fs-12">Disponível para Envio Imediato</span>
+                    {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-12">Esgotado</span>
+                    {% endif %}
+                </div>
+
+                <!-- Formulário de Seleção de Variação & Compra -->
+                <form method="post" action="{% url 'orders:add_to_cart' %}" class="my-4" id="detailPurchaseForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="variant_id" id="detailVariantIdInput" value="">
+
+                    <!-- Seleção de Cores (Se houver) -->
+                    {% if available_colors %}
+                    <div class="mb-3" id="detailColorsSection">
+                        <div class="d-flex justify-content-between align-items-center mb-1.5">
+                            <label class="fw-semibold fs-14 text-dark mb-0">🎨 Cor Disponível:</label>
+                            <small class="text-muted fs-12" id="detailSelectedColorText"></small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" id="detailColorsContainer">
+                            {% for col in available_colors %}
+                            <button type="button" class="btn btn-sm {% if forloop.first %}btn-dark text-white{% else %}btn-outline-secondary bg-white text-dark{% endif %} px-3 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs detail-color-btn" data-color-name="{{ col.name }}" onclick="selectDetailColor('{{ col.name|escapejs }}')">
+                                <span style="width: 12px; height: 12px; background-color: {{ col.hex }}; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.3);"></span>
+                                <span>{{ col.name }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Seleção de Tamanho Filtrado por Cor -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1.5">
+                            <label class="fw-semibold fs-14 text-dark mb-0">📏 Selecione o Tamanho:</label>
+                            <small class="text-muted fs-12" id="detailSelectedSizeText"></small>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2" id="detailSizesContainer">
+                            <!-- Injetado dinamicamente via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Quantidade -->
+                    <div class="row align-items-center mb-4">
+                        <div class="col-sm-4">
+                            <label class="fw-semibold fs-14 text-dark mb-2">Quantidade:</label>
+                            <input type="number" name="quantity" class="form-control" value="1" min="1" max="10">
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="submit" id="detailAddToCartBtn" class="btn btn-dark btn-lg px-4 d-flex align-items-center gap-2" {% if not product.in_stock %}disabled{% endif %}>
+                            <i class="bx bx-cart-add fs-20"></i> Adicionar à Sacola
+                        </button>
+
+                        <a id="detailWhatsAppBtn" href="https://wa.me/558391650137?text=Olá!%20Gostaria%20de%20tirar%20dúvidas%20sobre%20a%20peça%20{{ product.title|urlencode }}%20da%20Grife%20HF." target="_blank" class="btn btn-success btn-lg px-4 d-flex align-items-center gap-2">
+                            <i class="bx bxl-whatsapp fs-20"></i> Atendimento VIP WhatsApp
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Detalhes do Tecido & Descrição -->
+                <div class="border-top pt-4 mt-4">
+                    <h5 class="fs-15 fw-bold text-dark mb-2">Detalhes & Composição</h5>
+                    <p class="text-muted fs-14 mb-3">{{ product.description }}</p>
+
+                    {% if product.fabric_composition %}
+                    <div class="p-3 bg-light-subtle rounded mb-3">
+                        <span class="fw-semibold text-dark">🧵 Tecido:</span> {{ product.fabric_composition }}
+                    </div>
+                    {% endif %}
+
+                    {% if product.care_instructions %}
+                    <div class="p-3 bg-light-subtle rounded mb-3">
+                        <span class="fw-semibold text-dark">🧼 Cuidados & Lavagem:</span> {{ product.care_instructions }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Peças Relacionadas -->
+{% if related_products %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h4 class="fs-18 fw-bold text-dark mb-3">Você também pode gostar na mesma categoria</h4>
+    </div>
+    {% for rel in related_products %}
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 border-0 shadow-sm">
+            <div style="height: 220px; overflow: hidden; background-color: #f8f9fa;">
+                {% if rel.cover_image %}
+                <img src="{{ rel.cover_image.url }}" alt="{{ rel.title }}" class="w-100 h-100 object-fit-cover">
+                {% else %}
+                <img src="{% static 'images/product/p-1.png' %}" alt="{{ rel.title }}" class="w-100 h-100 object-fit-cover">
+                {% endif %}
+            </div>
+            <div class="card-body p-3">
+                <span class="badge bg-dark text-white fs-10 text-uppercase mb-1">{{ rel.brand.name }}</span>
+                <h6 class="fs-13 fw-semibold">
+                    <a href="{% url 'catalog:product_detail' slug=rel.slug %}" class="text-dark text-decoration-none">{{ rel.title }}</a>
+                </h6>
+                <div class="fw-bold text-dark fs-14 mt-2">R$ {{ rel.price|floatformat:2 }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allVariants = [
+        {% for v in variants %}
+        {
+            id: {{ v.id }},
+            size: "{{ v.size|escapejs }}",
+            color: "{{ v.color|escapejs }}",
+            stock: {{ v.stock_quantity }},
+            in_stock: {% if v.stock_quantity > 0 %}true{% else %}false{% endif %}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const productTitle = "{{ product.title|escapejs }}";
+    const brandName = "{{ product.brand.name|escapejs }}";
+    const productPrice = "R$ {{ product.price|floatformat:2 }}";
+    const productUrl = window.location.href;
+
+    let selectedColor = "";
+    let selectedSize = "";
+
+    const sizesContainer = document.getElementById('detailSizesContainer');
+    const colorText = document.getElementById('detailSelectedColorText');
+    const sizeText = document.getElementById('detailSelectedSizeText');
+    const variantInput = document.getElementById('detailVariantIdInput');
+    const whatsappBtn = document.getElementById('detailWhatsAppBtn');
+    const addToCartBtn = document.getElementById('detailAddToCartBtn');
+
+    function updateWhatsAppBtn() {
+        if (!whatsappBtn) return;
+        let msg = `Olá! Gostei da peça *${productTitle}* (${brandName})`;
+        if (selectedColor) msg += ` na cor *${selectedColor}*`;
+        if (selectedSize) msg += ` no tamanho *${selectedSize}*`;
+        msg += ` (${productPrice}) que vi na Grife HF: ${productUrl}`;
+        whatsappBtn.href = `https://wa.me/558391650137?text=${encodeURIComponent(msg)}`;
+    }
+
+    window.selectDetailColor = function(colorName) {
+        selectedColor = colorName;
+        if (colorText) colorText.textContent = `Cor selecionada: ${colorName}`;
+
+        document.querySelectorAll('.detail-color-btn').forEach(btn => {
+            if (btn.getAttribute('data-color-name') === colorName) {
+                btn.className = 'btn btn-sm btn-dark text-white px-3 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs detail-color-btn';
+            } else {
+                btn.className = 'btn btn-sm btn-outline-secondary bg-white text-dark px-3 py-1.5 fs-12 d-flex align-items-center gap-1.5 rounded-pill shadow-xs detail-color-btn';
+            }
+        });
+
+        renderSizes();
+    };
+
+    function renderSizes() {
+        if (!sizesContainer) return;
+        sizesContainer.innerHTML = '';
+
+        let matchingVariants = [];
+        if (selectedColor) {
+            matchingVariants = allVariants.filter(v => v.color && v.color.trim().toLowerCase() === selectedColor.trim().toLowerCase());
+        }
+
+        if (matchingVariants.length === 0) {
+            matchingVariants = allVariants;
+        }
+
+        if (matchingVariants.length === 0) {
+            sizesContainer.innerHTML = '<span class="text-danger fs-13">Nenhum tamanho disponível para esta cor.</span>';
+            if (variantInput) variantInput.value = '';
+            if (addToCartBtn) addToCartBtn.disabled = true;
+            return;
+        }
+
+        if (addToCartBtn) addToCartBtn.disabled = false;
+
+        let firstSelected = false;
+
+        matchingVariants.forEach(v => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn btn-outline-dark px-3 py-2 fs-13 fw-semibold rounded-2 detail-size-btn';
+            btn.innerHTML = `<strong>${v.size}</strong> <span class="badge bg-light text-muted ms-1 fs-10">${v.stock} un.</span>`;
+            
+            btn.onclick = function() {
+                sizesContainer.querySelectorAll('.detail-size-btn').forEach(b => {
+                    b.classList.remove('btn-dark', 'text-white');
+                    b.classList.add('btn-outline-dark');
+                });
+                btn.classList.remove('btn-outline-dark');
+                btn.classList.add('btn-dark', 'text-white');
+                selectedSize = v.size;
+                if (variantInput) variantInput.value = v.id;
+                if (sizeText) sizeText.textContent = `Tamanho selecionado: ${v.size}`;
+                updateWhatsAppBtn();
+            };
+
+            sizesContainer.appendChild(btn);
+
+            if (!firstSelected) {
+                btn.classList.remove('btn-outline-dark');
+                btn.classList.add('btn-dark', 'text-white');
+                selectedSize = v.size;
+                if (variantInput) variantInput.value = v.id;
+                if (sizeText) sizeText.textContent = `Tamanho selecionado: ${v.size}`;
+                firstSelected = true;
+            }
+        });
+
+        updateWhatsAppBtn();
+    }
+
+    const firstColorBtn = document.querySelector('.detail-color-btn');
+    if (firstColorBtn) {
+        selectDetailColor(firstColorBtn.getAttribute('data-color-name'));
+    } else {
+        renderSizes();
+    }
+});
+</script>
+{% endblock %}

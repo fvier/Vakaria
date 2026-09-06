@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static i18n crispy_forms_tags %}
+
+{% block title %}Encerrar Sessão | Grife HF{% endblock title %}
+
+{% block body_attribute %}class="authentication-bg"{% endblock body_attribute %}
+
+{% block extra_css %}
+<style>
+    body.authentication-bg {
+        background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+    }
+    .account-pages {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+    .logout-panel {
+        max-width: 440px;
+    }
+    .logout-panel .card-body {
+        padding: 2.25rem;
+    }
+    .logout-brand {
+        height: 52px;
+        width: auto;
+        object-fit: contain;
+    }
+    .user-info-chip {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        transition: all 0.2s ease;
+    }
+    .user-info-chip:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    .logout-icon-bubble {
+        width: 68px;
+        height: 68px;
+        background: #fef3c7;
+        color: #d97706;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        border: 2px solid #fde68a;
+        box-shadow: 0 8px 20px rgba(217, 119, 6, 0.15);
+    }
+    @media (max-width: 575.98px) {
+        .logout-panel .card-body { padding: 1.5rem; }
+        .account-pages { padding: 1rem 0 !important; }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="account-pages py-3">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-9 col-md-7 col-lg-5 logout-panel">
+                <div class="card auth-card shadow-lg border-0 rounded-4 bg-white overflow-hidden">
+                    
+                    <!-- Linha decorativa dourada no topo -->
+                    <div style="height: 4px; background: linear-gradient(90deg, #c5a059 0%, #ecd399 50%, #c5a059 100%);"></div>
+
+                    <div class="card-body text-center">
+                        
+                        <!-- Logo Centralizada -->
+                        <div class="mx-auto mb-3 auth-logo">
+                            <a href="{% url 'catalog:home' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none">
+                                <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Grife HF" class="logout-brand">
+                            </a>
+                        </div>
+
+                        <!-- Ícone de Logout Amigável -->
+                        <div class="logout-icon-bubble">
+                            <i class="bx bx-log-out fs-32"></i>
+                        </div>
+
+                        <!-- Título & Subtítulo -->
+                        <h2 class="fw-bold fs-20 text-dark mb-1">Deseja Encerrar a Sessão?</h2>
+                        <p class="text-muted small mb-3">Você está prestes a sair da sua conta com segurança.</p>
+
+                        <!-- Box com Informações do Usuário Conectado -->
+                        {% if user.is_authenticated %}
+                        <div class="user-info-chip d-flex align-items-center gap-2.5 text-start mb-4">
+                            <div class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs" style="width: 40px; height: 40px; font-size: 15px;">
+                                {{ user.first_name|default:user.username|slice:":1"|upper }}
+                            </div>
+                            <div class="overflow-hidden flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between gap-1">
+                                    <strong class="text-dark fs-13 text-truncate">{{ user.get_full_name|default:user.username }}</strong>
+                                    {% if user.is_superuser %}
+                                        <span class="badge bg-warning text-dark fs-10 rounded-pill">Admin</span>
+                                    {% elif user.is_staff %}
+                                        <span class="badge bg-primary text-white fs-10 rounded-pill">Equipe</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary text-white fs-10 rounded-pill">Cliente</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted fs-11 text-truncate d-block">{{ user.email|default:user.username }}</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Formulário de Confirmação de Logout -->
+                        <form method="post" action="{% url 'account_logout' %}" id="logoutForm">
+                            {% csrf_token %}
+                            {% if redirect_field_value %}
+                                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                            {% endif %}
+                            
+                            <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-warning text-dark py-2.5 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-sm fs-14" type="submit" id="confirmLogoutBtn">
+                                    <i class="bx bx-log-out fs-18"></i> <span>Sim, Encerrar Sessão</span>
+                                </button>
+                                
+                                <a href="{% if request.META.HTTP_REFERER and 'logout' not in request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'pages:admin_home_cms' %}{% endif %}" class="btn btn-outline-dark py-2.5 fw-semibold rounded-3 d-flex align-items-center justify-content-center gap-2 fs-14">
+                                    <i class="bx bx-arrow-back fs-18"></i> <span>Continuar Conectado</span>
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="border-top pt-3 text-center">
+                            <small class="text-muted fs-11 d-flex align-items-center justify-content-center gap-1">
+                                <i class="bx bx-shield-quarter text-success fs-14"></i> Desconexão Segura com Encerramento de Cookies
+                            </small>
+                        </div>
+
+                    </div> <!-- end card-body -->
+                </div> <!-- end card -->
+
+                <div class="text-center mt-3 d-flex justify-content-between align-items-center px-2">
+                    <a href="{% url 'catalog:home' %}" class="text-white text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1 opacity-75 hover-opacity-100">
+                        <i class="bx bx-store-alt"></i> Vitrine da Loja
+                    </a>
+                    <a href="/links" target="_blank" class="text-warning text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1">
+                        <i class="bx bx-link fs-14"></i> Linktree Grife HF
+                    </a>
+                </div>
+
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+    </div>
+</div>
+
+<script>
+    document.getElementById('logoutForm')?.addEventListener('submit', function () {
+        const btn = document.getElementById('confirmLogoutBtn');
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Desconectando...';
+            btn.disabled = true;
+        }
+    });
+</script>
+{% endblock content %}

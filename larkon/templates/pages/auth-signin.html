@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block title %}Entrar no Painel | Grife HF ERP{% endblock title %}
+
+{% block body_attribute %}class="authentication-bg"{% endblock body_attribute %}
+
+{% block extra_css %}
+<style>
+    body.authentication-bg {
+        background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+        min-height: 100vh;
+    }
+    .account-pages {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+    .login-panel {
+        max-width: 430px;
+    }
+    .login-panel .card-body {
+        padding: 2.25rem;
+    }
+    .login-panel .form-control {
+        min-height: 46px;
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        transition: all 0.2s ease;
+    }
+    .login-panel .form-control:focus {
+        background-color: #ffffff !important;
+        border-color: #c5a059 !important;
+        box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.18) !important;
+    }
+    .login-brand {
+        height: 52px;
+        width: auto;
+        object-fit: contain;
+    }
+    @media (max-width: 575.98px) {
+        .login-panel .card-body { padding: 1.5rem; }
+        .account-pages { padding: 1rem 0 !important; }
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="account-pages py-3">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-9 col-md-7 col-lg-5 login-panel">
+                <div class="card auth-card shadow-lg border-0 rounded-4 bg-white">
+                    <div class="card-body">
+                        
+                        <!-- Logo Centralizada -->
+                        <div class="mx-auto mb-2 text-center auth-logo">
+                            <a href="{% url 'catalog:home' %}" class="d-inline-flex align-items-center justify-content-center text-decoration-none">
+                                <img src="{% static 'images/logo-dark.png' %}?v=6" alt="Grife HF" class="login-brand">
+                            </a>
+                        </div>
+
+                        <!-- Badge de Área Restrita -->
+                        <div class="text-center mb-3">
+                            <span class="badge bg-light text-secondary border px-3 py-1 fs-11 rounded-pill text-uppercase fw-semibold" style="letter-spacing: 0.5px;">
+                                🔒 Acesso Restrito • Gestão & Consultoras
+                            </span>
+                        </div>
+
+                        <!-- Título & Subtítulo -->
+                        <h1 class="fw-bold text-center fs-20 text-dark mb-1">Cockpit Comercial</h1>
+                        <p class="text-muted text-center small mb-3">Informe suas credenciais para entrar no sistema.</p>
+
+                        <!-- Mensagens / Alertas -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3 fs-13 mb-3" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger rounded-3 fs-13 mb-3" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-0"><i class="bx bx-error-circle me-1"></i>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Formulário de Login -->
+                        <div>
+                            <form action="{% url 'account_login' %}" method="POST" class="authentication-form" id="loginForm">
+                                {% csrf_token %}
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold fs-13 text-dark" for="user-email">E-mail de Acesso</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0 text-muted"><i class="bx bx-envelope fs-16"></i></span>
+                                        <input class="form-control fs-14"
+                                               id="user-email" name="login" placeholder="admin@grifehf.com.br"
+                                               type="text" required autocomplete="username" autofocus/>
+                                    </div>
+                                    {% if form.login.errors %}
+                                        <small class="text-danger fs-12">{{ form.login.errors.0 }}</small>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold fs-13 text-dark" for="user-password">Senha de Segurança</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-0 text-muted"><i class="bx bx-lock-alt fs-16"></i></span>
+                                        <input class="form-control fs-14"
+                                               id="user-password" name="password" placeholder="Digite sua senha" type="password" required autocomplete="current-password"/>
+                                        <button class="btn btn-light border-0 text-muted px-3" type="button" id="toggle-password" title="Mostrar ou ocultar senha">
+                                            <i class="bx bx-show fs-18" id="toggle-password-icon"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.password.errors %}
+                                        <small class="text-danger fs-12">{{ form.password.errors.0 }}</small>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input class="form-check-input" id="checkbox-signin" name="remember" type="checkbox" checked/>
+                                        <label class="form-check-label small text-muted" for="checkbox-signin">Lembrar acesso</label>
+                                    </div>
+                                    <a class="text-muted text-decoration-none small" href="{{ STORE_WHATSAPP_URL }}?text=Olá!%20Preciso%20de%20ajuda%20para%20recuperar%20meu%20acesso%20ao%20painel%20da%20Grife%20HF." target="_blank">
+                                        Esqueceu a senha?
+                                    </a>
+                                </div>
+
+                                {% if redirect_field_value %}
+                                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                                {% endif %}
+
+                                <div class="d-grid mb-3">
+                                    <button class="btn btn-dark py-2.5 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-sm" type="submit" id="submitBtn">
+                                        <i class="bx bx-log-in fs-18"></i> <span>Acessar Cockpit ERP</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="border-top pt-3 text-center">
+                            <small class="text-muted fs-11 d-flex align-items-center justify-content-center gap-1">
+                                <i class="bx bx-shield-quarter text-success fs-14"></i> Conexão Criptografada SSL 256-bit
+                            </small>
+                        </div>
+
+                    </div> <!-- end card-body -->
+                </div> <!-- end card -->
+
+                <div class="text-center mt-3 d-flex justify-content-between align-items-center px-2">
+                    <a href="{% url 'catalog:home' %}" class="text-white text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1 opacity-75 hover-opacity-100">
+                        <i class="bx bx-arrow-back"></i> Vitrine Pública
+                    </a>
+                    <a href="/links" target="_blank" class="text-warning text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1">
+                        <i class="bx bx-link fs-14"></i> Linktree Grife HF
+                    </a>
+                </div>
+            </div> <!-- end col -->
+        </div> <!-- end row -->
+    </div>
+</div>
+
+<script>
+    document.getElementById('toggle-password')?.addEventListener('click', function () {
+        const passwordInput = document.getElementById('user-password');
+        const icon = document.getElementById('toggle-password-icon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.className = 'bx bx-hide fs-18';
+        } else {
+            passwordInput.type = 'password';
+            icon.className = 'bx bx-show fs-18';
+        }
+    });
+
+    document.getElementById('loginForm')?.addEventListener('submit', function () {
+        const btn = document.getElementById('submitBtn');
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Autenticando...';
+            btn.disabled = true;
+        }
+    });
+</script>
+{% endblock content %}

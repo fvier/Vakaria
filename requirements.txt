@@ -1,0 +1,21 @@
+# Core Python & Image Processing
+Pillow>=10.4.0
+python-slugify>=8.0.4
+argon2-cffi>=23.1.0
+
+# Django Core & Framework
+Django>=5.0.9,<5.2
+django-environ>=0.11.2
+django-model-utils>=5.0.0
+django-allauth[mfa]>=65.0.2
+django-crispy-forms>=2.3
+crispy-bootstrap5>=2024.10
+
+# Static & Web Server
+whitenoise>=6.7.0
+gunicorn>=22.0.0
+
+# Database & Cache (Optional / Production)
+psycopg2-binary>=2.9.9
+django-redis>=5.4.0
+redis>=5.1.1

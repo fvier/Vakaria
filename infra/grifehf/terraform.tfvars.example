@@ -1,0 +1,12 @@
+# Copie este arquivo para terraform.tfvars (que está no .gitignore) e preencha com seus segredos:
+# cp terraform.tfvars.example terraform.tfvars
+
+server_ip          = "147.79.110.132"
+ssh_user           = "root"
+docker_host        = "ssh://root@147.79.110.132"
+domain_name        = "grifehf.com.br"
+app_name           = "grifehf"
+postgres_db        = "grifehf"
+postgres_user      = "grifehf"
+postgres_password  = "ALTERE_PARA_SUA_SENHA_FORTE_DO_POSTGRES"
+django_secret_key  = "ALTERE_PARA_UMA_SECRET_KEY_COMPLEXA_GERADA_ALEATORIAMENTE"

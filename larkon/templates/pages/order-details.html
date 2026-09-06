@@ -1,0 +1,86 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Pedido #{{ order.order_number }} | Grife HF{% endblock %}
+
+{% block page_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4 text-center border-bottom bg-light-subtle">
+                <iconify-icon icon="solar:check-circle-bold-duotone" class="fs-48 text-success mb-2"></iconify-icon>
+                <h3 class="fw-bold text-dark mb-1">Pedido Registrado com Sucesso!</h3>
+                <p class="text-muted fs-15 mb-3">Número do Pedido: <strong class="text-dark">#{{ order.order_number }}</strong></p>
+                <div>
+                    <a href="{{ whatsapp_link }}" target="_blank" class="btn btn-success btn-lg px-4 shadow-sm d-inline-flex align-items-center gap-2">
+                        <i class="bx bxl-whatsapp fs-22"></i> 📲 Enviar Pedido para o WhatsApp da Grife HF
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <h6 class="text-muted text-uppercase fs-12 fw-bold mb-2">Dados do Cliente</h6>
+                        <h5 class="fs-15 fw-bold text-dark mb-1">{{ order.customer_name }}</h5>
+                        <p class="text-muted fs-13 mb-1">WhatsApp: {{ order.customer_phone }}</p>
+                        {% if order.customer_email %}<p class="text-muted fs-13 mb-1">E-mail: {{ order.customer_email }}</p>{% endif %}
+                        <p class="text-muted fs-13 mb-0">Data: {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase fs-12 fw-bold mb-2">Endereço de Entrega</h6>
+                        <p class="text-dark fs-14 mb-1">{{ order.shipping_address }}</p>
+                        <p class="text-muted fs-13 mb-1">{{ order.city }} - {{ order.state }} | CEP: {{ order.postal_code }}</p>
+                        {% if order.notes %}<p class="text-muted fs-13 mb-0"><em>Obs: {{ order.notes }}</em></p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Tabela de Itens -->
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Peça / Marca</th>
+                                <th class="text-center">Tamanho</th>
+                                <th class="text-center">Qtd</th>
+                                <th class="text-end">Preço Unitário</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-dark text-white fs-10 text-uppercase">{{ item.brand_name }}</span>
+                                    <h6 class="fs-14 fw-semibold mb-0 mt-1">{{ item.product_title }}</h6>
+                                </td>
+                                <td class="text-center fw-bold">{{ item.size }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">R$ {{ item.unit_price|floatformat:2 }}</td>
+                                <td class="text-end fw-bold">R$ {{ item.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold fs-15">Total Geral:</td>
+                                <td class="text-end fw-bold fs-16 text-dark">R$ {{ order.total|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-secondary">
+                        <i class="bx bx-arrow-back me-1"></i> Voltar à Vitrine
+                    </a>
+                    <a href="{{ whatsapp_link }}" target="_blank" class="btn btn-success d-inline-flex align-items-center gap-2">
+                        <i class="bx bxl-whatsapp fs-18"></i> Falar com Atendente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

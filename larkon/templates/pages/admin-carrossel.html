@@ -1,0 +1,213 @@
+{% extends 'layout-vertical.html' %}
+{% load static i18n %}
+
+{% block title %}Gerenciador de Carrossel & Banners | Grife HF ERP{% endblock title %}
+
+{% block page_content %}
+<div class="container-fluid">
+  
+  <!-- Page Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="page-title-box d-flex align-items-center justify-content-between my-3">
+        <div>
+          <h4 class="mb-0 text-dark fw-bold">Gerenciador de Banners & Carrosséis</h4>
+          <p class="text-muted fs-13 mb-0">Adicione, edite e ative os banners que aparecem na página inicial da loja.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'catalog:home' %}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+            <i class="bx bx-globe me-1"></i> Ver na Landing Page
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-3" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <!-- Form: Adicionar Novo Banner -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h5 class="card-title mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bx bx-plus-circle text-primary fs-20"></i> Adicionar Novo Banner
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Posição / Tipo de Carrossel</label>
+              <select name="slide_type" class="form-select fs-13 rounded-3" required>
+                <option value="hero" selected>Hero Principal (Topo da Página)</option>
+                <option value="drops">Drops & Novidades da Semana</option>
+                <option value="promo">Banner Promocional</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Título Principal</label>
+              <input type="text" name="title" class="form-control fs-13 rounded-3" placeholder="Ex: Nova Coleção Primavera/Verão" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Subtítulo / Descrição</label>
+              <textarea name="subtitle" rows="3" class="form-control fs-13 rounded-3" placeholder="Curadoria de peças exclusivas em seda nobre e linho..."></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Texto da Tag / Badge</label>
+                <input type="text" name="badge_text" class="form-control fs-13 rounded-3" placeholder="Ex: ✨ Drop Feminino Ativo">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Ordem de Exibição</label>
+                <input type="number" name="order" class="form-control fs-13 rounded-3" value="1" min="1">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Texto do Botão</label>
+                <input type="text" name="button_text" class="form-control fs-13 rounded-3" value="Explorar Coleção">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold fs-13 text-dark">Link de Destino</label>
+                <input type="text" name="button_url" class="form-control fs-13 rounded-3" value="/produtos/">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-13 text-dark">Upload de Imagem (Alta Definição)</label>
+              <input type="file" name="image" class="form-control fs-13 rounded-3" accept="image/*">
+              <small class="text-muted fs-11">Recomendado: 1920x1080px (Hero) ou 800x1000px (Drops).</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold fs-13 text-dark">Ou URL Direta de Imagem (CDN)</label>
+              <input type="url" name="image_url" class="form-control fs-13 rounded-3" placeholder="https://...">
+            </div>
+
+            <button type="submit" class="btn btn-dark w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2">
+              <i class="bx bx-check-circle fs-18"></i> Publicar Banner no Carrossel
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Banners Atuais -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0 fw-bold text-dark">Banners Cadastrados</h5>
+          <span class="badge bg-primary rounded-pill px-3 py-1 fs-12">
+            {{ hero_slides.count|add:drop_slides.count }} Banner(s)
+          </span>
+        </div>
+        <div class="card-body p-0">
+          
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light text-muted fs-12 text-uppercase">
+                <tr>
+                  <th class="ps-4">Banner</th>
+                  <th>Posição</th>
+                  <th>Ordem</th>
+                  <th>Status</th>
+                  <th class="text-end pe-4">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for slide in hero_slides %}
+                <tr>
+                  <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <img src="{{ slide.final_image_url }}" alt="{{ slide.title }}" class="rounded-3 object-fit-cover shadow-xs" width="70" height="45">
+                      <div>
+                        <strong class="text-dark d-block fs-14 text-truncate" style="max-width: 200px;">{{ slide.title }}</strong>
+                        <small class="text-muted fs-11">{{ slide.badge_text|default:"Sem tag" }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-dark rounded-pill px-2.5 py-1 fs-11">Hero Topo</span>
+                  </td>
+                  <td class="fw-bold fs-13">#{{ slide.order }}</td>
+                  <td>
+                    {% if slide.is_active %}
+                    <span class="badge bg-success text-white px-2.5 py-1 rounded-pill fs-11">Ativo</span>
+                    {% else %}
+                    <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill fs-11">Pausado</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="{% url 'pages:admin_carousel_toggle' pk=slide.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill me-1" title="Ativar/Desativar">
+                      <i class="bx bx-power-off"></i>
+                    </a>
+                    <a href="{% url 'pages:admin_carousel_delete' pk=slide.pk %}" onclick="return confirm('Deseja realmente remover este banner?')" class="btn btn-sm btn-outline-danger rounded-pill" title="Excluir">
+                      <i class="bx bx-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    Nenhum slide de Hero cadastrado.
+                  </td>
+                </tr>
+                {% endfor %}
+
+                {% for slide in drop_slides %}
+                <tr>
+                  <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <img src="{{ slide.final_image_url }}" alt="{{ slide.title }}" class="rounded-3 object-fit-cover shadow-xs" width="70" height="45">
+                      <div>
+                        <strong class="text-dark d-block fs-14 text-truncate" style="max-width: 200px;">{{ slide.title }}</strong>
+                        <small class="text-muted fs-11">{{ slide.badge_text|default:"Drops" }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1 fs-11">Drops</span>
+                  </td>
+                  <td class="fw-bold fs-13">#{{ slide.order }}</td>
+                  <td>
+                    {% if slide.is_active %}
+                    <span class="badge bg-success text-white px-2.5 py-1 rounded-pill fs-11">Ativo</span>
+                    {% else %}
+                    <span class="badge bg-secondary text-white px-2.5 py-1 rounded-pill fs-11">Pausado</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end pe-4">
+                    <a href="{% url 'pages:admin_carousel_toggle' pk=slide.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill me-1" title="Ativar/Desativar">
+                      <i class="bx bx-power-off"></i>
+                    </a>
+                    <a href="{% url 'pages:admin_carousel_delete' pk=slide.pk %}" onclick="return confirm('Deseja realmente remover este banner?')" class="btn btn-sm btn-outline-danger rounded-pill" title="Excluir">
+                      <i class="bx bx-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock page_content %}
