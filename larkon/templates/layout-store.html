@@ -249,8 +249,12 @@
   <nav class="navbar navbar-expand-lg store-navbar py-2">
     <div class="container-fluid px-lg-4">
       <!-- Logo Oficial -->
-      <a class="navbar-brand d-flex align-items-center me-4" href="/">
-        <img src="{% static 'images/logo-dark.png' %}" alt="Vakaria" height="36" class="me-2">
+      <a class="navbar-brand d-flex align-items-center me-4 gap-2" href="/">
+        <img src="{% static 'images/logo-dark.png' %}?v=12" alt="Cabeleireiro Eduardo Cardoso" height="42" class="rounded-2 shadow-xs">
+        <div class="d-none d-sm-flex flex-column text-start">
+          <span class="fw-bold fs-15 text-dark lh-1" style="font-family: 'Public Sans', sans-serif;">Eduardo Cardoso</span>
+          <span class="fs-9 text-uppercase text-muted fw-bold mt-0.5" style="letter-spacing: 1px;">Laboratório Artístico • Olinda</span>
+        </div>
       </a>
 
       <!-- Botão Mobile -->
@@ -265,16 +269,16 @@
             <a class="store-nav-link" href="/"><i class="bx bx-home-alt me-1"></i> Início</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link active" href="{% url 'catalog:product_grid' %}"><i class="bx bx-grid-alt me-1"></i> Vitrine</a>
+            <a class="store-nav-link active" href="{% url 'catalog:product_grid' %}"><i class="bx bx-cut me-1"></i> Todos os Serviços</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?gender=M">👔 Masculino</a>
+            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=cortes-personalizados">✂️ Cortes</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=luiza-fit">👗 Luiza Fit</a>
+            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais">💈 Barba na Toalha Quente</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:brand_list' %}">🏷️ Marcas</a>
+            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica">🔥 Nevou &amp; Alquimia</a>
           </li>
           {% if request.user.is_authenticated and request.user.is_staff %}
           <li class="nav-item">

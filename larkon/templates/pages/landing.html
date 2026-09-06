@@ -437,8 +437,12 @@
   <!-- ========== Header / Navbar Light Start ========== -->
   <nav class="navbar navbar-expand-lg navbar-light navbar-light-custom sticky-top py-2">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2 py-1" href="{% url 'catalog:home' %}">
-        <img src="{% static 'images/logo-dark.png' %}?v=4" alt="Vakaria" style="height: 52px; width: auto; object-fit: contain;">
+      <a class="navbar-brand d-flex align-items-center gap-2.5 py-1" href="{% url 'catalog:home' %}">
+        <img src="{% static 'images/logo-dark.png' %}?v=12" alt="Cabeleireiro Eduardo Cardoso" style="height: 54px; width: auto; object-fit: contain;" class="rounded-3 shadow-xs">
+        <div class="d-flex flex-column text-start">
+          <span class="fw-bold fs-17 text-dark lh-1" style="font-family: 'Public Sans', sans-serif; letter-spacing: -0.3px;">Eduardo Cardoso</span>
+          <span class="fs-10 text-uppercase text-muted fw-bold mt-0.5" style="letter-spacing: 1.2px;">Laboratório Artístico • Olinda</span>
+        </div>
       </a>
 
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarLanding" aria-controls="navbarLanding" aria-expanded="false" aria-label="Menu">
@@ -451,16 +455,19 @@
             <a class="nav-link active" href="{% url 'catalog:home' %}">Início</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}">Vitrine</a>
+            <a class="nav-link" href="{% url 'catalog:product_grid' %}">Serviços &amp; Cortes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}?gender=F">Feminino</a>
+            <a class="nav-link" href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais">Barba &amp; Toalha Quente</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}?gender=M">Masculino</a>
+            <a class="nav-link" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica">Alquimia &amp; Nevou</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:brand_list' %}">Marcas</a>
+            <a class="nav-link" href="#loja">O Espaço</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#avaliacoes">Depoimentos</a>
           </li>
         </ul>
 
@@ -526,34 +533,34 @@
               <div class="hero-glass-card p-4 rounded-4 text-white">
                 <div class="d-flex align-items-center {% if slide.text_alignment == 'center' %}justify-content-center{% elif slide.text_alignment == 'right' %}justify-content-end{% else %}justify-content-start{% endif %} gap-2 mb-2 text-warning fw-bold text-uppercase" style="font-size: 11px; letter-spacing: 1.2px;">
                   <i class="bx bxs-map-pin text-warning fs-15"></i>
-                  <span>{{ slide.badge_text|default:"Vakaria Barbearia • Cajazeiras - PB" }}</span>
+                  <span>{{ slide.badge_text|default:"Cabeleireiro Eduardo Cardoso • Sítio Histórico de Olinda" }}</span>
                 </div>
                 <h1 class="display-6 fw-bold text-white mb-2" style="letter-spacing: -0.5px; font-size: calc(1.3rem + 1.2vw);">
                   {{ slide.title }}
                 </h1>
                 <p class="text-white-50 fs-14 mb-3 leading-relaxed">
-                  {{ slide.subtitle|default:"Curadoria exclusiva de alta moda feminina e masculina. Peças autorais das marcas mais consagradas do país." }}
+                  {{ slide.subtitle|default:"Laboratório Artístico e Ecossistema de Beleza. Sua identidade cuidada com arte, respeito e alma olindense." }}
                 </p>
                 <div class="d-flex align-items-center {% if slide.text_alignment == 'center' %}justify-content-center{% elif slide.text_alignment == 'right' %}justify-content-end{% else %}justify-content-start{% endif %} gap-2 flex-wrap">
                   {% if slide.button_style == 'white' %}
                   <a href="{{ slide.button_url|default:'/produtos/' }}" class="btn btn-light btn-sm rounded-pill px-3.5 py-2 fw-bold text-dark d-inline-flex align-items-center gap-1.5 shadow-sm">
-                    <i class="bx bx-shopping-bag fs-16"></i> <span>{{ slide.button_text|default:"Explorar Coleção" }}</span>
+                    <i class="bx bx-cut fs-16"></i> <span>{{ slide.button_text|default:"Conhecer Serviços" }}</span>
                   </a>
                   {% elif slide.button_style == 'dark' %}
                   <a href="{{ slide.button_url|default:'/produtos/' }}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-2 fw-bold text-white border border-secondary d-inline-flex align-items-center gap-1.5 shadow-sm">
-                    <i class="bx bx-shopping-bag fs-16"></i> <span>{{ slide.button_text|default:"Explorar Coleção" }}</span>
+                    <i class="bx bx-cut fs-16"></i> <span>{{ slide.button_text|default:"Conhecer Serviços" }}</span>
                   </a>
                   {% elif slide.button_style == 'outline' %}
                   <a href="{{ slide.button_url|default:'/produtos/' }}" class="btn btn-outline-light btn-sm rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
-                    <i class="bx bx-shopping-bag fs-16"></i> <span>{{ slide.button_text|default:"Explorar Coleção" }}</span>
+                    <i class="bx bx-cut fs-16"></i> <span>{{ slide.button_text|default:"Conhecer Serviços" }}</span>
                   </a>
                   {% else %}
                   <a href="{{ slide.button_url|default:'/produtos/' }}" class="btn btn-warning btn-sm rounded-pill px-3.5 py-2 fw-bold text-dark d-inline-flex align-items-center gap-1.5 shadow-sm">
-                    <i class="bx bx-shopping-bag fs-16"></i> <span>{{ slide.button_text|default:"Explorar Coleção" }}</span>
+                    <i class="bx bx-cut fs-16"></i> <span>{{ slide.button_text|default:"Conhecer Serviços" }}</span>
                   </a>
                   {% endif %}
                   <a href="{{ STORE_WHATSAPP_URL }}" target="_blank" class="btn btn-outline-light btn-sm rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center gap-1.5">
-                    <i class="bx bxl-whatsapp fs-16 text-success"></i> <span>Consultoria VIP</span>
+                    <i class="bx bxl-whatsapp fs-16 text-success"></i> <span>Agendar no WhatsApp</span>
                   </a>
                 </div>
               </div>
@@ -908,9 +915,9 @@
         <!-- Header com Título e Controles do Carrossel -->
         <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
           <div>
-            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1 fs-11 text-uppercase mb-2 rounded-pill">{{ home_config.drops_badge|default:'🔥 Lançamentos Recentes' }}</span>
-            <h2 class="fw-bold fs-30 text-dark mb-1">{{ home_config.drops_title|default:'Drops & Novidades da Semana' }}</h2>
-            <p class="text-muted fs-14 mb-0">{{ home_config.drops_subtitle|default:'Novidades exclusivas que chegam duas vezes por semana na loja.' }}</p>
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1 fs-11 text-uppercase mb-2 rounded-pill">{{ home_config.drops_badge|default:'✨ EXPERIÊNCIAS AUTORAIS' }}</span>
+            <h2 class="fw-bold fs-30 text-dark mb-1">{{ home_config.drops_title|default:'Ecossistema de Serviços &amp; Cuidados' }}</h2>
+            <p class="text-muted fs-14 mb-0">{{ home_config.drops_subtitle|default:'Procedimentos executados com excelência técnica e o acolhimento típico de Olinda.' }}</p>
           </div>
           
           <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
@@ -978,8 +985,8 @@
                         {% endif %}
                         <span class="fs-18 fw-bold text-dark">R$ {{ product.price|floatformat:2 }}</span>
                       </div>
-                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
-                        Ver Peça
+                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-12 fw-semibold">
+                        Ver Serviço &amp; Agendar
                       </a>
                     </div>
                   </div>
@@ -1038,8 +1045,8 @@
                         {% endif %}
                         <span class="fs-18 fw-bold text-dark">R$ {{ product.price|floatformat:2 }}</span>
                       </div>
-                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
-                        Ver Peça
+                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-12 fw-semibold">
+                        Ver Serviço &amp; Agendar
                       </a>
                     </div>
                   </div>
