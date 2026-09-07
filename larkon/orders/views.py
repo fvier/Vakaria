@@ -660,7 +660,120 @@ class AgendaView(View):
     """Página de Agendamento Online da Barbearia Eduardo Cardoso (Vakaria)."""
 
     def get(self, request, *args, **kwargs):
-        # Procedimentos autênticos da barbearia (Cortes, Barba e Alquimia)
+        today = timezone.localdate()
+        start_date_str = request.GET.get("start")
+        if start_date_str:
+            try:
+                start_date = timezone.datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                start_date = today
+        else:
+            # Se domingo, começar na segunda/terça
+            if today.weekday() == 6:
+                start_date = today + timezone.timedelta(days=2)
+            else:
+                start_date = today
+
+        # Montar os 4 dias da grade convencional
+        day_names_pt = {
+            0: "Segunda", 1: "Terça", 2: "Quarta", 3: "Quinta", 4: "Sexta", 5: "Sábado", 6: "Domingo"
+        }
+        day_short_pt = {
+            0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"
+        }
+        months_pt = {
+            1: "Jan", 2: "Fev", 3: "Mar", 4: "Abr", 5: "Mai", 6: "Jun",
+            7: "Jul", 8: "Ago", 9: "Set", 10: "Out", 11: "Nov", 12: "Dez"
+        }
+
+        days_list = []
+        curr = start_date
+        while len(days_list) < 4:
+            # Pula domingo (dia de descanso total da barbearia)
+            if curr.weekday() != 6:
+                days_list.append(curr)
+            curr += timezone.timedelta(days=1)
+
+        end_date = days_list[-1]
+
+        # Horários de atendimento na cadeira
+        time_slots = [
+            "09:00", "10:00", "11:00", "14:00",
+            "15:00", "16:00", "17:00", "18:00"
+        ]
+
+        # Agendamentos existentes no banco para esses 4 dias
+        existing_appointments = Appointment.objects.filter(
+            appointment_date__gte=days_list[0],
+            appointment_date__lte=end_date,
+            status__in=["pending", "confirmed"]
+        ).prefetch_related("services")
+
+        appointments_map = {}
+        for appt in existing_appointments:
+            d_str = appt.appointment_date.strftime("%Y-%m-%d")
+            t_str = appt.appointment_time[:5]
+            name_parts = appt.customer_name.strip().split()
+            first_name = name_parts[0] if name_parts else "Cliente"
+            initial = f"{name_parts[1][0]}." if len(name_parts) > 1 else ""
+            display_name = f"{first_name} {initial}".strip()
+
+            services_names = [s.title for s in appt.services.all()]
+            service_display = services_names[0] if services_names else "Procedimento"
+            if len(services_names) > 1:
+                service_display += f" +{len(services_names)-1}"
+
+            key = f"{d_str}_{t_str}"
+            appointments_map[key] = {
+                "id": appt.id,
+                "display_name": display_name,
+                "service_display": service_display,
+                "status": appt.status,
+            }
+
+        # Estrutura dos 4 dias para exibição na agenda
+        agenda_days = []
+        for d in days_list:
+            d_str = d.strftime("%Y-%m-%d")
+            slots_data = []
+            booked_count = 0
+            for t in time_slots:
+                key = f"{d_str}_{t}"
+                appt_info = appointments_map.get(key)
+                if appt_info:
+                    booked_count += 1
+                    slots_data.append({
+                        "time": t,
+                        "is_booked": True,
+                        "appointment": appt_info,
+                    })
+                else:
+                    slots_data.append({
+                        "time": t,
+                        "is_booked": False,
+                        "appointment": None,
+                    })
+
+            agenda_days.append({
+                "date": d,
+                "date_iso": d_str,
+                "day_name": day_names_pt[d.weekday()],
+                "day_short": day_short_pt[d.weekday()],
+                "formatted_date": f"{d.day} de {months_pt[d.month]}",
+                "is_today": (d == today),
+                "is_closed": (d.weekday() == 0), # Segunda fechado
+                "booked_count": booked_count,
+                "free_count": len(time_slots) - booked_count,
+                "slots": slots_data,
+            })
+
+        # Navegação de períodos (-4 dias e +4 dias)
+        prev_start = days_list[0] - timezone.timedelta(days=4)
+        next_start = days_list[-1] + timezone.timedelta(days=1)
+        if next_start.weekday() == 6:
+            next_start += timezone.timedelta(days=1)
+
+        # Procedimentos autênticos da barbearia para o formulário
         services = (
             Product.objects.filter(is_active=True)
             .filter(
@@ -669,52 +782,20 @@ class AgendaView(View):
             )
             .select_related("category", "brand", "category__parent")
             .prefetch_related("images")
-            .order_by("category__parent__order", "category__order", "title")
+            .order_by("category__parent__order", "category__order", "price")
         )
 
         if not services.exists():
             services = Product.objects.filter(is_active=True).select_related("category").order_by("title")
 
-        # Procedimento pré-selecionado via query param (?service=slug_ou_id)
-        selected_service_param = request.GET.get("service")
-        preselected_ids = []
-        if selected_service_param:
-            preselected_prod = services.filter(
-                Q(slug=selected_service_param) | Q(id__iexact=selected_service_param if selected_service_param.isdigit() else 0)
-            ).first()
-            if preselected_prod:
-                preselected_ids.append(preselected_prod.id)
-
-        # Horários disponíveis padrão no ateliê
-        time_slots = [
-            "09:00", "09:45", "10:30", "11:15",
-            "13:30", "14:15", "15:00", "15:45",
-            "16:30", "17:15", "18:00", "18:45"
-        ]
-
-        # Próximas datas sugeridas (próximos 14 dias, excluindo domingo e segunda)
-        today = timezone.localdate()
-        available_dates = []
-        day_names_pt = {
-            0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"
-        }
-        for i in range(1, 15):
-            d = today + timezone.timedelta(days=i)
-            # Ateliê funciona de Terça a Sábado
-            if d.weekday() not in (0, 6):
-                available_dates.append({
-                    "date": d.strftime("%Y-%m-%d"),
-                    "formatted": d.strftime("%d/%m"),
-                    "day_name": day_names_pt[d.weekday()],
-                    "full_str": f"{day_names_pt[d.weekday()]}, {d.strftime('%d/%m')}",
-                })
-
         context = {
-            "services": services,
-            "preselected_ids": preselected_ids,
+            "agenda_days": agenda_days,
             "time_slots": time_slots,
-            "available_dates": available_dates,
+            "services": services,
             "today_iso": today.strftime("%Y-%m-%d"),
+            "prev_start_iso": prev_start.strftime("%Y-%m-%d"),
+            "next_start_iso": next_start.strftime("%Y-%m-%d"),
+            "period_label": f"{days_list[0].day} de {months_pt[days_list[0].month]} a {end_date.day} de {months_pt[end_date.month]}",
         }
         return render(request, "pages/agenda.html", context)
 
@@ -722,14 +803,15 @@ class AgendaView(View):
         customer_name = request.POST.get("customer_name", "").strip()
         customer_phone = request.POST.get("customer_phone", "").strip()
         customer_email = request.POST.get("customer_email", "").strip()
-        service_ids = request.POST.getlist("services")
+        service_id = request.POST.get("service_id") or request.POST.get("services")
         appointment_date_str = request.POST.get("appointment_date", "").strip()
         appointment_time = request.POST.get("appointment_time", "").strip()
-        notes = request.POST.get("notes", "").strip()
+        is_first_time = request.POST.get("is_first_time", "")
+        extra_notes = request.POST.get("notes", "").strip()
         is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest" or request.POST.get("ajax") == "1"
 
         if not customer_name or not customer_phone or not appointment_date_str or not appointment_time:
-            msg = "Por favor, preencha todos os campos obrigatórios (Nome, WhatsApp, Data e Horário)."
+            msg = "Por favor, informe seu nome, WhatsApp, dia e horário desejado."
             if is_ajax:
                 return JsonResponse({"success": False, "message": msg}, status=400)
             messages.error(request, msg)
@@ -738,14 +820,28 @@ class AgendaView(View):
         try:
             appointment_date = timezone.datetime.strptime(appointment_date_str, "%Y-%m-%d").date()
         except ValueError:
-            msg = "Formato de data inválido."
+            msg = "Data selecionada inválida."
             if is_ajax:
                 return JsonResponse({"success": False, "message": msg}, status=400)
             messages.error(request, msg)
             return redirect("orders:agenda")
 
-        selected_services = Product.objects.filter(id__in=service_ids, is_active=True)
-        total_price = sum(s.price for s in selected_services) if selected_services.exists() else Decimal("0.00")
+        # Concatenar notas simples
+        notes_parts = []
+        if is_first_time:
+            notes_parts.append(f"Primeira vez na cadeira: {is_first_time}")
+        if extra_notes:
+            notes_parts.append(extra_notes)
+        notes = " | ".join(notes_parts)
+
+        # Procedimento selecionado
+        selected_services = []
+        total_price = Decimal("0.00")
+        if service_id:
+            service_obj = Product.objects.filter(id=service_id, is_active=True).first()
+            if service_obj:
+                selected_services = [service_obj]
+                total_price = service_obj.price
 
         appointment = Appointment.objects.create(
             user=request.user if request.user.is_authenticated else None,
@@ -756,9 +852,9 @@ class AgendaView(View):
             appointment_time=appointment_time,
             total_price=total_price,
             notes=notes,
-            status="pending",
+            status="confirmed",
         )
-        if selected_services.exists():
+        if selected_services:
             appointment.services.set(selected_services)
 
         whatsapp_url = appointment.generate_whatsapp_confirmation_link()
@@ -766,12 +862,12 @@ class AgendaView(View):
         if is_ajax:
             return JsonResponse({
                 "success": True,
-                "message": "Agendamento registrado com sucesso! Redirecionando para o WhatsApp...",
+                "message": "Horário reservado com sucesso! Abrindo WhatsApp...",
                 "whatsapp_url": whatsapp_url,
                 "appointment_id": appointment.id,
             })
 
-        messages.success(request, "Agendamento pré-reservado! Enviando para o WhatsApp de confirmação...")
+        messages.success(request, "Horário pré-agendado! Confirmando no WhatsApp...")
         return redirect(whatsapp_url)
 
 
