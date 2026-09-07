@@ -381,6 +381,132 @@
       color: #444444;
       padding: 60px 0 30px;
     }
+
+    /* Instagram-Style Stories & Causos */
+    .story-bubble-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.25s ease;
+      min-width: 84px;
+    }
+    .story-bubble-wrapper:hover {
+      transform: translateY(-3px);
+    }
+    .story-bubble-ring {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.3s ease;
+    }
+    .story-bubble-wrapper:hover .story-bubble-ring {
+      box-shadow: 0 6px 18px rgba(220, 39, 67, 0.4);
+    }
+    .story-bubble-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2.5px solid #ffffff;
+      overflow: hidden;
+      background: #000;
+    }
+    .story-bubble-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .story-bubble-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #333333;
+      margin-top: 6px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Vertical Story Cards (9:16 aspect ratio) */
+    .story-card-vaka {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      height: 490px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .story-card-vaka:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+    .story-card-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+      z-index: 1;
+    }
+    .story-card-vaka:hover .story-card-bg {
+      transform: scale(1.05);
+    }
+    .story-card-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 32%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.94) 100%);
+      z-index: 2;
+    }
+    .story-card-content {
+      position: relative;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+    .story-progress-bar-container {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+    .story-progress-segment {
+      height: 3px;
+      flex: 1;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .story-progress-segment.active {
+      background: #ffffff;
+    }
+    .story-author-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid #f09433;
+      object-fit: cover;
+    }
+    .story-causo-bubble {
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
   </style>
 </head>
 <body>
@@ -455,22 +581,16 @@
             <a class="nav-link active" href="{% url 'catalog:home' %}">Início</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}">Serviços &amp; Cortes</a>
+            <a class="nav-link" href="{% url 'catalog:product_grid' %}">Vitrine</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais">Barba &amp; Toalha Quente</a>
+            <a class="nav-link" href="#causos">Causos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica">Alquimia &amp; Nevou</a>
+            <a class="nav-link" href="#galeria">Galeria</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#clube">Clube Vakaria</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#loja">O Espaço</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#avaliacoes">Depoimentos</a>
           </li>
         </ul>
 
@@ -725,7 +845,7 @@
       <div id="dualPromoCarousel" class="carousel slide" data-bs-interval="false">
         <div class="carousel-inner">
           
-          <!-- SLIDE 1: RITUAIS AVULSOS (CORTES & BARBOTERAPIA) -->
+          <!-- SLIDE 1: RITUAIS AVULSOS (CORTES & RITUAL DA BARBA) -->
           <div class="carousel-item active" id="slide-collections">
             <div class="row g-4">
               <!-- Card Cortes Autorais -->
@@ -745,13 +865,13 @@
                 </a>
               </div>
 
-              <!-- Card Barboterapia & Rituais -->
+              <!-- Card Barba & Rituais -->
               <div class="col-md-6">
                 <a href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais" class="text-decoration-none">
                   <div class="category-card">
                     <img src="{% static 'images/atelie_olinda_frontal.png' %}" alt="Ritual da Barba &amp; Nevou" loading="lazy">
                     <div class="category-overlay">
-                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">💈 Barboterapia &amp; Alquimia</span>
+                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">💈 Barba &amp; Alquimia</span>
                       <h3 class="fw-bold text-white mb-1 fs-26">Ritual da Barba &amp; Nevou</h3>
                       <p class="text-white-50 fs-14 mb-3">Toalha quente, navalha clássica, nevou de alto padrão e alquimia capilar no quintal de Olinda.</p>
                       <span class="text-white fw-bold fs-14 d-flex align-items-center gap-1">
@@ -810,7 +930,7 @@
                 </div>
               </div>
 
-              <!-- Plano 2: Alquimia & Barboterapia (Destaque Mais Escolhido) -->
+              <!-- Plano 2: Alquimia & Barba (Destaque Mais Escolhido) -->
               <div class="col-lg-4 col-md-6">
                 <div class="card h-100 border border-2 border-warning shadow rounded-4 p-4 bg-white d-flex flex-column justify-content-between position-relative transition-hover" style="transform: translateY(-4px);">
                   <div class="position-absolute top-0 start-50 translate-middle">
@@ -825,7 +945,7 @@
                       </span>
                       <span class="fs-12 text-muted fw-semibold">Quinzenal VIP</span>
                     </div>
-                    <h4 class="fw-bold text-dark fs-20 mb-1">Alquimia &amp; Barboterapia</h4>
+                    <h4 class="fw-bold text-dark fs-20 mb-1">Alquimia &amp; Barba</h4>
                     <p class="text-muted fs-13 mb-3">O ritual completo de autocuidado. Cabelo alinhado e barba tratada com toalha quente e óleos.</p>
                     <div class="d-flex align-items-baseline gap-1 mb-4">
                       <span class="fs-14 text-muted">R$</span>
@@ -855,7 +975,7 @@
                       </li>
                     </ul>
                   </div>
-                  <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Quero%20fazer%20parte%20do%20*Plano%20Alquimia%20%26%20Barboterapia*%20do%20Clube%20Vakaria." target="_blank" class="btn btn-warning rounded-pill py-2.5 fw-bold text-dark d-flex align-items-center justify-content-center gap-2 shadow-sm fs-13">
+                  <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Quero%20fazer%20parte%20do%20*Plano%20Alquimia%20%26%20Barba*%20do%20Clube%20Vakaria." target="_blank" class="btn btn-warning rounded-pill py-2.5 fw-bold text-dark d-flex align-items-center justify-content-center gap-2 shadow-sm fs-13">
                     <i class="bx bxl-whatsapp fs-18"></i> Quero o Ritual Completo
                   </a>
                 </div>
@@ -943,169 +1063,284 @@
   <!-- ========== Rituais Avulsos & Clube Vakaria End ========== -->
 
 
-  <!-- ========== Drops da Semana Carrossel Start ========== -->
-  <section class="py-5 bg-white border-top border-bottom" id="drops" style="border-color: var(--hf-border) !important;">
+  <!-- ========== Stories dos Últimos Cortes & Causos Start ========== -->
+  <section class="py-5 bg-white border-top border-bottom" id="causos" style="border-color: var(--hf-border) !important; scroll-margin-top: 80px;">
     <div class="container py-3">
       
-      <div id="dropsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="7000">
+      <!-- Header com Título e Link Instagram -->
+      <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+        <div>
+          <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1 fs-11 text-uppercase mb-2 rounded-pill">
+            📸 STORIES DAS LADEIRAS • CAUSOS DE OLINDA
+          </span>
+          <h2 class="fw-bold fs-30 text-dark mb-1">Stories dos Últimos Cortes</h2>
+          <p class="text-muted fs-14 mb-0">
+            Acompanhe o dia a dia, transformações e causos direto da cadeira do Barbeiro Vaka nas ladeiras de Olinda.
+          </p>
+        </div>
         
-        <!-- Header com Título e Controles do Carrossel -->
-        <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
-          <div>
-            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1 fs-11 text-uppercase mb-2 rounded-pill">{{ home_config.drops_badge|default:'✨ EXPERIÊNCIAS AUTORAIS' }}</span>
-            <h2 class="fw-bold fs-30 text-dark mb-1">{{ home_config.drops_title|default:'Ecossistema de Serviços &amp; Cuidados' }}</h2>
-            <p class="text-muted fs-14 mb-0">{{ home_config.drops_subtitle|default:'Procedimentos executados com excelência técnica e o acolhimento típico de Olinda.' }}</p>
+        <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+          <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/eduardo_vaka_/' }}" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 py-1.5 fs-13 fw-semibold d-inline-flex align-items-center gap-1.5">
+            <i class="bx bxl-instagram text-danger fs-18"></i> Siga @eduardo_vaka_
+          </a>
+          <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-1.5 fs-13 fw-semibold">
+            Ver Vitrine Completa <i class="bx bx-right-arrow-alt ms-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Barra de Stories / Círculos de Destaque (Instagram Style) -->
+      <div class="d-flex align-items-center gap-3 gap-md-4 overflow-auto py-2 mb-4 scrollbar-none" style="-webkit-overflow-scrolling: touch;">
+        <a href="#causo-corte" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/story_corte_autoral.jpg' %}" alt="Cortes Autorais">
+            </div>
           </div>
-          
-          <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
-            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="prev" style="width: 38px; height: 38px;" title="Serviços anteriores">
-              <i class="bx bx-chevron-left fs-22"></i>
-            </button>
-            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="next" style="width: 38px; height: 38px;" title="Próximos serviços">
-              <i class="bx bx-chevron-right fs-22"></i>
-            </button>
-            <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-1.5 ms-2 fs-13 fw-semibold">
-              Ver Todos os Serviços <i class="bx bx-right-arrow-alt ms-1"></i>
-            </a>
+          <span class="story-bubble-label">✂️ Cortes</span>
+        </a>
+        <a href="#causo-barba" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/story_barba_toalha.jpg' %}" alt="Ritual Barba">
+            </div>
+          </div>
+          <span class="story-bubble-label">💈 Barba</span>
+        </a>
+        <a href="#causo-nevou" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/story_nevou.jpg' %}" alt="Nevou & Cor">
+            </div>
+          </div>
+          <span class="story-bubble-label">❄️ Nevou</span>
+        </a>
+        <a href="#causo-afeto" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/ambiente_acolhimento_pet.jpg' %}" alt="Afeto & Pet">
+            </div>
+          </div>
+          <span class="story-bubble-label">🐶 Afeto &amp; Pet</span>
+        </a>
+        <a href="#galeria" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/atelie_olinda_frontal.png' %}" alt="O Espaço">
+            </div>
+          </div>
+          <span class="story-bubble-label">📍 O Ateliê</span>
+        </a>
+        <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/eduardo_vaka_/' }}" target="_blank" class="story-bubble-wrapper">
+          <div class="story-bubble-ring">
+            <div class="story-bubble-inner">
+              <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Barbeiro Vaka">
+            </div>
+          </div>
+          <span class="story-bubble-label">🐮 O Barbeiro</span>
+        </a>
+      </div>
+
+      <!-- Grid de Stories dos Últimos Cortes -->
+      <div class="row g-4">
+        
+        <!-- Story 1: Corte Autoral -->
+        <div class="col-12 col-sm-6 col-lg-3" id="causo-corte">
+          <div class="story-card-vaka">
+            <img src="{% static 'images/story_corte_autoral.jpg' %}" alt="Corte Autoral com Barbeiro Vaka" class="story-card-bg" loading="lazy">
+            <div class="story-card-gradient"></div>
+            
+            <div class="story-card-content">
+              <!-- Top bar -->
+              <div>
+                <div class="story-progress-bar-container">
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment"></div>
+                  <div class="story-progress-segment"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Eduardo Vaka" class="story-author-avatar">
+                    <div>
+                      <span class="fw-bold text-white fs-12 d-block leading-tight">eduardo_vaka_</span>
+                      <small class="text-white-50 fs-10">Hoje • Olinda</small>
+                    </div>
+                  </div>
+                  <span class="badge bg-black bg-opacity-50 text-white border border-white border-opacity-25 rounded-pill px-2 py-0.5 fs-10">
+                    <i class="bx bx-music text-warning me-1"></i>Frevo &amp; Groove
+                  </span>
+                </div>
+              </div>
+
+              <!-- Bottom Content & Causo -->
+              <div>
+                <div class="story-causo-bubble mb-3">
+                  <div class="d-flex align-items-center gap-1.5 mb-1.5">
+                    <span class="badge bg-warning text-dark fw-bold rounded-pill px-2 py-0.5" style="font-size: 10px;">✂️ VISAGISMO AUTORAL</span>
+                  </div>
+                  <h4 class="text-white fw-bold fs-16 mb-1">O Corte que Liberta</h4>
+                  <p class="text-white-50 fs-12 mb-0 fst-italic">
+                    "Cheguei sem saber definir o que queria. O Vaka olhou meu formato de rosto, conversamos e nasceu esse corte incrível!"
+                  </p>
+                </div>
+
+                <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Vi%20o%20Story%20do%20*Corte%20Autoral%20%26%20Visagismo*%20no%20site%20e%20quero%20agendar%20um%20hor%C3%A1rio!" target="_blank" class="btn btn-warning rounded-pill w-100 py-2 fw-bold text-dark d-flex align-items-center justify-content-center gap-1.5 shadow-sm fs-12">
+                  <i class="bx bxl-whatsapp fs-16"></i> Quero Esse Corte
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Slides do Carrossel (3 Serviços por Slide) -->
-        <div class="carousel-inner">
-          
-          <!-- Slide 1: Primeiros 3 Serviços -->
-          <div class="carousel-item active">
-            <div class="row g-4">
-              {% for product in featured_products|slice:":3" %}
-              <div class="col-md-6 col-lg-4">
-                <div class="product-card-light h-100 d-flex flex-column justify-content-between">
-                  <div>
-                    <div class="product-img-holder">
-                      {% if product.cover_image %}
-                      <img src="{{ product.cover_image.url }}" alt="{{ product.title }}">
-                      {% else %}
-                      <img src="{% static 'images/product/p-1.png' %}" alt="{{ product.title }}">
-                      {% endif %}
-                      
-                      <div class="position-absolute top-0 start-0 m-3 d-flex flex-column gap-1">
-                        <span class="badge bg-white text-dark border shadow-sm px-2 py-1 fs-11 fw-bold text-uppercase">{{ product.brand.name }}</span>
-                        {% if product.is_exclusive %}
-                        <span class="badge badge-gold px-2 py-1 fs-11 rounded-pill">✨ Exclusivo</span>
-                        {% endif %}
-                      </div>
-
-                      <div class="position-absolute top-0 end-0 m-3">
-                        <span class="badge {% if product.gender == 'F' %}bg-danger{% elif product.gender == 'M' %}bg-dark{% else %}bg-secondary{% endif %} text-white fs-11 rounded-pill">
-                          {{ product.get_gender_display }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="p-4">
-                      <small class="text-muted d-block mb-1 fs-12">{{ product.category.name }}</small>
-                      <h5 class="fs-16 fw-bold mb-2">
-                        <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="text-dark text-decoration-none hover-gold">
-                          {{ product.title }}
-                        </a>
-                      </h5>
-                      {% if product.fabric_composition %}
-                      <p class="text-muted fs-12 mb-0"><i class="bx bx-check-circle me-1 text-success"></i>{{ product.fabric_composition }}</p>
-                      {% endif %}
+        <!-- Story 2: Barba & Toalha Quente -->
+        <div class="col-12 col-sm-6 col-lg-3" id="causo-barba">
+          <div class="story-card-vaka">
+            <img src="{% static 'images/story_barba_toalha.jpg' %}" alt="Ritual da Barba com Toalha Quente" class="story-card-bg" loading="lazy">
+            <div class="story-card-gradient"></div>
+            
+            <div class="story-card-content">
+              <!-- Top bar -->
+              <div>
+                <div class="story-progress-bar-container">
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Eduardo Vaka" class="story-author-avatar">
+                    <div>
+                      <span class="fw-bold text-white fs-12 d-block leading-tight">eduardo_vaka_</span>
+                      <small class="text-white-50 fs-10">Há 3 horas</small>
                     </div>
                   </div>
-
-                  <div class="px-4 pb-4 pt-0">
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--hf-border) !important;">
-                      <div>
-                        {% if product.compare_at_price %}
-                        <small class="text-muted text-decoration-line-through d-block fs-11">R$ {{ product.compare_at_price|floatformat:2 }}</small>
-                        {% endif %}
-                        <span class="fs-18 fw-bold text-dark">R$ {{ product.price|floatformat:2 }}</span>
-                      </div>
-                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-12 fw-semibold">
-                        Ver Serviço &amp; Agendar
-                      </a>
-                    </div>
-                  </div>
+                  <span class="badge bg-black bg-opacity-50 text-white border border-white border-opacity-25 rounded-pill px-2 py-0.5 fs-10">
+                    <i class="bx bx-flame text-danger me-1"></i>Toalha Quente
+                  </span>
                 </div>
               </div>
-              {% endfor %}
-            </div>
-          </div>
 
-          <!-- Slide 2: Próximos Serviços -->
-          <div class="carousel-item">
-            <div class="row g-4">
-              {% for product in featured_products|slice:"3:6" %}
-              <div class="col-md-6 col-lg-4">
-                <div class="product-card-light h-100 d-flex flex-column justify-content-between">
-                  <div>
-                    <div class="product-img-holder">
-                      {% if product.cover_image %}
-                      <img src="{{ product.cover_image.url }}" alt="{{ product.title }}">
-                      {% else %}
-                      <img src="{% static 'images/product/p-1.png' %}" alt="{{ product.title }}">
-                      {% endif %}
-                      
-                      <div class="position-absolute top-0 start-0 m-3 d-flex flex-column gap-1">
-                        <span class="badge bg-white text-dark border shadow-sm px-2 py-1 fs-11 fw-bold text-uppercase">{{ product.brand.name }}</span>
-                        {% if product.is_exclusive %}
-                        <span class="badge badge-gold px-2 py-1 fs-11 rounded-pill">✨ Exclusivo</span>
-                        {% endif %}
-                      </div>
-
-                      <div class="position-absolute top-0 end-0 m-3">
-                        <span class="badge {% if product.gender == 'F' %}bg-danger{% elif product.gender == 'M' %}bg-dark{% else %}bg-secondary{% endif %} text-white fs-11 rounded-pill">
-                          {{ product.get_gender_display }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div class="p-4">
-                      <small class="text-muted d-block mb-1 fs-12">{{ product.category.name }}</small>
-                      <h5 class="fs-16 fw-bold mb-2">
-                        <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="text-dark text-decoration-none hover-gold">
-                          {{ product.title }}
-                        </a>
-                      </h5>
-                      {% if product.fabric_composition %}
-                      <p class="text-muted fs-12 mb-0"><i class="bx bx-check-circle me-1 text-success"></i>{{ product.fabric_composition }}</p>
-                      {% endif %}
-                    </div>
+              <!-- Bottom Content & Causo -->
+              <div>
+                <div class="story-causo-bubble mb-3">
+                  <div class="d-flex align-items-center gap-1.5 mb-1.5">
+                    <span class="badge bg-info text-dark fw-bold rounded-pill px-2 py-0.5" style="font-size: 10px;">💈 RITUAL DE BARBA</span>
                   </div>
-
-                  <div class="px-4 pb-4 pt-0">
-                    <div class="pt-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--hf-border) !important;">
-                      <div>
-                        {% if product.compare_at_price %}
-                        <small class="text-muted text-decoration-line-through d-block fs-11">R$ {{ product.compare_at_price|floatformat:2 }}</small>
-                        {% endif %}
-                        <span class="fs-18 fw-bold text-dark">R$ {{ product.price|floatformat:2 }}</span>
-                      </div>
-                      <a href="{% url 'catalog:product_detail' slug=product.slug %}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fs-12 fw-semibold">
-                        Ver Serviço &amp; Agendar
-                      </a>
-                    </div>
-                  </div>
+                  <h4 class="text-white fw-bold fs-16 mb-1">Pausa &amp; Toalha Quente</h4>
+                  <p class="text-white-50 fs-12 mb-0 fst-italic">
+                    "O aroma dos óleos vegetais e a toalha aquecida no vapor... desacelera qualquer dia corrido nas ladeiras."
+                  </p>
                 </div>
+
+                <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Vi%20o%20Story%20do%20*Ritual%20da%20Barba%20na%20Toalha%20Quente*%20e%20quero%20agendar!" target="_blank" class="btn btn-warning rounded-pill w-100 py-2 fw-bold text-dark d-flex align-items-center justify-content-center gap-1.5 shadow-sm fs-12">
+                  <i class="bx bxl-whatsapp fs-16"></i> Quero Esse Ritual
+                </a>
               </div>
-              {% endfor %}
             </div>
           </div>
-
         </div>
 
-        <!-- Indicadores Inferiores -->
-        <div class="carousel-indicators position-relative mt-4 mb-0">
-          <button type="button" data-bs-target="#dropsCarousel" data-bs-slide-to="0" class="active bg-dark rounded-pill" aria-current="true" aria-label="Slide 1" style="width: 28px; height: 4px;"></button>
-          <button type="button" data-bs-target="#dropsCarousel" data-bs-slide-to="1" class="bg-dark rounded-pill" aria-label="Slide 2" style="width: 28px; height: 4px;"></button>
+        <!-- Story 3: Nevou & Alquimia -->
+        <div class="col-12 col-sm-6 col-lg-3" id="causo-nevou">
+          <div class="story-card-vaka">
+            <img src="{% static 'images/story_nevou.jpg' %}" alt="Nevou Olindense" class="story-card-bg" loading="lazy">
+            <div class="story-card-gradient"></div>
+            
+            <div class="story-card-content">
+              <!-- Top bar -->
+              <div>
+                <div class="story-progress-bar-container">
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment active"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Eduardo Vaka" class="story-author-avatar">
+                    <div>
+                      <span class="fw-bold text-white fs-12 d-block leading-tight">eduardo_vaka_</span>
+                      <small class="text-white-50 fs-10">Ontem às 18:20</small>
+                    </div>
+                  </div>
+                  <span class="badge bg-black bg-opacity-50 text-white border border-white border-opacity-25 rounded-pill px-2 py-0.5 fs-10">
+                    <i class="bx bx-sparkles text-info me-1"></i>Nevou VIP
+                  </span>
+                </div>
+              </div>
+
+              <!-- Bottom Content & Causo -->
+              <div>
+                <div class="story-causo-bubble mb-3">
+                  <div class="d-flex align-items-center gap-1.5 mb-1.5">
+                    <span class="badge bg-danger text-white fw-bold rounded-pill px-2 py-0.5" style="font-size: 10px;">❄️ ALQUIMIA DAS CORES</span>
+                  </div>
+                  <h4 class="text-white fw-bold fs-16 mb-1">O Autêntico Nevou</h4>
+                  <p class="text-white-50 fs-12 mb-0 fst-italic">
+                    "Platinado de respeito sem arder nada, com matização fria perfeita. Estética urbana viva de Pernambuco!"
+                  </p>
+                </div>
+
+                <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Vi%20o%20Story%20do%20*Nevou%20Olindense*%20e%20quero%20agendar%20minha%20descolora%C3%A7%C3%A3o!" target="_blank" class="btn btn-warning rounded-pill w-100 py-2 fw-bold text-dark d-flex align-items-center justify-content-center gap-1.5 shadow-sm fs-12">
+                  <i class="bx bxl-whatsapp fs-16"></i> Quero Esse Nevou
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Story 4: Afeto & Pet Friendly -->
+        <div class="col-12 col-sm-6 col-lg-3" id="causo-afeto">
+          <div class="story-card-vaka">
+            <img src="{% static 'images/ambiente_acolhimento_pet.jpg' %}" alt="Acolhimento e Pet Friendly em Olinda" class="story-card-bg" loading="lazy">
+            <div class="story-card-gradient"></div>
+            
+            <div class="story-card-content">
+              <!-- Top bar -->
+              <div>
+                <div class="story-progress-bar-container">
+                  <div class="story-progress-segment active"></div>
+                  <div class="story-progress-segment"></div>
+                  <div class="story-progress-segment"></div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-2">
+                    <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Eduardo Vaka" class="story-author-avatar">
+                    <div>
+                      <span class="fw-bold text-white fs-12 d-block leading-tight">eduardo_vaka_</span>
+                      <small class="text-white-50 fs-10">Destaque da Semana</small>
+                    </div>
+                  </div>
+                  <span class="badge bg-black bg-opacity-50 text-white border border-white border-opacity-25 rounded-pill px-2 py-0.5 fs-10">
+                    <i class="bx bx-heart text-danger me-1"></i>Pet Friendly
+                  </span>
+                </div>
+              </div>
+
+              <!-- Bottom Content & Causo -->
+              <div>
+                <div class="story-causo-bubble mb-3">
+                  <div class="d-flex align-items-center gap-1.5 mb-1.5">
+                    <span class="badge bg-success text-white fw-bold rounded-pill px-2 py-0.5" style="font-size: 10px;">☕ AFETO &amp; CAFÉ</span>
+                  </div>
+                  <h4 class="text-white fw-bold fs-16 mb-1">Causo, Café &amp; Bicho</h4>
+                  <p class="text-white-50 fs-12 mb-0 fst-italic">
+                    "Trazer meu pet, tomar um café coado na hora e sair com o visual renovado. A Vakaria é acolhimento puro."
+                  </p>
+                </div>
+
+                <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Adorei%20o%20clima%20do%20ateli%C3%AA%20e%20quero%20agendar%20um%20hor%C3%A1rio%20de%20atendimento!" target="_blank" class="btn btn-warning rounded-pill w-100 py-2 fw-bold text-dark d-flex align-items-center justify-content-center gap-1.5 shadow-sm fs-12">
+                  <i class="bx bxl-whatsapp fs-16"></i> Agendar com Afeto
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
 
     </div>
   </section>
-  <!-- ========== Drops da Semana Carrossel End ========== -->
+  <!-- ========== Stories dos Últimos Cortes & Causos End ========== -->
 
 
 
@@ -1196,16 +1431,26 @@
       </div>
 
       <!-- Galeria do Ambiente Real em Olinda -->
-      <div class="row g-3 mt-4 pt-2">
-        <div class="col-6 col-md-3">
-          <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-hover">
-            <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Barbeiro Vaka nas ladeiras de Olinda" class="img-fluid w-100" style="height: 180px; object-fit: cover;">
-            <div class="card-body p-3 text-center bg-light">
-              <span class="fw-bold text-dark fs-13 d-block">💈 Barbeiro Vaka</span>
-              <small class="text-muted fs-11">Eduardo Cardoso • Olinda</small>
+      <div id="galeria" class="pt-4 mt-4 border-top" style="border-color: var(--hf-border) !important; scroll-margin-top: 100px;">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-3 py-1 fs-11 text-uppercase rounded-pill">📸 GALERIA DO ATELIÊ</span>
+            <h3 class="fw-bold fs-22 text-dark mt-1 mb-0">O Espaço nas Ladeiras de Olinda</h3>
+          </div>
+          <a href="{{ STORE_INSTAGRAM_URL|default:'https://www.instagram.com/eduardo_vaka_/' }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-3 fs-12 d-none d-sm-inline-flex align-items-center gap-1">
+            <i class="bx bxl-instagram fs-16 text-danger"></i> Mais no Instagram
+          </a>
+        </div>
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-hover">
+              <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Barbeiro Vaka nas ladeiras de Olinda" class="img-fluid w-100" style="height: 180px; object-fit: cover;">
+              <div class="card-body p-3 text-center bg-light">
+                <span class="fw-bold text-dark fs-13 d-block">💈 Barbeiro Vaka</span>
+                <small class="text-muted fs-11">Eduardo Cardoso • Olinda</small>
+              </div>
             </div>
           </div>
-        </div>
         <div class="col-6 col-md-3">
           <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 transition-hover">
             <img src="{% static 'images/atelie_olinda_frontal.png' %}" alt="Laboratório Artístico & Cadeira" class="img-fluid w-100" style="height: 180px; object-fit: cover;">

@@ -58,7 +58,7 @@ class Command(BaseCommand):
             ("Cortes Femininos Personalizados", "F", cat_cortes),
             ("Cortes Infantis & Juvenis", "U", cat_cortes),
             ("Ritual da Barba com Toalha Quente", "M", cat_barba),
-            ("Alinhamento & Barboterapia", "M", cat_barba),
+            ("Alinhamento & Barba Completa", "M", cat_barba),
             ("Nevou & Descoloração Global", "U", cat_quimica),
             ("Coloração Artística & Mechas", "U", cat_quimica),
             ("Tratamentos & Cronograma Capilar", "U", cat_quimica),
@@ -154,7 +154,7 @@ class Command(BaseCommand):
                     "A experiência definitiva do laboratório. Uma pausa de puro relaxamento e renovação no Sítio "
                     "Histórico de Olinda: corte completo alinhado ao seu perfil + ritual da barba com toalha quente."
                 ),
-                "fabric_composition": "Visagismo Completo + Barboterapia Relaxante",
+                "fabric_composition": "Visagismo Completo + Ritual da Barba com Toalha Quente",
                 "care_instructions": "Duração média: 60 minutos de acolhimento e cuidado impecável.",
                 "is_featured": True,
                 "variants": [
@@ -260,7 +260,7 @@ class Command(BaseCommand):
         CarouselSlide.objects.create(
             title="Ritual da Barba & O Autêntico Nevou",
             subtitle="Alinhamento na toalha quente, cuidados faciais e a celebração da estética urbana olindense.",
-            badge_text="🔥 Barboterapia & Alquimia Capilar",
+            badge_text="🔥 Ritual da Barba & Alquimia Capilar",
             button_text="Agendar Procedimento",
             button_url="/pedidos/carrinho/",
             slide_type="hero",
@@ -315,7 +315,7 @@ class Command(BaseCommand):
         conf.women_card_url = "/produtos/?category=cortes-personalizados"
         conf.women_card_btn_text = "Explorar Cortes"
 
-        conf.men_card_badge = "🔥 Barboterapia & Alquimia"
+        conf.men_card_badge = "🔥 Barba & Alquimia"
         conf.men_card_title = "Barba na Toalha Quente & Nevou"
         conf.men_card_subtitle = "Alinhamento preciso com toalha quente, tratamentos para a pele e o autêntico nevou da cultura urbana."
         conf.men_card_url = "/produtos/?category=barba-bigode-cuidados-faciais"
