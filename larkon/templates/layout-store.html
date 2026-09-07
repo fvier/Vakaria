@@ -290,13 +290,13 @@
           {% endif %}
         </ul>
 
-        <!-- Ações do Topo: Sacola e WhatsApp VIP -->
+        <!-- Ações do Topo: Agendamentos e WhatsApp VIP -->
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
           <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558183983355' }}" target="_blank" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold">
-            <i class="bx bxl-whatsapp me-1 fs-16"></i> Atendimento VIP
+            <i class="bx bxl-whatsapp me-1 fs-16"></i> Agendar WhatsApp
           </a>
           <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 rounded-pill position-relative fw-semibold">
-            <i class="bx bx-shopping-bag me-1 fs-16"></i> Sacola
+            <i class="bx bx-calendar me-1 fs-16 text-warning"></i> Agendamentos
             {% if cart.total_items > 0 %}
             <span class="badge bg-danger rounded-pill ms-1">{{ cart.total_items }}</span>
             {% endif %}
@@ -482,8 +482,8 @@
       <span>Vitrine</span>
     </a>
     <a href="{% url 'orders:cart' %}" class="mobile-bottom-nav-item position-relative {% if '/pedidos/carrinho/' in request.path %}active{% endif %}">
-      <i class="bx bx-shopping-bag"></i>
-      <span>Sacola</span>
+      <i class="bx bx-calendar"></i>
+      <span>Agendamento</span>
       {% if cart.total_items > 0 %}
       <span class="mobile-nav-badge">{{ cart.total_items }}</span>
       {% endif %}

@@ -464,6 +464,9 @@
             <a class="nav-link" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica">Alquimia &amp; Nevou</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="#clube">Clube Vakaria</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="#loja">O Espaço</a>
           </li>
           <li class="nav-item">
@@ -478,10 +481,10 @@
             <i class="bx bxl-instagram fs-20"></i>
           </a>
 
-          <!-- Sacola Minimalist -->
-          <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-ghost-dark d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill text-dark" title="Sacola de Compras">
-            <i class="bx bx-shopping-bag fs-18"></i>
-            <span class="fs-13 fw-semibold">Sacola</span>
+          <!-- Agendamentos Minimalist -->
+          <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-ghost-dark d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill text-dark" title="Serviços Selecionados e Agendamento">
+            <i class="bx bx-calendar fs-18 text-warning"></i>
+            <span class="fs-13 fw-semibold">Agendamentos</span>
           </a>
 
           <!-- Entrar / Login Minimalist -->
@@ -692,69 +695,67 @@
 
 
   <!-- ========== Coleções & Promoções Relâmpago (Carrossel 2 em 1) Start ========== -->
-  <section class="py-5" id="collections-promo-section" style="background-color: #fbf9f6;">
+  <!-- ========== Rituais Avulsos & Clube Vakaria Start ========== -->
+  <section class="py-5" id="clube" style="background-color: #fbf9f6;">
     <div class="container py-3">
       
       <!-- Cabeçalho com Switcher e Controles do Carrossel -->
       <div class="d-flex flex-column align-items-center mb-4 text-center">
         <span class="badge bg-white text-dark border shadow-xs px-3 py-1 fs-11 text-uppercase mb-2 rounded-pill">
-          Curadoria & Oportunidades
+          💈 Exclusividade &amp; Economia em Olinda
         </span>
-        <h2 class="fw-bold fs-32 text-dark mb-3">Explore por Estilo ou Ofertas Relâmpago</h2>
+        <h2 class="fw-bold fs-32 text-dark mb-2">Rituais Avulsos &amp; Clube Vakaria</h2>
+        <p class="text-muted fs-15 max-w-600 mb-3">Escolha entre agendar procedimentos avulsos sob demanda ou assinar nosso clube de cuidados mensais com vantagens exclusivas.</p>
         
-        {% if home_config.promo_active %}
         <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap mb-2">
-          <!-- Botão Slide 1: Coleções -->
+          <!-- Botão Slide 1: Rituais Avulsos -->
           <button type="button" class="btn promo-carousel-nav-btn active rounded-pill px-4 py-2 fw-bold fs-13 d-flex align-items-center gap-2 shadow-xs" id="btnSlideCollections" onclick="goToPromoSlide(0)">
-            <i class="bx bx-grid-alt fs-16"></i> Coleções em Destaque
+            <i class="bx bx-cut fs-16"></i> Rituais &amp; Procedimentos Avulsos
           </button>
           
-          <!-- Botão Slide 2: Promoção & Timer -->
-          <button type="button" class="btn promo-carousel-nav-btn rounded-pill px-4 py-2 fw-bold fs-13 d-flex align-items-center gap-2 text-danger shadow-xs" id="btnSlidePromo" onclick="goToPromoSlide(1)">
-            <i class="bx bx-time-five fs-16 animate-pulse"></i> ⚡ Ofertas Relâmpago 
-            <span class="badge bg-danger text-white rounded-pill fs-10 px-2 py-0.5 ms-1" id="tabMiniTimer">00:00:00</span>
+          <!-- Botão Slide 2: Clube Vakaria -->
+          <button type="button" class="btn promo-carousel-nav-btn rounded-pill px-4 py-2 fw-bold fs-13 d-flex align-items-center gap-2 shadow-xs" id="btnSlidePromo" onclick="goToPromoSlide(1)" style="border-color: #d97706; color: #b45309;">
+            <i class="bx bx-crown fs-16 text-warning"></i> ⭐ Clube Vakaria (Planos Mensais)
+            <span class="badge bg-warning text-dark rounded-pill fs-10 px-2 py-0.5 ms-1">Economia VIP</span>
           </button>
         </div>
-        {% else %}
-        <p class="text-muted fs-15 mb-0">Explore as peças selecionadas para cada estilo.</p>
-        {% endif %}
       </div>
 
-      <!-- Carrossel 2 em 1 com Auto-play (7 segundos) -->
-      <div id="dualPromoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="7000" data-bs-pause="hover">
+      <!-- Carrossel 2 em 1 com Navegação por Abas -->
+      <div id="dualPromoCarousel" class="carousel slide" data-bs-interval="false">
         <div class="carousel-inner">
           
-          <!-- SLIDE 1: COLEÇÕES EM DESTAQUE (FEMININO & MASCULINO) -->
+          <!-- SLIDE 1: RITUAIS AVULSOS (CORTES & BARBOTERAPIA) -->
           <div class="carousel-item active" id="slide-collections">
             <div class="row g-4">
-              <!-- Card Feminino -->
+              <!-- Card Cortes Autorais -->
               <div class="col-md-6">
-                <a href="{{ home_config.women_card_url|default:'/produtos/?gender=F' }}" class="text-decoration-none">
+                <a href="{% url 'catalog:product_grid' %}" class="text-decoration-none">
                   <div class="category-card">
-                    <img src="{{ home_config.final_women_card_image }}" alt="{{ home_config.women_card_title }}" loading="lazy">
+                    <img src="{% static 'images/eduardo_ladeira_olinda.png' %}" alt="Cortes Autorais com Barbeiro Vaka" loading="lazy">
                     <div class="category-overlay">
-                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">{{ home_config.women_card_badge|default:'👗 Coleção Feminina' }}</span>
-                      <h3 class="fw-bold text-white mb-1 fs-26">{{ home_config.women_card_title|default:'Moda Feminina Autêntica' }}</h3>
-                      <p class="text-white-50 fs-14 mb-3">{{ home_config.women_card_subtitle|default:'Vestidos de seda, conjuntos de alfaiataria, linho puro e novidades semanais.' }}</p>
+                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">✂️ Cortes &amp; Visagismo</span>
+                      <h3 class="fw-bold text-white mb-1 fs-26">Cortes Autorais com Barbeiro Vaka</h3>
+                      <p class="text-white-50 fs-14 mb-3">A tesoura não tem gênero. Atendimento humanizado e cortes autorais que expressam a sua identidade.</p>
                       <span class="text-white fw-bold fs-14 d-flex align-items-center gap-1">
-                        {{ home_config.women_card_btn_text|default:'Ver Coleção Feminina' }} <i class="bx bx-right-arrow-alt fs-18"></i>
+                        Ver Cortes &amp; Agendar <i class="bx bx-right-arrow-alt fs-18"></i>
                       </span>
                     </div>
                   </div>
                 </a>
               </div>
 
-              <!-- Card Masculino -->
+              <!-- Card Barboterapia & Rituais -->
               <div class="col-md-6">
-                <a href="{{ home_config.men_card_url|default:'/produtos/?gender=M' }}" class="text-decoration-none">
+                <a href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais" class="text-decoration-none">
                   <div class="category-card">
-                    <img src="{{ home_config.final_men_card_image }}" alt="{{ home_config.men_card_title }}" loading="lazy">
+                    <img src="{% static 'images/atelie_olinda_frontal.png' %}" alt="Ritual da Barba &amp; Nevou" loading="lazy">
                     <div class="category-overlay">
-                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">{{ home_config.men_card_badge|default:'👔 Coleção Masculina' }}</span>
-                      <h3 class="fw-bold text-white mb-1 fs-26">{{ home_config.men_card_title|default:'Moda Masculina Elegante' }}</h3>
-                      <p class="text-white-50 fs-14 mb-3">{{ home_config.men_card_subtitle|default:'Camisas em linho nobre, blazers slim, polos pima cotton e bermudas alfaiataria.' }}</p>
+                      <span class="badge bg-white text-dark w-auto align-self-start mb-2 px-3 py-1 rounded-pill fw-semibold">💈 Barboterapia &amp; Alquimia</span>
+                      <h3 class="fw-bold text-white mb-1 fs-26">Ritual da Barba &amp; Nevou</h3>
+                      <p class="text-white-50 fs-14 mb-3">Toalha quente, navalha clássica, nevou de alto padrão e alquimia capilar no quintal de Olinda.</p>
                       <span class="text-white fw-bold fs-14 d-flex align-items-center gap-1">
-                        {{ home_config.men_card_btn_text|default:'Ver Coleção Masculina' }} <i class="bx bx-right-arrow-alt fs-18"></i>
+                        Conhecer Rituais <i class="bx bx-right-arrow-alt fs-18"></i>
                       </span>
                     </div>
                   </div>
@@ -763,147 +764,183 @@
             </div>
           </div>
 
-          {% if home_config.promo_active %}
-          <!-- SLIDE 2: ⚡ OFERTAS RELÂMPAGO COM CONTADOR REGRESSIVO -->
+          <!-- SLIDE 2: ⭐ CLUBE VAKARIA (PLANOS DE ASSINATURA) -->
           <div class="carousel-item" id="slide-promo">
-            <div class="row g-4 align-items-stretch">
+            <div class="row g-4 align-items-stretch justify-content-center">
               
-              <!-- Banner Editorial da Promoção com Timer -->
-              <div class="col-lg-5">
-                <div class="promo-hero-card position-relative rounded-4 overflow-hidden h-100 shadow-sm d-flex flex-column justify-content-between p-4 p-md-5 text-white" style="min-height: 480px;">
-                  <img src="{{ home_config.final_promo_card_image }}" alt="{{ home_config.promo_title }}" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover; z-index: 1;">
-                  <div class="position-absolute top-0 start-0 w-100 h-100" style="z-index: 2; background: linear-gradient(135deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.65) 50%, rgba(15, 23, 42, 0.95) 100%);"></div>
-                  
-                  <!-- Top Badge -->
-                  <div class="position-relative d-flex justify-content-between align-items-center" style="z-index: 3;">
-                    <span class="badge bg-danger text-white px-3 py-1.5 rounded-pill fs-11 fw-bold d-inline-flex align-items-center gap-1 shadow-sm">
-                      <i class="bx bx-bolt-circle fs-14"></i> {{ home_config.promo_badge|default:'⚡ DROP RELÂMPAGO' }}
-                    </span>
-                    <span class="badge bg-warning text-dark px-3 py-1.5 rounded-pill fs-12 fw-extrabold shadow-sm">
-                      {{ home_config.promo_discount_badge|default:'ATÉ 30% OFF' }}
-                    </span>
-                  </div>
-
-                  <!-- Center Content & Timer -->
-                  <div class="position-relative my-4" style="z-index: 3;">
-                    <h3 class="fw-bold text-white fs-28 mb-2">{{ home_config.promo_title|default:'Peças Selecionadas com até 30% OFF' }}</h3>
-                    <p class="text-white-50 fs-14 mb-4">{{ home_config.promo_subtitle|default:'Condições exclusivas por tempo limitado. Aproveite a contagem regressiva para garantir sua numeração.' }}</p>
-                    
-                    <!-- Box do Cronômetro Regressivo -->
-                    <div class="promo-countdown-wrapper bg-black bg-opacity-60 border border-white border-opacity-15 rounded-3 p-3 backdrop-blur shadow-sm text-center">
-                      <div class="fs-11 text-uppercase text-warning fw-bold letter-spacing-1 mb-2">
-                        <i class="bx bx-time-five me-1"></i> A promoção encerra em:
-                      </div>
-                      <div class="d-flex align-items-center justify-content-center gap-2" id="promoLiveCountdown">
-                        <div class="promo-time-box">
-                          <div class="fs-22 fw-bold text-white" id="promoDays">00</div>
-                          <div class="fs-9 text-muted text-uppercase">Dias</div>
-                        </div>
-                        <span class="fs-20 fw-bold text-warning">:</span>
-                        <div class="promo-time-box">
-                          <div class="fs-22 fw-bold text-white" id="promoHours">00</div>
-                          <div class="fs-9 text-muted text-uppercase">Horas</div>
-                        </div>
-                        <span class="fs-20 fw-bold text-warning">:</span>
-                        <div class="promo-time-box">
-                          <div class="fs-22 fw-bold text-white" id="promoMinutes">00</div>
-                          <div class="fs-9 text-muted text-uppercase">Min</div>
-                        </div>
-                        <span class="fs-20 fw-bold text-warning">:</span>
-                        <div class="promo-time-box">
-                          <div class="fs-22 fw-bold text-danger" id="promoSeconds">00</div>
-                          <div class="fs-9 text-muted text-uppercase">Seg</div>
-                        </div>
-                      </div>
-                      {% if home_config.promo_stock_alert_text %}
-                      <div class="fs-11 text-warning bg-warning bg-opacity-10 border border-warning border-opacity-20 rounded-pill py-1 px-3 mt-3 d-inline-block">
-                        {{ home_config.promo_stock_alert_text }}
-                      </div>
-                      {% endif %}
+              <!-- Plano 1: Na Régua -->
+              <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm rounded-4 p-4 bg-white d-flex flex-column justify-content-between position-relative transition-hover">
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill fs-11 fw-bold text-uppercase">
+                        ✂️ Essencial
+                      </span>
+                      <span class="fs-12 text-muted fw-semibold">2x ao Mês</span>
                     </div>
+                    <h4 class="fw-bold text-dark fs-20 mb-1">Plano Na Régua</h4>
+                    <p class="text-muted fs-13 mb-3">Ideal para manter o corte em dia com estilo e praticidade nas ladeiras de Olinda.</p>
+                    <div class="d-flex align-items-baseline gap-1 mb-4">
+                      <span class="fs-14 text-muted">R$</span>
+                      <span class="display-6 fw-extrabold text-dark">90</span>
+                      <span class="text-muted fs-13">/ mês</span>
+                    </div>
+                    <ul class="list-unstyled d-flex flex-column gap-2.5 fs-13 mb-4">
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-success fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>2 Cortes Autorais</strong> por mês com Barbeiro Vaka</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-success fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Horário preferencial</strong> na agenda da semana</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-success fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Café especial</strong> passado na hora sempre incluso</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-success fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span>Sem carência, cancele quando quiser</span>
+                      </li>
+                    </ul>
                   </div>
-
-                  <!-- Bottom Button -->
-                  <div class="position-relative" style="z-index: 3;">
-                    <a href="{{ home_config.promo_button_url|default:'/produtos/' }}" class="btn btn-gold w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm fs-14">
-                      <i class="bx bxl-whatsapp fs-18"></i> {{ home_config.promo_button_text|default:'Garantir Oferta no WhatsApp' }}
-                    </a>
-                  </div>
-
+                  <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Gostaria%20de%20assinar%20o%20*Plano%20Na%20R%C3%A9gua*%20do%20Clube%20Vakaria." target="_blank" class="btn btn-outline-dark rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-xs fs-13">
+                    <i class="bx bxl-whatsapp text-success fs-18"></i> Assinar Plano Na Régua
+                  </a>
                 </div>
               </div>
 
-              <!-- Grade de Peças em Oferta (3 a 4 Peças) -->
-              <div class="col-lg-7">
-                <div class="row g-3 h-100">
-                  {% for prod in promo_products|slice:":4" %}
-                  <div class="col-sm-6">
-                    <div class="product-card-light h-100 d-flex flex-column justify-content-between p-3 rounded-4 shadow-xs border bg-white position-relative">
-                      
-                      <!-- Badge de Desconto no Card -->
-                      <span class="badge bg-danger text-white position-absolute top-0 start-0 m-3 px-2.5 py-1 rounded-pill fs-11 fw-bold shadow-xs" style="z-index: 2;">
-                        {% if prod.discount_percentage %}
-                          -{{ prod.discount_percentage }}% OFF
-                        {% else %}
-                          ⚡ OFERTA
-                        {% endif %}
+              <!-- Plano 2: Alquimia & Barboterapia (Destaque Mais Escolhido) -->
+              <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border border-2 border-warning shadow rounded-4 p-4 bg-white d-flex flex-column justify-content-between position-relative transition-hover" style="transform: translateY(-4px);">
+                  <div class="position-absolute top-0 start-50 translate-middle">
+                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fs-11 fw-extrabold shadow-sm text-uppercase">
+                      ⭐ Mais Escolhido • Ritual Completo
+                    </span>
+                  </div>
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-1">
+                      <span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-3 py-1.5 rounded-pill fs-11 fw-bold text-uppercase">
+                        💈 Cabelo &amp; Barba
                       </span>
-
-                      <div>
-                        <div class="product-img-holder rounded-3 mb-2" style="height: 180px;">
-                          {% if prod.cover_image %}
-                          <img src="{{ prod.cover_image.url }}" alt="{{ prod.title }}" loading="lazy">
-                          {% else %}
-                          <img src="{% static 'images/product/p-1.png' %}" alt="{{ prod.title }}" loading="lazy">
-                          {% endif %}
-                        </div>
-                        <span class="fs-11 text-uppercase text-muted fw-bold d-block">{{ prod.brand.name|default:'Vakaria' }}</span>
-                        <h5 class="fw-bold text-dark fs-14 mb-1 text-truncate" title="{{ prod.title }}">
-                          <a href="{{ prod.get_absolute_url }}" class="text-dark text-decoration-none hover-primary">{{ prod.title }}</a>
-                        </h5>
-                        
-                        <!-- Preços De / Por -->
-                        <div class="d-flex align-items-baseline gap-2 mb-2">
-                          <span class="fw-extrabold text-dark fs-16">R$ {{ prod.price|floatformat:2 }}</span>
-                          {% if prod.compare_at_price %}
-                          <span class="text-muted text-decoration-line-through fs-11">R$ {{ prod.compare_at_price|floatformat:2 }}</span>
-                          {% endif %}
-                        </div>
-
-                        <!-- Grade de Tamanhos disponíveis -->
-                        <div class="d-flex flex-wrap gap-1 mb-2">
-                          {% for v in prod.variants.all %}
-                            {% if v.stock_quantity > 0 %}
-                            <span class="badge bg-light text-dark border fs-10 px-1.5 py-0.5 rounded" title="{{ v.stock_quantity }} un. em estoque">{{ v.size }}</span>
-                            {% endif %}
-                          {% endfor %}
-                        </div>
-                      </div>
-
-                      <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1!%20Vi%20a%20promo%C3%A7%C3%A3o%20da%20pe%C3%A7a%20*{{ prod.title|urlencode }}*%20no%20site%20da%20Vakaria%20e%20quero%20aproveitar%20o%20desconto!" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill w-100 fw-semibold d-flex align-items-center justify-content-center gap-1.5 py-1.5 fs-12">
-                        <i class="bx bxl-whatsapp text-success fs-15"></i> Pedir no WhatsApp
-                      </a>
-
+                      <span class="fs-12 text-muted fw-semibold">Quinzenal VIP</span>
                     </div>
+                    <h4 class="fw-bold text-dark fs-20 mb-1">Alquimia &amp; Barboterapia</h4>
+                    <p class="text-muted fs-13 mb-3">O ritual completo de autocuidado. Cabelo alinhado e barba tratada com toalha quente e óleos.</p>
+                    <div class="d-flex align-items-baseline gap-1 mb-4">
+                      <span class="fs-14 text-muted">R$</span>
+                      <span class="display-6 fw-extrabold text-dark">160</span>
+                      <span class="text-muted fs-13">/ mês</span>
+                    </div>
+                    <ul class="list-unstyled d-flex flex-column gap-2.5 fs-13 mb-4">
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>2 Cortes Autorais</strong> completos por mês</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>2 Rituais de Barba</strong> com toalha quente e óleos</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Acabamento de pezinho</strong> cortesia entre os cortes</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Cerveja artesanal ou café</strong> durante o atendimento</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>15% OFF</strong> em produtos de finalização e cuidados</span>
+                      </li>
+                    </ul>
                   </div>
-                  {% empty %}
-                  <div class="col-12 text-center py-5">
-                    <p class="text-muted">Nenhuma peça cadastrada para a promoção no momento.</p>
+                  <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Quero%20fazer%20parte%20do%20*Plano%20Alquimia%20%26%20Barboterapia*%20do%20Clube%20Vakaria." target="_blank" class="btn btn-warning rounded-pill py-2.5 fw-bold text-dark d-flex align-items-center justify-content-center gap-2 shadow-sm fs-13">
+                    <i class="bx bxl-whatsapp fs-18"></i> Quero o Ritual Completo
+                  </a>
+                </div>
+              </div>
+
+              <!-- Plano 3: Laboratório VIP & Carnaval -->
+              <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow rounded-4 p-4 text-white d-flex flex-column justify-content-between position-relative transition-hover" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span class="badge bg-danger text-white px-3 py-1.5 rounded-pill fs-11 fw-bold text-uppercase">
+                        🎭 Experiência Total
+                      </span>
+                      <span class="fs-12 text-warning fw-semibold">Ilimitado &amp; Químicas</span>
+                    </div>
+                    <h4 class="fw-bold text-white fs-20 mb-1">Laboratório VIP &amp; Carnaval</h4>
+                    <p class="text-white-50 fs-13 mb-3">Para quem vive a arte e a efervescência de Olinda. Cuidado ilimitado e prioridade absoluta.</p>
+                    <div class="d-flex align-items-baseline gap-1 mb-4">
+                      <span class="fs-14 text-white-50">R$</span>
+                      <span class="display-6 fw-extrabold text-white">250</span>
+                      <span class="text-white-50 fs-13">/ mês</span>
+                    </div>
+                    <ul class="list-unstyled d-flex flex-column gap-2.5 fs-13 mb-4 text-white-75">
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Cortes Autorais LIVRES</strong> durante todo o mês</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Barba &amp; Bigode alinhados</strong> com toalha quente</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>Prioridade máxima de agenda</strong> no Carnaval de Olinda</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span><strong>30% OFF</strong> em Descoloração Global (Nevou)</span>
+                      </li>
+                      <li class="d-flex align-items-start gap-2">
+                        <i class="bx bx-check-circle text-warning fs-18 flex-shrink-0 mt-0.5"></i>
+                        <span>Convidado VIP nos encontros culturais do quintal</span>
+                      </li>
+                    </ul>
                   </div>
-                  {% endfor %}
+                  <a href="https://api.whatsapp.com/send?phone=558183983355&text=Ol%C3%A1%20Eduardo%20Vaka!%20Quero%20assinar%20o%20*Plano%20Laborat%C3%B3rio%20VIP%20%26%20Carnaval*%20do%20Clube%20Vakaria." target="_blank" class="btn btn-outline-light rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm fs-13">
+                    <i class="bx bxl-whatsapp text-success fs-18"></i> Assinar Laboratório VIP
+                  </a>
                 </div>
               </div>
 
             </div>
+
+            <!-- Selo de Vantagens e Transparência do Clube -->
+            <div class="row mt-4 pt-2">
+              <div class="col-12">
+                <div class="bg-white border rounded-4 p-3.5 shadow-xs d-flex flex-wrap align-items-center justify-content-around gap-3 text-center">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-shield-check text-success fs-22"></i>
+                    <span class="fs-13 fw-semibold text-dark">Sem taxa de adesão ou fidelidade</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-coffee text-warning fs-22"></i>
+                    <span class="fs-13 fw-semibold text-dark">Café especial ou cerveja inclusos</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-map-pin text-danger fs-22"></i>
+                    <span class="fs-13 fw-semibold text-dark">Quintal acolhedor no Sítio Histórico</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-calendar-check text-primary fs-22"></i>
+                    <span class="fs-13 fw-semibold text-dark">Agendamento ágil no WhatsApp</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
-          {% endif %}
 
         </div>
       </div>
 
     </div>
   </section>
-  <!-- ========== Coleções & Promoções End ========== -->
+  <!-- ========== Rituais Avulsos & Clube Vakaria End ========== -->
 
 
   <!-- ========== Drops da Semana Carrossel Start ========== -->
@@ -1409,18 +1446,18 @@
           <h6 class="text-uppercase fw-bold text-dark fs-13 mb-3">Navegação</h6>
           <ul class="list-unstyled d-flex flex-column gap-2 fs-14 text-muted">
             <li><a href="{% url 'catalog:home' %}" class="text-muted text-decoration-none">Início</a></li>
-            <li><a href="{% url 'catalog:product_grid' %}?gender=F" class="text-muted text-decoration-none">Coleção Feminina</a></li>
-            <li><a href="{% url 'catalog:product_grid' %}?gender=M" class="text-muted text-decoration-none">Coleção Masculina</a></li>
-            <li><a href="{% url 'catalog:brand_list' %}" class="text-muted text-decoration-none">Marcas Parceiras</a></li>
-            <li><a href="{% url 'orders:cart' %}" class="text-muted text-decoration-none">Sacola de Compras</a></li>
-            <li><a href="/login/" class="text-muted text-decoration-none">Acesso à Conta</a></li>
+            <li><a href="{% url 'catalog:product_grid' %}" class="text-muted text-decoration-none">Serviços &amp; Cortes</a></li>
+            <li><a href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais" class="text-muted text-decoration-none">Barba &amp; Toalha Quente</a></li>
+            <li><a href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica" class="text-muted text-decoration-none">Alquimia &amp; Nevou</a></li>
+            <li><a href="#clube" class="text-muted text-decoration-none">Clube Vakaria (Planos)</a></li>
+            <li><a href="{% url 'orders:cart' %}" class="text-muted text-decoration-none">Agendamentos</a></li>
           </ul>
         </div>
 
         <div class="col-lg-4 col-md-6">
-          <h6 class="text-uppercase fw-bold text-dark fs-13 mb-3">Loja Física & Contato</h6>
+          <h6 class="text-uppercase fw-bold text-dark fs-13 mb-3">Ateliê Físico &amp; Contato</h6>
           <p class="text-muted fs-14 mb-2">
-            <i class="bx bx-map-pin me-1 text-danger"></i> {{ STORE_ADDRESS|default:"Rua José Pires Braga 120, Cajazeiras PB, 58900-000" }}
+            <i class="bx bx-map-pin me-1 text-danger"></i> {{ STORE_ADDRESS|default:"Sítio Histórico de Olinda, Olinda - PE, Brasil" }}
           </p>
           <p class="text-muted fs-14 mb-2">
             <i class="bx bxl-whatsapp me-1 text-success"></i> {{ STORE_PHONE|default:"+55 81 8398-3355" }}
@@ -1432,7 +1469,7 @@
       </div>
 
       <div class="border-top mt-4 pt-4 text-center text-muted fs-13" style="border-color: var(--hf-border) !important;">
-        <p class="mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Vakaria Barbearia. Todos os direitos reservados. Cajazeiras - PB.</p>
+        <p class="mb-0">&copy; <script>document.write(new Date().getFullYear())</script> Vakaria — Cabeleireiro Eduardo Cardoso. Todos os direitos reservados. Sítio Histórico de Olinda - PE.</p>
       </div>
     </div>
   </footer>
