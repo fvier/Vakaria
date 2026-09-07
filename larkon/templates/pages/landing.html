@@ -958,22 +958,22 @@
           </div>
           
           <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
-            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="prev" style="width: 38px; height: 38px;" title="Peças anteriores">
+            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="prev" style="width: 38px; height: 38px;" title="Serviços anteriores">
               <i class="bx bx-chevron-left fs-22"></i>
             </button>
-            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="next" style="width: 38px; height: 38px;" title="Próximas peças">
+            <button class="btn btn-outline-dark btn-sm rounded-circle p-2 d-flex align-items-center justify-content-center" type="button" data-bs-target="#dropsCarousel" data-bs-slide="next" style="width: 38px; height: 38px;" title="Próximos serviços">
               <i class="bx bx-chevron-right fs-22"></i>
             </button>
             <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-1.5 ms-2 fs-13 fw-semibold">
-              Ver Catálogo Completo <i class="bx bx-right-arrow-alt ms-1"></i>
+              Ver Todos os Serviços <i class="bx bx-right-arrow-alt ms-1"></i>
             </a>
           </div>
         </div>
 
-        <!-- Slides do Carrossel (3 Peças por Slide) -->
+        <!-- Slides do Carrossel (3 Serviços por Slide) -->
         <div class="carousel-inner">
           
-          <!-- Slide 1: Primeiras 3 Peças -->
+          <!-- Slide 1: Primeiros 3 Serviços -->
           <div class="carousel-item active">
             <div class="row g-4">
               {% for product in featured_products|slice:":3" %}
@@ -1033,7 +1033,7 @@
             </div>
           </div>
 
-          <!-- Slide 2: Próximas Peças -->
+          <!-- Slide 2: Próximos Serviços -->
           <div class="carousel-item">
             <div class="row g-4">
               {% for product in featured_products|slice:"3:6" %}

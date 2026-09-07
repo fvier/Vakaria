@@ -258,7 +258,7 @@
     </div>
     <div class="d-flex align-items-center gap-2">
         <button type="button" class="btn btn-success btn-sm fs-11 px-2.5 py-1 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickProductModal">
-            <i class="bx bx-plus-circle me-1"></i>+ Cadastrar Peça
+            <i class="bx bx-plus-circle me-1"></i>+ Cadastrar Serviço
         </button>
         <a href="/dashboard/" class="btn btn-outline-light btn-sm fs-11 px-2.5 py-1">
             <i class="bx bx-tachometer me-1"></i>Painel
@@ -274,7 +274,7 @@
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb mb-0 fs-13">
     <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted"><i class="bx bx-home-alt me-1"></i>Início</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}" class="text-decoration-none {% if not selected_category %}text-dark fw-bold{% else %}text-muted{% endif %}">Vitrine</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}" class="text-decoration-none {% if not selected_category %}text-dark fw-bold{% else %}text-muted{% endif %}">Serviços</a></li>
     {% if selected_parent %}
       {% if selected_parent.slug != selected_category.slug %}
       <li class="breadcrumb-item"><a href="{% url 'catalog:product_grid' %}?category={{ selected_parent.slug }}" class="text-decoration-none text-muted">{{ selected_parent.name }}</a></li>
@@ -294,7 +294,7 @@
             <div class="card-body p-3">
                 <form method="get" action="{% url 'catalog:product_grid' %}">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Buscar peça, marca..." value="{{ search_query }}">
+                        <input type="text" name="q" class="form-control" placeholder="Buscar serviço, corte, ritual..." value="{{ search_query }}">
                         {% if active_gender %}<input type="hidden" name="gender" value="{{ active_gender }}">{% endif %}
                         {% if active_brand %}<input type="hidden" name="brand" value="{{ active_brand }}">{% endif %}
                         {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
@@ -308,12 +308,12 @@
         {% if not is_luiza_fit %}
         <div class="card mb-3 shadow-sm border-0">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
-                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Vakaria • Departamentos</span>
+                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Vakaria • Categorias de Serviços</span>
             </div>
             <div class="card-body p-2">
-                <!-- Botão Ver Todas as Peças -->
+                <!-- Botão Ver Todos os Serviços -->
                 <a href="{% url 'catalog:product_grid' %}" class="category-subitem mb-2 fw-semibold {% if not active_category and not active_gender and not active_brand %}active{% endif %}">
-                    <span>✨ Todas as Peças</span>
+                    <span>✨ Todos os Serviços</span>
                     <i class="bx bx-chevron-right fs-14"></i>
                 </a>
 
@@ -437,7 +437,7 @@
                 <i class="bx bx-slider-alt fs-14"></i>
                 <span>Departamentos & Filtros</span>
             </button>
-            <span class="fs-12 text-muted fw-medium">{{ products|length }} peças</span>
+            <span class="fs-12 text-muted fw-medium">{{ products|length }} serviços</span>
         </div>
 
         <!-- Topo da Listagem com Título e Estatísticas -->
@@ -452,17 +452,17 @@
                             <div>
                                 <h4 class="fs-18 fw-bold text-dark mb-1">
                                     {% if selected_category and selected_category.slug != 'luiza-fit' %}
-                                        <i class="bx bx-collection text-primary me-1"></i> {{ selected_category.name }}
+                                        <i class="bx bx-cut text-warning me-1"></i> {{ selected_category.name }}
                                     {% elif selected_category %}
                                         {{ selected_category.name }}
-                                    {% elif active_gender == 'F' %}👗 Coleção Feminina — Luiza Fit
-                                    {% elif active_gender == 'M' %}👔 Coleção Masculina — Vakaria
-                                    {% elif active_brand %}🏷️ Marca: {{ active_brand|title }}
-                                    {% else %}✨ Todas as Peças &amp; Lançamentos
+                                    {% elif active_gender == 'F' %}✂️ Cortes &amp; Visagismo
+                                    {% elif active_gender == 'M' %}💈 Barboterapia &amp; Cortes
+                                    {% elif active_brand %}🏷️ {{ active_brand|title }}
+                                    {% else %}✨ Todos os Serviços &amp; Rituais
                                     {% endif %}
                                 </h4>
                                 <p class="mb-0 text-muted fs-13">
-                                    Mostrando {{ products|length }} {% if products|length == 1 %}peça encontrada{% else %}peças exclusivas{% endif %}
+                                    Mostrando {{ products|length }} {% if products|length == 1 %}serviço disponível{% else %}serviços e procedimentos disponíveis{% endif %}
                                 </p>
                             </div>
                         </div>
@@ -471,11 +471,11 @@
                         <div class="d-inline-flex gap-2">
                             {% if request.user.is_authenticated and request.user.is_staff %}
                             <button type="button" class="btn btn-success btn-sm px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickProductModal">
-                                <i class="bx bx-plus-circle me-1 fs-16"></i> Cadastrar Peça
+                                <i class="bx bx-plus-circle me-1 fs-16"></i> Cadastrar Serviço
                             </button>
                             {% endif %}
                             <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 fw-semibold">
-                                <i class="bx bx-cart me-1"></i> Sacola
+                                <i class="bx bx-calendar me-1 text-warning"></i> Agendamentos
                             </a>
                         </div>
                     </div>
@@ -706,16 +706,16 @@
                                 <form action="{% url 'orders:add_to_cart' %}" method="POST" class="ajax-add-cart-form d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="product_id" value="{{ product.id }}">
-                                    <button type="submit" class="btn btn-dark btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Adicionar à Sacola">
-                                        <i class="bx bx-shopping-bag fs-14"></i> <span class="d-none d-md-inline fs-11">Sacola</span>
+                                    <button type="submit" class="btn btn-dark btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Adicionar aos Agendamentos">
+                                        <i class="bx bx-calendar fs-14 text-warning"></i> <span class="d-none d-md-inline fs-11">Agendar</span>
                                     </button>
                                 </form>
                                 {% else %}
-                                <a href="https://wa.me/558183983355?text=Ol%C3%A1!%20Tenho%20interesse%20na%20pe%C3%A7a%20'{{ product.title|urlencode }}'%20que%20est%C3%A1%20esgotada.%20Quando%20chegar%C3%A1%20novamente%3F" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Encomendar no WhatsApp">
-                                    <i class="bx bxl-whatsapp fs-14"></i> <span class="d-none d-md-inline fs-11">Encomendar</span>
+                                <a href="https://wa.me/558183983355?text=Ol%C3%A1!%20Gostaria%20de%20consultar%20a%20agenda%20para%20o%20servi%C3%A7o%20'{{ product.title|urlencode }}'%20no%20ateli%C3%AA%20de%20Olinda." target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 d-flex align-items-center gap-1 shadow-sm" title="Consultar no WhatsApp">
+                                    <i class="bx bxl-whatsapp fs-14"></i> <span class="d-none d-md-inline fs-11">Consultar</span>
                                 </a>
                                 {% endif %}
-                                <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" onclick="openQuickViewModal({{ product.id }})" title="Ver Peça Ampliada">
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-1" onclick="openQuickViewModal({{ product.id }})" title="Ver Detalhes do Serviço">
                                     <i class="bx bx-expand-alt fs-14"></i>
                                 </button>
                             </div>
@@ -726,12 +726,12 @@
             {% empty %}
             <div class="col-12 text-center py-5">
                 <div class="avatar-lg bg-light-subtle rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3">
-                    <i class="bx bx-shopping-bag fs-36 text-muted"></i>
+                    <i class="bx bx-cut fs-36 text-muted"></i>
                 </div>
-                <h4 class="fs-18 fw-bold text-dark">Nenhuma peça encontrada nesta categoria</h4>
-                <p class="text-muted fs-14">Novas peças chegam semanalmente. Tente outro filtro ou limpe a busca.</p>
+                <h4 class="fs-18 fw-bold text-dark">Nenhum serviço encontrado nesta categoria</h4>
+                <p class="text-muted fs-14">Tente outro filtro de cuidado ou limpe a busca.</p>
                 <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-primary btn-sm">
-                    Ver Todas as Peças
+                    Ver Todos os Serviços
                 </a>
             </div>
             {% endfor %}

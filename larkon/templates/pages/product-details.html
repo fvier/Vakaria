@@ -171,29 +171,29 @@
                     <!-- Botões de Ação -->
                     <div class="d-flex flex-wrap gap-2">
                         <button type="submit" id="detailAddToCartBtn" class="btn btn-dark btn-lg px-4 d-flex align-items-center gap-2" {% if not product.in_stock %}disabled{% endif %}>
-                            <i class="bx bx-cart-add fs-20"></i> Adicionar à Sacola
+                            <i class="bx bx-calendar fs-20 text-warning"></i> Agendar este Serviço
                         </button>
 
-                        <a id="detailWhatsAppBtn" href="https://wa.me/558183983355?text=Olá!%20Gostaria%20de%20tirar%20dúvidas%20sobre%20a%20peça%20{{ product.title|urlencode }}%20da%20Vakaria." target="_blank" class="btn btn-success btn-lg px-4 d-flex align-items-center gap-2">
-                            <i class="bx bxl-whatsapp fs-20"></i> Atendimento VIP WhatsApp
+                        <a id="detailWhatsAppBtn" href="https://wa.me/558183983355?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20o%20servi%C3%A7o%20*{{ product.title|urlencode }}*%20com%20o%20Barbeiro%20Vaka%20em%20Olinda." target="_blank" class="btn btn-success btn-lg px-4 d-flex align-items-center gap-2">
+                            <i class="bx bxl-whatsapp fs-20"></i> Agendar pelo WhatsApp
                         </a>
                     </div>
                 </form>
 
-                <!-- Detalhes do Tecido & Descrição -->
+                <!-- Detalhes do Procedimento & Descrição -->
                 <div class="border-top pt-4 mt-4">
-                    <h5 class="fs-15 fw-bold text-dark mb-2">Detalhes & Composição</h5>
+                    <h5 class="fs-15 fw-bold text-dark mb-2">Sobre este Procedimento</h5>
                     <p class="text-muted fs-14 mb-3">{{ product.description }}</p>
 
                     {% if product.fabric_composition %}
                     <div class="p-3 bg-light-subtle rounded mb-3">
-                        <span class="fw-semibold text-dark">🧵 Tecido:</span> {{ product.fabric_composition }}
+                        <span class="fw-semibold text-dark">✂️ Técnica &amp; Detalhes:</span> {{ product.fabric_composition }}
                     </div>
                     {% endif %}
 
                     {% if product.care_instructions %}
                     <div class="p-3 bg-light-subtle rounded mb-3">
-                        <span class="fw-semibold text-dark">🧼 Cuidados & Lavagem:</span> {{ product.care_instructions }}
+                        <span class="fw-semibold text-dark">🧴 Cuidados Recomendados:</span> {{ product.care_instructions }}
                     </div>
                     {% endif %}
                 </div>
@@ -202,11 +202,11 @@
     </div>
 </div>
 
-<!-- Peças Relacionadas -->
+<!-- Serviços Relacionados -->
 {% if related_products %}
 <div class="row mt-4">
     <div class="col-12">
-        <h4 class="fs-18 fw-bold text-dark mb-3">Você também pode gostar na mesma categoria</h4>
+        <h4 class="fs-18 fw-bold text-dark mb-3">Outros Cuidados &amp; Serviços Recomendados</h4>
     </div>
     {% for rel in related_products %}
     <div class="col-md-3 mb-3">

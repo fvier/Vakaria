@@ -1,23 +1,23 @@
 {% extends 'layout-store.html' %}
 {% load static i18n %}
 
-{% block title %}Sacola de Compras | Vakaria{% endblock %}
+{% block title %}Meus Agendamentos &amp; Serviços | Vakaria{% endblock %}
 
 {% block store_content %}
 <div class="row">
     <div class="col-lg-8">
         <div class="d-flex mb-4 bg-dark p-3 rounded text-white align-items-center">
             <p class="fw-medium fs-15 text-white m-0">
-                <i class="bx bx-shopping-bag me-1"></i> Você possui <strong>{{ cart.total_items }} peça(s)</strong> na sua sacola
+                <i class="bx bx-calendar text-warning me-1"></i> Você possui <strong>{{ cart.total_items }} serviço(s)</strong> selecionado(s)
             </p>
-            <a href="{% url 'catalog:product_grid' %}" class="ms-auto text-white fs-14 text-decoration-underline">Continuar Comprando</a>
+            <a href="{% url 'catalog:product_grid' %}" class="ms-auto text-white fs-14 text-decoration-underline">Ver Mais Serviços</a>
         </div>
 
         {% for item in cart_items %}
         <div class="card cart-detail mb-2.5 shadow-sm border-0">
             <div class="card-body p-3">
                 <div class="d-flex align-items-center gap-3">
-                    <!-- Foto da Peça -->
+                    <!-- Foto do Serviço -->
                     <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 76px; height: 76px; overflow: hidden;">
                         {% if item.variant.product.cover_image %}
                         <img src="{{ item.variant.product.cover_image.url }}" alt="{{ item.variant.product.title }}" class="w-100 h-100 object-fit-cover rounded">
@@ -35,8 +35,8 @@
                             </a>
                         </h6>
                         <div class="d-flex flex-wrap align-items-center gap-2 text-muted fs-12">
-                            <span>Tam: <strong class="text-dark">{{ item.variant.size }}</strong></span>
-                            {% if item.variant.color %}<span>Cor: <strong class="text-dark">{{ item.variant.color }}</strong></span>{% endif %}
+                            <span>Opção: <strong class="text-dark">{{ item.variant.size }}</strong></span>
+                            {% if item.variant.color %}<span>Estilo: <strong class="text-dark">{{ item.variant.color }}</strong></span>{% endif %}
                             <span>Qtd: <strong class="text-dark">{{ item.quantity }}</strong></span>
                         </div>
                         <div class="d-flex align-items-center justify-content-between mt-1">
@@ -54,11 +54,11 @@
         </div>
         {% empty %}
         <div class="card p-5 text-center border-0 shadow-sm">
-            <iconify-icon icon="solar:bag-cross-bold-duotone" class="fs-48 text-muted mx-auto mb-3"></iconify-icon>
-            <h4>Sua sacola está vazia</h4>
-            <p class="text-muted">Aproveite as novidades exclusivas e drops da semana da Vakaria.</p>
+            <i class="bx bx-calendar-x fs-48 text-muted mx-auto mb-3"></i>
+            <h4>Nenhum serviço selecionado ainda</h4>
+            <p class="text-muted">Conheça nossos cortes autorais, ritual da barba e alquimia capilar no Sítio Histórico de Olinda.</p>
             <div class="mt-3">
-                <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark">Explorar Coleção</a>
+                <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark">Ver Catálogo de Serviços</a>
             </div>
         </div>
         {% endfor %}
@@ -68,16 +68,16 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent border-bottom">
-                <h5 class="card-title mb-0 fs-16"><i class="bx bx-receipt me-1"></i> Resumo da Compra</h5>
+                <h5 class="card-title mb-0 fs-16"><i class="bx bx-receipt me-1"></i> Resumo do Agendamento</h5>
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
-                    <span class="text-muted">Subtotal ({{ cart.total_items }} itens):</span>
+                    <span class="text-muted">Subtotal ({{ cart.total_items }} procedimentos):</span>
                     <span class="fw-semibold text-dark">R$ {{ cart.subtotal|floatformat:2 }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                    <span class="text-muted">Envio / Frete:</span>
-                    <span class="text-success fw-semibold">A calcular / VIP</span>
+                    <span class="text-muted">Local de Atendimento:</span>
+                    <span class="text-success fw-semibold">Sítio Histórico de Olinda</span>
                 </div>
                 <div class="border-top pt-3 d-flex justify-content-between align-items-center mb-4">
                     <span class="fs-16 fw-bold text-dark">Total:</span>
@@ -87,11 +87,11 @@
                 <div class="d-grid gap-2">
                     {% if cart.total_items > 0 %}
                     <a href="{% url 'orders:checkout' %}" class="btn btn-dark btn-lg d-flex align-items-center justify-content-center gap-2">
-                        <i class="bx bx-check-shield fs-20"></i> Finalizar Pedido
+                        <i class="bx bx-calendar-check fs-20 text-warning"></i> Confirmar Agendamento
                     </a>
                     {% endif %}
                     <a href="{% url 'catalog:product_grid' %}" class="btn btn-outline-secondary">
-                        Continuar Comprando
+                        Continuar Escolhendo Serviços
                     </a>
                 </div>
             </div>
