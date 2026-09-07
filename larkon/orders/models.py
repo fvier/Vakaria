@@ -288,3 +288,83 @@ class ProductReservation(models.Model):
         encoded_msg = urllib.parse.quote(msg)
         return f"https://wa.me/{clean_phone}?text={encoded_msg}"
 
+
+class Appointment(models.Model):
+    """Agendamento de Procedimentos / Serviços na Barbearia Eduardo Cardoso (Vakaria)."""
+    STATUS_CHOICES = [
+        ("pending", _("Pendente")),
+        ("confirmed", _("Confirmado")),
+        ("completed", _("Concluído")),
+        ("cancelled", _("Cancelado")),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="appointments",
+        verbose_name=_("Usuário"),
+    )
+    customer_name = models.CharField(_("Nome do Cliente"), max_length=150)
+    customer_phone = models.CharField(_("WhatsApp / Telefone"), max_length=30)
+    customer_email = models.EmailField(_("E-mail"), blank=True)
+    services = models.ManyToManyField(
+        "catalog.Product",
+        related_name="appointments",
+        verbose_name=_("Procedimentos / Serviços"),
+    )
+    appointment_date = models.DateField(_("Data do Agendamento"))
+    appointment_time = models.CharField(_("Horário"), max_length=10)
+    professional = models.CharField(
+        _("Profissional"),
+        max_length=100,
+        default="Cabeleireiro Eduardo Cardoso (Barbeiro Vaka)",
+    )
+    total_price = models.DecimalField(
+        _("Valor Estimado (R$)"),
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+    )
+    notes = models.TextField(_("Observações / Preferências"), blank=True)
+    status = models.CharField(
+        _("Status"),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+    created_at = models.DateTimeField(_("Criado em"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Atualizado em"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Agendamento")
+        verbose_name_plural = _("Agendamentos")
+        ordering = ["-appointment_date", "-appointment_time"]
+
+    def __str__(self):
+        return f"Agendamento #{self.id} - {self.customer_name} ({self.appointment_date} {self.appointment_time})"
+
+    def generate_whatsapp_confirmation_link(self):
+        """Gera link formatado para envio do agendamento diretamente ao WhatsApp da barbearia."""
+        clean_target_phone = "".join(filter(str.isdigit, "558183983355"))
+        services_list = [s.title for s in self.services.all()]
+        services_str = ", ".join(services_list) if services_list else "Serviço Selecionado"
+        date_str = self.appointment_date.strftime("%d/%m/%Y") if self.appointment_date else ""
+
+        msg = (
+            f"💈 *Novo Agendamento • Cabeleireiro Eduardo Cardoso*\n\n"
+            f"Olá Vaka! Gostaria de confirmar meu agendamento no Sítio Histórico de Olinda:\n\n"
+            f"👤 *Cliente:* {self.customer_name}\n"
+            f"📱 *WhatsApp:* {self.customer_phone}\n"
+            f"✂️ *Procedimento(s):* {services_str}\n"
+            f"📅 *Data:* {date_str}\n"
+            f"⏰ *Horário:* {self.appointment_time}\n"
+            f"💰 *Valor Estimado:* R$ {self.total_price:.2f}\n"
+        )
+        if self.notes:
+            msg += f"💬 *Preferências/Obs:* {self.notes}\n"
+        msg += "\nPode confirmar a reserva desse horário para mim? ☕ Obrigado!"
+        encoded_msg = urllib.parse.quote(msg)
+        return f"https://wa.me/{clean_target_phone}?text={encoded_msg}"
+

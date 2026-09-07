@@ -581,6 +581,9 @@
             <a class="nav-link active" href="{% url 'catalog:home' %}">Início</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="/agenda/">Agenda</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="{% url 'catalog:product_grid' %}">Vitrine</a>
           </li>
           <li class="nav-item">
@@ -601,10 +604,19 @@
             <i class="bx bxl-instagram fs-20"></i>
           </a>
 
-          <!-- Agendamentos Minimalist -->
-          <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-ghost-dark d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill text-dark" title="Serviços Selecionados e Agendamento">
-            <i class="bx bx-calendar fs-18 text-warning"></i>
-            <span class="fs-13 fw-semibold">Agendamentos</span>
+          <!-- Agenda Online CTA -->
+          <a href="/agenda/" class="btn btn-sm btn-warning d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill text-dark fw-semibold shadow-xs" title="Agendar Horário Online">
+            <i class="bx bx-calendar fs-16"></i>
+            <span class="fs-13">Agendar</span>
+          </a>
+
+          <!-- Carrinho de Compras -->
+          <a href="{% url 'orders:cart' %}" class="btn btn-sm btn-ghost-dark d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill text-dark position-relative" title="Meu Carrinho de Compras">
+            <i class="bx bx-cart fs-18"></i>
+            <span class="fs-13 fw-semibold">Carrinho</span>
+            {% if cart.total_items > 0 %}
+            <span class="badge bg-danger rounded-pill fs-10 px-1.5">{{ cart.total_items }}</span>
+            {% endif %}
           </a>
 
           <!-- Entrar / Login Minimalist -->
@@ -1691,11 +1703,11 @@
           <h6 class="text-uppercase fw-bold text-dark fs-13 mb-3">Navegação</h6>
           <ul class="list-unstyled d-flex flex-column gap-2 fs-14 text-muted">
             <li><a href="{% url 'catalog:home' %}" class="text-muted text-decoration-none">Início</a></li>
-            <li><a href="{% url 'catalog:product_grid' %}" class="text-muted text-decoration-none">Serviços &amp; Cortes</a></li>
-            <li><a href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais" class="text-muted text-decoration-none">Barba &amp; Toalha Quente</a></li>
-            <li><a href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica" class="text-muted text-decoration-none">Alquimia &amp; Nevou</a></li>
+            <li><a href="/agenda/" class="text-muted text-decoration-none fw-semibold text-warning">Agenda Online</a></li>
+            <li><a href="{% url 'catalog:product_grid' %}" class="text-muted text-decoration-none">Vitrine &amp; Serviços</a></li>
+            <li><a href="{% url 'catalog:product_grid' %}?category=grife-da-la-deira" class="text-muted text-decoration-none">Grife Da Lá D'eira</a></li>
             <li><a href="#clube" class="text-muted text-decoration-none">Clube Vakaria (Planos)</a></li>
-            <li><a href="{% url 'orders:cart' %}" class="text-muted text-decoration-none">Agendamentos</a></li>
+            <li><a href="{% url 'orders:cart' %}" class="text-muted text-decoration-none">Carrinho de Compras</a></li>
           </ul>
         </div>
 

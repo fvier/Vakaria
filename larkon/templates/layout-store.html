@@ -265,7 +265,10 @@
             <a class="store-nav-link" href="/"><i class="bx bx-home-alt me-1"></i> Início</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link {% if not active_category %}active{% endif %}" href="{% url 'catalog:product_grid' %}">Todos</a>
+            <a class="store-nav-link {% if '/agenda/' in request.path %}active{% endif %}" href="/agenda/"><i class="bx bx-calendar me-1 text-warning"></i> Agenda</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link {% if not active_category and '/produtos/' in request.path %}active{% endif %}" href="{% url 'catalog:product_grid' %}">Todos</a>
           </li>
           <li class="nav-item">
             <a class="store-nav-link {% if active_category == 'cortes-visagismo' %}active{% endif %}" href="{% url 'catalog:product_grid' %}?category=cortes-visagismo">Cortes</a>
@@ -289,13 +292,13 @@
           {% endif %}
         </ul>
 
-        <!-- Ações do Topo: Agendamentos e WhatsApp VIP -->
+        <!-- Ações do Topo: Agenda e Carrinho -->
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-          <a href="{{ STORE_WHATSAPP_URL|default:'https://wa.me/558183983355' }}" target="_blank" class="btn btn-outline-success btn-sm px-3 rounded-pill fw-semibold">
-            <i class="bx bxl-whatsapp me-1 fs-16"></i> Agendar WhatsApp
+          <a href="/agenda/" class="btn btn-warning btn-sm px-3 rounded-pill fw-semibold text-dark shadow-xs">
+            <i class="bx bx-calendar me-1 fs-16"></i> Agendar Horário
           </a>
-          <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 rounded-pill position-relative fw-semibold">
-            <i class="bx bx-calendar me-1 fs-16 text-warning"></i> Agendamentos
+          <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 rounded-pill position-relative fw-semibold" title="Ver Carrinho de Compras">
+            <i class="bx bx-cart me-1 fs-16 text-warning"></i> Carrinho
             {% if cart.total_items > 0 %}
             <span class="badge bg-danger rounded-pill ms-1">{{ cart.total_items }}</span>
             {% endif %}
@@ -321,6 +324,19 @@
           <button class="btn btn-dark btn-sm" type="submit"><i class="bx bx-search-alt"></i></button>
         </div>
       </form>
+
+      <!-- Acesso Rápido -->
+      <div class="d-grid gap-2 mb-3">
+        <a href="/agenda/" class="btn btn-warning fw-bold text-dark fs-13 py-2 rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-xs">
+          <i class="bx bx-calendar fs-18"></i> Agendar Horário Online
+        </a>
+        <a href="{% url 'orders:cart' %}" class="btn btn-outline-dark fs-13 py-2 rounded-3 d-flex align-items-center justify-content-between px-3">
+          <span><i class="bx bx-cart me-2 fs-16"></i> Meu Carrinho</span>
+          {% if cart.total_items > 0 %}
+          <span class="badge bg-danger rounded-pill">{{ cart.total_items }}</span>
+          {% endif %}
+        </a>
+      </div>
 
       <!-- Links principais -->
       <h6 class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">Categorias</h6>
@@ -467,17 +483,17 @@
       <i class="bx bx-home-alt"></i>
       <span>Início</span>
     </a>
-    <a href="#offcanvasStoreMenu" data-bs-toggle="offcanvas" class="mobile-bottom-nav-item">
-      <i class="bx bx-grid-alt"></i>
-      <span>Categorias</span>
-    </a>
     <a href="{% url 'catalog:product_grid' %}" class="mobile-bottom-nav-item {% if '/produtos/' in request.path %}active{% endif %}">
       <i class="bx bx-store-alt"></i>
       <span>Vitrine</span>
     </a>
+    <a href="/agenda/" class="mobile-bottom-nav-item {% if '/agenda/' in request.path %}active{% endif %}">
+      <i class="bx bx-calendar text-warning"></i>
+      <span class="fw-semibold">Agenda</span>
+    </a>
     <a href="{% url 'orders:cart' %}" class="mobile-bottom-nav-item position-relative {% if '/pedidos/carrinho/' in request.path %}active{% endif %}">
-      <i class="bx bx-calendar"></i>
-      <span>Agendamento</span>
+      <i class="bx bx-cart"></i>
+      <span>Carrinho</span>
       {% if cart.total_items > 0 %}
       <span class="mobile-nav-badge">{{ cart.total_items }}</span>
       {% endif %}

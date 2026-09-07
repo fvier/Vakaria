@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Cart, CartItem, Order, OrderItem, ProductReservation
+from .models import Cart, CartItem, Order, OrderItem, ProductReservation, Appointment
 
 
 class OrderItemInline(admin.TabularInline):
@@ -75,4 +75,29 @@ class ProductReservationAdmin(admin.ModelAdmin):
         link = obj.generate_whatsapp_vip_link()
         return format_html('<a class="button" style="background-color: #25D366; color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none;" href="{}" target="_blank">💬 Avisar Peça Chegou</a>', link)
     whatsapp_vip_button.short_description = "Aviso VIP"
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "customer_name", "customer_phone", "appointment_date", "appointment_time", "total_price", "status_badge", "created_at", "whatsapp_button")
+    list_filter = ("status", "appointment_date", "created_at")
+    search_fields = ("customer_name", "customer_phone", "customer_email", "notes")
+    filter_horizontal = ("services",)
+    readonly_fields = ("created_at", "updated_at")
+
+    def status_badge(self, obj):
+        colors = {
+            "pending": "#d97706",
+            "confirmed": "#2563eb",
+            "completed": "#16a34a",
+            "cancelled": "#dc2626",
+        }
+        color = colors.get(obj.status, "#6b7280")
+        return format_html('<span style="color: {}; font-weight: bold;">{}</span>', color, obj.get_status_display())
+    status_badge.short_description = "Status"
+
+    def whatsapp_button(self, obj):
+        link = obj.generate_whatsapp_confirmation_link()
+        return format_html('<a class="button" style="background-color: #25D366; color: white; padding: 3px 8px; border-radius: 4px; text-decoration: none;" href="{}" target="_blank">📲 WhatsApp</a>', link)
+    whatsapp_button.short_description = "WhatsApp Barbeiro"
 

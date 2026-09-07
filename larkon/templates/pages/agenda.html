@@ -1,0 +1,522 @@
+{% extends 'layout-store.html' %}
+{% load static i18n %}
+
+{% block title %}Agenda Online • Cabeleireiro Eduardo Cardoso | Sítio Histórico de Olinda{% endblock %}
+
+{% block extra_css %}
+<style>
+  .agenda-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .agenda-hero::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .service-card-select {
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease-in-out;
+    background: #ffffff;
+    border-radius: 12px;
+  }
+  .service-card-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    border-color: #f59e0b;
+  }
+  .service-card-select.selected {
+    border-color: #0f172a;
+    background-color: #f8fafc;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+  .service-card-select.selected .service-check-icon {
+    background-color: #0f172a !important;
+    color: #f59e0b !important;
+    border-color: #0f172a !important;
+  }
+  .date-pill {
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    min-width: 82px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .date-pill:hover {
+    border-color: #f59e0b;
+    background: #fffbeb;
+  }
+  .date-pill.active {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+  }
+  .date-pill.active .date-day-name {
+    color: #f59e0b !important;
+  }
+  .slot-btn {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+  .slot-btn:hover {
+    border-color: #0f172a;
+    background: #f1f5f9;
+  }
+  .slot-btn.active {
+    background: #0f172a;
+    color: #f59e0b;
+    border-color: #0f172a;
+  }
+  .sticky-summary {
+    position: sticky;
+    top: 90px;
+    z-index: 10;
+  }
+  .step-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #f59e0b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+</style>
+{% endblock %}
+
+{% block store_content %}
+<!-- Hero da Agenda -->
+<div class="agenda-hero p-4 p-md-5 text-white mb-4 shadow-sm">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-warning-subtle text-warning fs-12 fw-bold text-uppercase mb-3">
+        <i class="bx bx-calendar-star"></i> Ateliê nas Ladeiras • Olinda - PE
+      </div>
+      <h1 class="display-6 fw-bold text-white mb-2" style="font-family: 'Public Sans', sans-serif;">
+        Agenda Online do Barbeiro Vaka
+      </h1>
+      <p class="text-slate-300 fs-15 mb-3 mb-lg-0" style="max-width: 620px; color: #cbd5e1;">
+        Atendimento exclusivo com hora marcada, café passado, toalha quente, afeto e música boa no Sítio Histórico de Olinda. Espaço seguro e radicalmente <em>Pet Friendly</em>.
+      </p>
+    </div>
+    <div class="col-lg-4 text-lg-end">
+      <div class="bg-dark bg-opacity-50 p-3 rounded-3 border border-secondary border-opacity-25 d-inline-block text-start">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <i class="bx bx-time-five text-warning fs-18"></i>
+          <span class="fs-13 fw-semibold text-white">Horário de Atendimento</span>
+        </div>
+        <p class="fs-12 text-muted mb-0">Terça a Sábado: 09:00 às 19:00</p>
+        <p class="fs-11 text-warning mt-1 mb-0">Domingos e Segundas: Fechado</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Formulário Principal de Agendamento -->
+<form id="agendaForm" method="post" action="{% url 'orders:agenda' %}">
+  {% csrf_token %}
+  <div class="row g-4">
+    <!-- Coluna Esquerda: Etapas do Agendamento -->
+    <div class="col-lg-8">
+      
+      <!-- ETAPA 1: Procedimentos / Serviços -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="step-badge">1</span>
+            <h5 class="card-title mb-0 fs-16 fw-bold text-dark">Escolha o(s) Procedimento(s)</h5>
+          </div>
+          <span class="badge bg-light text-muted fs-11 fw-normal">Você pode selecionar mais de um</span>
+        </div>
+        <div class="card-body p-3 p-md-4">
+          <div class="row g-3" id="servicesContainer">
+            {% for prod in services %}
+            <div class="col-md-6">
+              <div class="service-card-select p-3 border h-100 position-relative {% if prod.id in preselected_ids %}selected{% endif %}"
+                   data-service-id="{{ prod.id }}"
+                   data-service-title="{{ prod.title }}"
+                   data-service-price="{{ prod.price }}">
+                <input type="checkbox" name="services" value="{{ prod.id }}" class="d-none service-checkbox" {% if prod.id in preselected_ids %}checked{% endif %}>
+                
+                <div class="d-flex align-items-center gap-3">
+                  <!-- Imagem do Serviço -->
+                  <div class="rounded-3 bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 68px; height: 68px; overflow: hidden;">
+                    {% if prod.cover_image %}
+                    <img src="{{ prod.cover_image.url }}" alt="{{ prod.title }}" class="w-100 h-100 object-fit-cover">
+                    {% else %}
+                    <img src="{% static 'images/corte_autoral_masculino.jpg' %}" alt="{{ prod.title }}" class="w-100 h-100 object-fit-cover">
+                    {% endif %}
+                  </div>
+                  
+                  <!-- Detalhes -->
+                  <div class="flex-grow-1 min-w-0 pe-4">
+                    <span class="badge bg-dark-subtle text-dark fs-9 text-uppercase mb-1">{{ prod.category.name|default:"Barbearia" }}</span>
+                    <h6 class="fs-14 fw-bold text-dark mb-1 text-truncate" title="{{ prod.title }}">{{ prod.title }}</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <span class="fw-bold fs-15 text-dark">
+                        R$ {{ prod.price|floatformat:2 }}
+                      </span>
+                      {% if prod.compare_at_price %}
+                      <small class="text-muted text-decoration-line-through fs-11">R$ {{ prod.compare_at_price|floatformat:2 }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <!-- Ícone Checkbox -->
+                  <div class="position-absolute top-0 end-0 p-3">
+                    <div class="service-check-icon rounded-circle border d-flex align-items-center justify-content-center" style="width: 22px; height: 22px; background: #ffffff;">
+                      <i class="bx bx-check fs-14"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- ETAPA 2: Seleção de Data -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="step-badge">2</span>
+            <h5 class="card-title mb-0 fs-16 fw-bold text-dark">Escolha o Dia do Atendimento</h5>
+          </div>
+          <span class="text-muted fs-12 d-none d-sm-inline">Atendimento de Terça a Sábado</span>
+        </div>
+        <div class="card-body p-3 p-md-4">
+          <!-- Carrossel de Pílulas de Data -->
+          <div class="d-flex gap-2 overflow-x-auto pb-2 mb-3" style="scrollbar-width: thin;">
+            {% for d in available_dates %}
+            <div class="date-pill {% if forloop.first %}active{% endif %}" data-date="{{ d.date }}" data-full-str="{{ d.full_str }}">
+              <div class="date-day-name fs-11 text-uppercase fw-bold text-muted">{{ d.day_name }}</div>
+              <div class="fs-16 fw-bold mt-0.5">{{ d.formatted }}</div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Seletor de Data alternativo para calendário -->
+          <div class="row align-items-center mt-2">
+            <div class="col-sm-6">
+              <label class="form-label fs-12 text-muted fw-semibold mb-1">Ou selecione uma data específica:</label>
+              <input type="date" id="customDatePicker" class="form-control form-control-sm rounded-2" min="{{ today_iso }}">
+            </div>
+            <div class="col-sm-6 mt-2 mt-sm-0">
+              <small class="text-muted d-block fs-11">
+                <i class="bx bx-info-circle me-1 text-warning"></i>Caso selecione domingo ou segunda, combinamos o encaixe via WhatsApp.
+              </small>
+            </div>
+          </div>
+          <!-- Campo oculto com a data final -->
+          <input type="hidden" name="appointment_date" id="selectedDateInput" value="{{ available_dates.0.date }}">
+        </div>
+      </div>
+
+      <!-- ETAPA 3: Seleção de Horário -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="step-badge">3</span>
+            <h5 class="card-title mb-0 fs-16 fw-bold text-dark">Escolha o Horário</h5>
+          </div>
+          <span class="badge bg-success-subtle text-success fs-11"><i class="bx bx-check-double me-1"></i>Vagas Disponíveis</span>
+        </div>
+        <div class="card-body p-3 p-md-4">
+          <div class="row g-2" id="timeSlotsContainer">
+            {% for slot in time_slots %}
+            <div class="col-4 col-sm-3 col-md-2">
+              <div class="slot-btn {% if forloop.first %}active{% endif %}" data-time="{{ slot }}">
+                <i class="bx bx-time text-muted me-1 fs-12"></i>{{ slot }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <!-- Campo oculto com o horário final -->
+          <input type="hidden" name="appointment_time" id="selectedTimeInput" value="{{ time_slots.0 }}">
+        </div>
+      </div>
+
+      <!-- ETAPA 4: Seus Dados -->
+      <div class="card border-0 shadow-sm rounded-3 mb-4">
+        <div class="card-header bg-transparent border-bottom py-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="step-badge">4</span>
+            <h5 class="card-title mb-0 fs-16 fw-bold text-dark">Seus Dados de Contato</h5>
+          </div>
+        </div>
+        <div class="card-body p-3 p-md-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fs-13 fw-semibold text-dark">Nome Completo *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bx bx-user text-muted"></i></span>
+                <input type="text" name="customer_name" class="form-control" placeholder="Seu nome" required
+                       value="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fs-13 fw-semibold text-dark">WhatsApp / Telefone *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bx bxl-whatsapp text-success"></i></span>
+                <input type="tel" name="customer_phone" id="customerPhone" class="form-control" placeholder="(81) 99999-9999" required
+                       value="{% if request.user.is_authenticated and request.user.phone %}{{ request.user.phone }}{% endif %}">
+              </div>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fs-13 fw-semibold text-dark">E-mail (Opcional)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bx bx-envelope text-muted"></i></span>
+                <input type="email" name="customer_email" class="form-control" placeholder="seuemail@exemplo.com"
+                       value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+              </div>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fs-13 fw-semibold text-dark">Observações &amp; Preferências (Opcional)</label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Ex: Vou levar meu pet; Gosto de café sem açúcar; Primeira vez no ateliê..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Coluna Direita: Resumo do Agendamento (Sticky Summary) -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-3 sticky-summary">
+        <div class="card-header bg-dark text-white py-3 rounded-top-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0 fs-16 text-white fw-bold">
+              <i class="bx bx-calendar-check text-warning me-1"></i> Resumo do Agendamento
+            </h5>
+            <span class="badge bg-warning text-dark fs-10 fw-bold text-uppercase">Ateliê Olinda</span>
+          </div>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- Profissional -->
+          <div class="d-flex align-items-center gap-2 mb-3 pb-3 border-bottom">
+            <div class="rounded-circle bg-dark text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+              <i class="bx bx-cut fs-20"></i>
+            </div>
+            <div>
+              <small class="text-muted d-block fs-11 text-uppercase fw-bold">Profissional Responsável</small>
+              <span class="fw-bold text-dark fs-14">Eduardo Cardoso (Barbeiro Vaka)</span>
+            </div>
+          </div>
+
+          <!-- Data e Horário Escolhidos -->
+          <div class="bg-light p-3 rounded-3 mb-3 border">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="text-muted fs-12"><i class="bx bx-calendar me-1"></i> Data:</span>
+              <strong id="summaryDateDisplay" class="text-dark fs-13">{{ available_dates.0.full_str }}</strong>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="text-muted fs-12"><i class="bx bx-time me-1"></i> Horário:</span>
+              <strong id="summaryTimeDisplay" class="text-warning fs-13">{{ time_slots.0 }}</strong>
+            </div>
+          </div>
+
+          <!-- Lista de Procedimentos Selecionados -->
+          <div class="mb-3">
+            <label class="fs-12 fw-bold text-uppercase text-muted mb-2">Procedimentos Selecionados:</label>
+            <div id="summaryServicesList" class="d-flex flex-column gap-1.5">
+              <p class="text-muted fs-13 fst-italic mb-0">Nenhum serviço selecionado ainda.</p>
+            </div>
+          </div>
+
+          <!-- Total Financeiro Estimado -->
+          <div class="border-top pt-3 mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="text-muted fs-14">Valor Estimado:</span>
+              <span class="fs-22 fw-bold text-dark" id="summaryTotalPrice">R$ 0,00</span>
+            </div>
+            <small class="text-muted fs-11 d-block">Pagamento realizado no ateliê (PIX, Cartão ou Espécie).</small>
+          </div>
+
+          <!-- Botão de Confirmação no WhatsApp -->
+          <div class="d-grid gap-2">
+            <button type="submit" id="btnSubmitAgenda" class="btn btn-success btn-lg py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+              <i class="bx bxl-whatsapp fs-22"></i>
+              <span>Confirmar no WhatsApp</span>
+            </button>
+            <p class="text-center text-muted fs-11 mt-1 mb-0">
+              <i class="bx bx-shield-quarter me-1 text-success"></i> Seus dados estão seguros e o atendimento é 100% humanizado.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const serviceCards = document.querySelectorAll('.service-card-select');
+  const datePills = document.querySelectorAll('.date-pill');
+  const slotBtns = document.querySelectorAll('.slot-btn');
+  const customDatePicker = document.getElementById('customDatePicker');
+  const selectedDateInput = document.getElementById('selectedDateInput');
+  const selectedTimeInput = document.getElementById('selectedTimeInput');
+  const summaryDateDisplay = document.getElementById('summaryDateDisplay');
+  const summaryTimeDisplay = document.getElementById('summaryTimeDisplay');
+  const summaryServicesList = document.getElementById('summaryServicesList');
+  const summaryTotalPrice = document.getElementById('summaryTotalPrice');
+  const agendaForm = document.getElementById('agendaForm');
+  const btnSubmitAgenda = document.getElementById('btnSubmitAgenda');
+
+  // Atualiza Resumo dos Serviços
+  function updateServicesSummary() {
+    let total = 0;
+    const selectedServices = [];
+
+    serviceCards.forEach(card => {
+      const checkbox = card.querySelector('.service-checkbox');
+      if (checkbox && checkbox.checked) {
+        card.classList.add('selected');
+        const title = card.getAttribute('data-service-title');
+        const price = parseFloat(card.getAttribute('data-service-price').replace(',', '.')) || 0;
+        total += price;
+        selectedServices.push({ title, price });
+      } else {
+        card.classList.remove('selected');
+      }
+    });
+
+    if (selectedServices.length === 0) {
+      summaryServicesList.innerHTML = '<p class="text-muted fs-13 fst-italic mb-0">Selecione pelo menos um procedimento acima.</p>';
+    } else {
+      summaryServicesList.innerHTML = selectedServices.map(s => `
+        <div class="d-flex justify-content-between align-items-center fs-13 py-1 border-bottom border-light">
+          <span class="text-dark fw-medium text-truncate me-2">• ${s.title}</span>
+          <strong class="text-dark">R$ ${s.price.toFixed(2).replace('.', ',')}</strong>
+        </div>
+      `).join('');
+    }
+
+    summaryTotalPrice.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  }
+
+  // Clique nos Cards de Serviço
+  serviceCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      const checkbox = this.querySelector('.service-checkbox');
+      if (e.target !== checkbox) {
+        checkbox.checked = !checkbox.checked;
+      }
+      updateServicesSummary();
+    });
+  });
+
+  // Clique nas Pílulas de Data
+  datePills.forEach(pill => {
+    pill.addEventListener('click', function() {
+      datePills.forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      const dateVal = this.getAttribute('data-date');
+      const fullStr = this.getAttribute('data-full-str');
+      selectedDateInput.value = dateVal;
+      summaryDateDisplay.textContent = fullStr;
+      if (customDatePicker) customDatePicker.value = '';
+    });
+  });
+
+  // Seletor de Data customizado (input type="date")
+  if (customDatePicker) {
+    customDatePicker.addEventListener('change', function() {
+      if (this.value) {
+        datePills.forEach(p => p.classList.remove('active'));
+        selectedDateInput.value = this.value;
+        const parts = this.value.split('-');
+        if (parts.length === 3) {
+          summaryDateDisplay.textContent = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        } else {
+          summaryDateDisplay.textContent = this.value;
+        }
+      }
+    });
+  }
+
+  // Clique nos Horários
+  slotBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      slotBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      const timeVal = this.getAttribute('data-time');
+      selectedTimeInput.value = timeVal;
+      summaryTimeDisplay.textContent = timeVal;
+    });
+  });
+
+  // Se nenhum serviço foi marcado inicialmente, marca o primeiro por conveniência
+  const checkedAny = Array.from(document.querySelectorAll('.service-checkbox')).some(cb => cb.checked);
+  if (!checkedAny && serviceCards.length > 0) {
+    const firstCheckbox = serviceCards[0].querySelector('.service-checkbox');
+    if (firstCheckbox) firstCheckbox.checked = true;
+  }
+  updateServicesSummary();
+
+  // Validação e Envio com Redirecionamento ao WhatsApp
+  agendaForm.addEventListener('submit', function(e) {
+    const checkedCount = document.querySelectorAll('.service-checkbox:checked').length;
+    if (checkedCount === 0) {
+      e.preventDefault();
+      alert('Por favor, selecione ao menos um procedimento para o agendamento.');
+      return false;
+    }
+
+    e.preventDefault();
+    const originalBtnHtml = btnSubmitAgenda.innerHTML;
+    btnSubmitAgenda.disabled = true;
+    btnSubmitAgenda.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Confirmando...';
+
+    const formData = new FormData(agendaForm);
+
+    fetch(agendaForm.action, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.whatsapp_url) {
+        btnSubmitAgenda.innerHTML = '<i class="bx bx-check-double fs-20 me-1"></i> Redirecionando...';
+        window.location.href = data.whatsapp_url;
+      } else {
+        alert(data.message || 'Ocorreu um erro ao registrar seu agendamento.');
+        btnSubmitAgenda.disabled = false;
+        btnSubmitAgenda.innerHTML = originalBtnHtml;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      // Fallback para envio nativo se a rede falhar
+      agendaForm.submit();
+    });
+  });
+});
+</script>
+{% endblock %}

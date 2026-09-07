@@ -6,11 +6,12 @@ from django.views.generic import TemplateView, DetailView
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Count, Sum, Q
 from larkon.catalog.models import ProductVariant, Product
-from .models import Cart, CartItem, Order, OrderItem, ProductReservation
+from .models import Cart, CartItem, Order, OrderItem, ProductReservation, Appointment
 
 
 def get_or_create_cart(request):
@@ -652,6 +653,126 @@ class OrderStatusWhatsAppView(View):
             return JsonResponse({"success": True, "whatsapp_link": wa_link})
 
         return redirect(wa_link)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class AgendaView(View):
+    """Página de Agendamento Online da Barbearia Eduardo Cardoso (Vakaria)."""
+
+    def get(self, request, *args, **kwargs):
+        # Procedimentos autênticos da barbearia (Cortes, Barba e Alquimia)
+        services = (
+            Product.objects.filter(is_active=True)
+            .filter(
+                Q(category__slug__in=["cortes-visagismo", "barba-rituais", "alquimia-capilar-cor"])
+                | Q(category__parent__slug__in=["cortes-visagismo", "barba-rituais", "alquimia-capilar-cor"])
+            )
+            .select_related("category", "brand", "category__parent")
+            .prefetch_related("images")
+            .order_by("category__parent__order", "category__order", "title")
+        )
+
+        if not services.exists():
+            services = Product.objects.filter(is_active=True).select_related("category").order_by("title")
+
+        # Procedimento pré-selecionado via query param (?service=slug_ou_id)
+        selected_service_param = request.GET.get("service")
+        preselected_ids = []
+        if selected_service_param:
+            preselected_prod = services.filter(
+                Q(slug=selected_service_param) | Q(id__iexact=selected_service_param if selected_service_param.isdigit() else 0)
+            ).first()
+            if preselected_prod:
+                preselected_ids.append(preselected_prod.id)
+
+        # Horários disponíveis padrão no ateliê
+        time_slots = [
+            "09:00", "09:45", "10:30", "11:15",
+            "13:30", "14:15", "15:00", "15:45",
+            "16:30", "17:15", "18:00", "18:45"
+        ]
+
+        # Próximas datas sugeridas (próximos 14 dias, excluindo domingo e segunda)
+        today = timezone.localdate()
+        available_dates = []
+        day_names_pt = {
+            0: "Seg", 1: "Ter", 2: "Qua", 3: "Qui", 4: "Sex", 5: "Sáb", 6: "Dom"
+        }
+        for i in range(1, 15):
+            d = today + timezone.timedelta(days=i)
+            # Ateliê funciona de Terça a Sábado
+            if d.weekday() not in (0, 6):
+                available_dates.append({
+                    "date": d.strftime("%Y-%m-%d"),
+                    "formatted": d.strftime("%d/%m"),
+                    "day_name": day_names_pt[d.weekday()],
+                    "full_str": f"{day_names_pt[d.weekday()]}, {d.strftime('%d/%m')}",
+                })
+
+        context = {
+            "services": services,
+            "preselected_ids": preselected_ids,
+            "time_slots": time_slots,
+            "available_dates": available_dates,
+            "today_iso": today.strftime("%Y-%m-%d"),
+        }
+        return render(request, "pages/agenda.html", context)
+
+    def post(self, request, *args, **kwargs):
+        customer_name = request.POST.get("customer_name", "").strip()
+        customer_phone = request.POST.get("customer_phone", "").strip()
+        customer_email = request.POST.get("customer_email", "").strip()
+        service_ids = request.POST.getlist("services")
+        appointment_date_str = request.POST.get("appointment_date", "").strip()
+        appointment_time = request.POST.get("appointment_time", "").strip()
+        notes = request.POST.get("notes", "").strip()
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest" or request.POST.get("ajax") == "1"
+
+        if not customer_name or not customer_phone or not appointment_date_str or not appointment_time:
+            msg = "Por favor, preencha todos os campos obrigatórios (Nome, WhatsApp, Data e Horário)."
+            if is_ajax:
+                return JsonResponse({"success": False, "message": msg}, status=400)
+            messages.error(request, msg)
+            return redirect("orders:agenda")
+
+        try:
+            appointment_date = timezone.datetime.strptime(appointment_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            msg = "Formato de data inválido."
+            if is_ajax:
+                return JsonResponse({"success": False, "message": msg}, status=400)
+            messages.error(request, msg)
+            return redirect("orders:agenda")
+
+        selected_services = Product.objects.filter(id__in=service_ids, is_active=True)
+        total_price = sum(s.price for s in selected_services) if selected_services.exists() else Decimal("0.00")
+
+        appointment = Appointment.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            customer_name=customer_name,
+            customer_phone=customer_phone,
+            customer_email=customer_email,
+            appointment_date=appointment_date,
+            appointment_time=appointment_time,
+            total_price=total_price,
+            notes=notes,
+            status="pending",
+        )
+        if selected_services.exists():
+            appointment.services.set(selected_services)
+
+        whatsapp_url = appointment.generate_whatsapp_confirmation_link()
+
+        if is_ajax:
+            return JsonResponse({
+                "success": True,
+                "message": "Agendamento registrado com sucesso! Redirecionando para o WhatsApp...",
+                "whatsapp_url": whatsapp_url,
+                "appointment_id": appointment.id,
+            })
+
+        messages.success(request, "Agendamento pré-reservado! Enviando para o WhatsApp de confirmação...")
+        return redirect(whatsapp_url)
 
 
 

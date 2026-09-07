@@ -20,6 +20,11 @@ urlpatterns = [
     # E-commerce Vakaria: Catálogo e Pedidos
     path("", include("larkon.catalog.urls", namespace="catalog")),
     path("pedidos/", include("larkon.orders.urls", namespace="orders")),
+    # Agenda Online & Agendamento Direto
+    path("agenda/", larkon.orders.views.AgendaView.as_view(), name="agenda"),
+    path("agenda", larkon.orders.views.AgendaView.as_view()),
+    path("agendar/", larkon.orders.views.AgendaView.as_view(), name="agendar"),
+    path("agendar", larkon.orders.views.AgendaView.as_view()),
     # Módulo de Reservas & Fila de Espera (CRM)
     path("reservas/", larkon.orders.views.AdminReservationsView.as_view(), name="reservas_direct"),
     path("reservas/<int:pk>/status/", larkon.orders.views.UpdateReservationStatusView.as_view(), name="reservas_status_direct"),
