@@ -119,10 +119,6 @@
       background: #ced4da;
       border-radius: 4px;
     }
-    .luiza-fit-card {
-      background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
-      border: 1px solid rgba(251, 191, 36, 0.3);
-    }
 
     /* Rodapé com Alto Contraste e Legibilidade */
     .store-footer {
@@ -269,16 +265,19 @@
             <a class="store-nav-link" href="/"><i class="bx bx-home-alt me-1"></i> Início</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link active" href="{% url 'catalog:product_grid' %}"><i class="bx bx-cut me-1"></i> Todos os Serviços</a>
+            <a class="store-nav-link {% if not active_category %}active{% endif %}" href="{% url 'catalog:product_grid' %}">Todos</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=cortes-personalizados">✂️ Cortes</a>
+            <a class="store-nav-link {% if active_category == 'cortes-visagismo' %}active{% endif %}" href="{% url 'catalog:product_grid' %}?category=cortes-visagismo">Cortes</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=barba-bigode-cuidados-faciais">💈 Barba na Toalha Quente</a>
+            <a class="store-nav-link {% if active_category == 'barba-rituais' %}active{% endif %}" href="{% url 'catalog:product_grid' %}?category=barba-rituais">Barba</a>
           </li>
           <li class="nav-item">
-            <a class="store-nav-link" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor-quimica">🔥 Nevou &amp; Alquimia</a>
+            <a class="store-nav-link {% if active_category == 'alquimia-capilar-cor' %}active{% endif %}" href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor">Alquimia</a>
+          </li>
+          <li class="nav-item">
+            <a class="store-nav-link {% if active_category == 'grife-da-la-deira' %}active{% endif %}" href="{% url 'catalog:product_grid' %}?category=grife-da-la-deira">Da Lá D'eira</a>
           </li>
           {% if request.user.is_authenticated and request.user.is_staff %}
           <li class="nav-item">
@@ -324,34 +323,29 @@
       </form>
 
       <!-- Links principais -->
-      <h6 class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">Departamentos &amp; Categorias</h6>
+      <h6 class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">Categorias</h6>
       <div class="d-flex flex-column gap-1 mb-3">
         <a href="{% url 'catalog:product_grid' %}" class="btn btn-dark text-start fs-13 fw-semibold py-2 px-3 rounded-3 d-flex align-items-center justify-content-between">
-          <span>✨ Ver Todas as Peças</span>
+          <span>Todos</span>
           <i class="bx bx-chevron-right text-white"></i>
         </a>
-        
-        <div class="mt-2 mb-1">
-          <small class="text-uppercase text-muted fs-10 fw-bold px-1">👔 Moda Masculina</small>
-        </div>
-        <a href="{% url 'catalog:product_grid' %}?gender=M" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
-          <span>• Todas Masculinas</span>
+        <a href="{% url 'catalog:product_grid' %}?category=cortes-visagismo" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Cortes</span>
           <i class="bx bx-chevron-right text-muted fs-12"></i>
         </a>
-        {% for cat in men_categories %}
-        <a href="{% url 'catalog:product_grid' %}?category={{ cat.slug }}" class="btn btn-white border text-start fs-12 py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
-          <span>{{ cat.name }}</span>
-          <i class="bx bx-chevron-right text-muted fs-11"></i>
+        <a href="{% url 'catalog:product_grid' %}?category=barba-rituais" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Barba</span>
+          <i class="bx bx-chevron-right text-muted fs-12"></i>
         </a>
-        {% endfor %}
-
-        <div class="mt-2 mb-1">
-          <small class="text-uppercase text-danger fs-10 fw-bold px-1">👗 Moda Feminina</small>
-        </div>
-        <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" class="btn btn-danger-subtle text-danger border border-danger-subtle text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
-          <span>Luiza Fit (Coleção Feminina)</span>
-          <i class="bx bx-chevron-right text-danger fs-12"></i>
+        <a href="{% url 'catalog:product_grid' %}?category=alquimia-capilar-cor" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Alquimia</span>
+          <i class="bx bx-chevron-right text-muted fs-12"></i>
         </a>
+        <a href="{% url 'catalog:product_grid' %}?category=grife-da-la-deira" class="btn btn-light text-start fs-12 fw-semibold py-1.5 px-3 rounded-2 d-flex align-items-center justify-content-between">
+          <span>Da Lá D'eira</span>
+          <i class="bx bx-chevron-right text-muted fs-12"></i>
+        </a>
+      </div>
 
         <div class="mt-2 mb-1">
           <small class="text-uppercase text-muted fs-10 fw-bold px-1">🏷️ Curadoria de Marcas</small>

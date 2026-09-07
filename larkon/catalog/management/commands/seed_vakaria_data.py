@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from larkon.catalog.models import (
@@ -7,6 +7,7 @@ from larkon.catalog.models import (
     Drop,
     Product,
     ProductVariant,
+    ProductImage,
     CarouselSlide,
     CustomerReview,
     HomePageConfig,
@@ -16,61 +17,102 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Popula o banco de dados com a identidade, serviços e ambiente do Cabeleireiro Eduardo Cardoso em Olinda"
+    help = "Popula o banco de dados com a identidade, serviços, ambiente e a Grife Da Lá D'eira da Vakaria em Olinda"
 
     def handle(self, *args, **options):
-        self.stdout.write(self.style.NOTICE("💈 Iniciando o Seed do Cabeleireiro Eduardo Cardoso (Olinda - PE)..."))
+        self.stdout.write(self.style.NOTICE("💈 Iniciando o Seed da Vakaria & Grife Da Lá D'eira (Olinda - PE)..."))
 
         # 1. Superuser
         if not User.objects.filter(email="admin@vakaria.com.br").exists():
             User.objects.create_superuser("admin@vakaria.com.br", "admin123", name="Eduardo Cardoso")
             self.stdout.write(self.style.SUCCESS("✅ Superusuário criado: admin@vakaria.com.br / admin123"))
 
-        # 2. Linhas de Cuidado / Assinaturas
+        # 2. Marcas Oficiais da Vakaria & Grife Da Lá D'eira
         brands_data = [
-            {"name": "Eduardo Cardoso Atelier", "description": "Atendimento autoral com corte e visagismo personalizado no Sítio Histórico de Olinda."},
-            {"name": "Ritual Barber & Spa", "description": "Alinhamento preciso, toalha quente e cuidados faciais para relaxamento pleno."},
-            {"name": "Alquimia Capilar Olinda", "description": "Cor, mechas, relaxamento seguro e a autêntica arte do 'nevou' olindense."},
+            {
+                "name": "Grife Da Lá D'eira",
+                "slug": "da-la-deira",
+                "description": "Moda autoral, streetwear, bonés e cosméticos de barbearia inspirados na alma das ladeiras de Olinda.",
+            },
+            {
+                "name": "Eduardo Cardoso Atelier",
+                "slug": "eduardo-cardoso-atelier",
+                "description": "Atendimento autoral com corte e visagismo personalizado no Sítio Histórico de Olinda.",
+            },
+            {
+                "name": "Vakaria Barbearia",
+                "slug": "vakaria-barbearia",
+                "description": "Alinhamento preciso, toalha quente e cuidados masculinos para relaxamento pleno.",
+            },
+            {
+                "name": "Alquimia Capilar Olinda",
+                "slug": "alquimia-capilar-olinda",
+                "description": "Cor, mechas, relaxamento seguro e a autêntica arte do 'nevou' olindense.",
+            },
         ]
 
         brand_objs = {}
         for b_data in brands_data:
-            brand, _ = Brand.objects.get_or_create(name=b_data["name"], defaults={"description": b_data["description"], "is_active": True})
-            brand_objs[b_data["name"]] = brand
-        self.stdout.write(self.style.SUCCESS(f"✅ {len(brand_objs)} Linhas de Serviços cadastradas"))
+            slug = b_data.pop("slug")
+            brand, _ = Brand.objects.update_or_create(
+                slug=slug,
+                defaults={"name": b_data["name"], "description": b_data["description"], "is_active": True}
+            )
+            brand_objs[slug] = brand
+        self.stdout.write(self.style.SUCCESS(f"✅ {len(brand_objs)} Marcas/Linhas configuradas"))
 
-        # 3. Categorias Principais do Ecossistema
-        cat_cortes, _ = Category.objects.get_or_create(
-            name="Cortes Personalizados",
-            defaults={"gender_target": "U", "order": 1, "icon": "solar:scissors-square-bold-duotone"}
+        # 3. Categorias Principais
+        # Categorias Pai
+        cat_cortes, _ = Category.objects.update_or_create(
+            slug="cortes-visagismo",
+            defaults={"name": "Cortes & Visagismo", "gender_target": "U", "order": 1, "icon": "solar:scissors-square-bold-duotone", "is_active": True}
         )
-        cat_barba, _ = Category.objects.get_or_create(
-            name="Barba, Bigode & Cuidados Faciais",
-            defaults={"gender_target": "M", "order": 2, "icon": "solar:shield-user-bold-duotone"}
+        cat_barba, _ = Category.objects.update_or_create(
+            slug="barba-rituais",
+            defaults={"name": "Barba & Rituais", "gender_target": "M", "order": 2, "icon": "solar:shield-user-bold-duotone", "is_active": True}
         )
-        cat_quimica, _ = Category.objects.get_or_create(
-            name="Alquimia Capilar, Cor & Química",
-            defaults={"gender_target": "U", "order": 3, "icon": "solar:fire-bold-duotone"}
+        cat_quimica, _ = Category.objects.update_or_create(
+            slug="alquimia-capilar-cor",
+            defaults={"name": "Alquimia Capilar & Cor", "gender_target": "U", "order": 3, "icon": "solar:fire-bold-duotone", "is_active": True}
+        )
+        cat_grife, _ = Category.objects.update_or_create(
+            slug="grife-da-la-deira",
+            defaults={"name": "Grife Da Lá D'eira", "gender_target": "U", "order": 4, "icon": "solar:t-shirt-bold-duotone", "is_active": True}
         )
 
         subcats = [
-            ("Cortes Masculinos Autorais", "M", cat_cortes),
-            ("Cortes Femininos Personalizados", "F", cat_cortes),
-            ("Cortes Infantis & Juvenis", "U", cat_cortes),
-            ("Ritual da Barba com Toalha Quente", "M", cat_barba),
-            ("Alinhamento & Barba Completa", "M", cat_barba),
-            ("Nevou & Descoloração Global", "U", cat_quimica),
-            ("Coloração Artística & Mechas", "U", cat_quimica),
-            ("Tratamentos & Cronograma Capilar", "U", cat_quimica),
+            # Cortes
+            ("Cortes Masculinos Autorais", "cortes-masculinos-autorais", "M", cat_cortes, 1),
+            ("Cortes Femininos & Visagismo", "cortes-femininos-visagismo", "F", cat_cortes, 2),
+            ("Cortes Infantis & Juvenis", "cortes-infantis-juvenis", "U", cat_cortes, 3),
+            # Barba
+            ("Ritual da Barba com Toalha Quente", "ritual-barba-toalha-quente", "M", cat_barba, 1),
+            ("Alinhamento & Design de Barba", "alinhamento-design-barba", "M", cat_barba, 2),
+            ("Combo Cabelo & Barba Completa", "combo-cabelo-barba", "M", cat_barba, 3),
+            # Alquimia
+            ("O Autêntico Nevou Olindense", "nevou-olindense", "U", cat_quimica, 1),
+            ("Coloração Artística & Mechas", "coloracao-artistica-mechas", "U", cat_quimica, 2),
+            ("Cronograma & Tratamentos Capilares", "cronograma-tratamentos-capilares", "U", cat_quimica, 3),
+            # Grife Da Lá D'eira
+            ("Camisetas & Streetwear Olinda", "camisetas-streetwear-olinda", "U", cat_grife, 1),
+            ("Acessórios das Ladeiras", "acessorios-das-ladeiras", "U", cat_grife, 2),
+            ("Pomadas & Cuidados Barber", "pomadas-cuidados-barber", "U", cat_grife, 3),
         ]
 
         cat_objs = {}
-        for name, gender, parent in subcats:
-            cat, _ = Category.objects.get_or_create(name=name, defaults={"gender_target": gender, "parent": parent})
-            cat_objs[name] = cat
-        self.stdout.write(self.style.SUCCESS("✅ Categorias do Ecossistema de Beleza configuradas"))
+        for name, slug, gender, parent, order in subcats:
+            cat, _ = Category.objects.update_or_create(
+                slug=slug,
+                defaults={"name": name, "gender_target": gender, "parent": parent, "order": order, "is_active": True}
+            )
+            cat_objs[slug] = cat
+        self.stdout.write(self.style.SUCCESS("✅ Categorias e Subcategorias da Vakaria & Grife Da Lá D'eira configuradas"))
 
-        # 4. Drops / Sessões de Atendimento
+        # Desativar categorias antigas de teste que não fazem mais parte do escopo
+        valid_slugs = ["cortes-visagismo", "barba-rituais", "alquimia-capilar-cor", "grife-da-la-deira"] + [s[1] for s in subcats]
+        Category.objects.exclude(slug__in=valid_slugs).update(is_active=False)
+
+        # 4. Drop
         drop_olinda, _ = Drop.objects.get_or_create(
             title="Temporada Olinda — Identidade, Arte & Acolhimento",
             defaults={
@@ -82,99 +124,122 @@ class Command(BaseCommand):
             }
         )
 
-        # 5. Serviços / Procedimentos
-        services_data = [
+        # 5. Catálogo de Produtos & Serviços
+        products_data = [
+            # SERVIÇOS ✂️
             {
                 "title": "Corte Autoral Eduardo Cardoso (Todas as Gerações)",
-                "brand": brand_objs["Eduardo Cardoso Atelier"],
-                "category": cat_objs["Cortes Masculinos Autorais"],
+                "brand": brand_objs["eduardo-cardoso-atelier"],
+                "category": cat_objs["cortes-masculinos-autorais"],
                 "gender": "U",
-                "price": 60.00,
-                "compare_at_price": 70.00,
+                "price": 50.00,
+                "compare_at_price": 60.00,
                 "description": (
-                    "A tesoura não tem gênero. Atendimento focado na escuta atenta para traduzir a sua "
-                    "personalidade e estilo de vida. Inclui lavagem com produtos de alta performance, "
-                    "corte milimétrico e finalização personalizada."
+                    "A tesoura não tem gênero. Atendimento humanizado e visagismo que traduz sua personalidade. "
+                    "Inclui lavagem, corte autoral milimétrico e finalização com pomada Da Lá D'eira."
                 ),
-                "fabric_composition": "Tesoura, Navalha & Visagismo Humanizado",
-                "care_instructions": "Recomendada manutenção a cada 20 a 30 dias para preservar as linhas do corte.",
+                "fabric_composition": "Visagismo, Tesoura & Navalha",
+                "care_instructions": "Manutenção recomendada a cada 20 a 30 dias.",
+                "image_path": "products/corte_autoral_masculino.jpg",
                 "is_featured": True,
                 "variants": [
-                    {"size": "Tradicional", "color": "Atelier", "stock": 99},
-                    {"size": "Moderno / Fade", "color": "Atelier", "stock": 99},
+                    {"size": "Tradicional / Social", "color": "Autoral", "stock": 99},
+                    {"size": "Moderno / Fade", "color": "Autoral", "stock": 99},
                 ],
             },
             {
                 "title": "Corte Feminino Personalizado & Visagismo",
-                "brand": brand_objs["Eduardo Cardoso Atelier"],
-                "category": cat_objs["Cortes Femininos Personalizados"],
+                "brand": brand_objs["eduardo-cardoso-atelier"],
+                "category": cat_objs["cortes-femininos-visagismo"],
                 "gender": "F",
-                "price": 80.00,
-                "compare_at_price": 95.00,
+                "price": 65.00,
+                "compare_at_price": 75.00,
                 "description": (
-                    "Corte feito sob medida para realçar os traços, textura natural dos fios e identidade. "
-                    "Seja curto, médio, longo ou desfiado, a proposta é leveza, movimento e harmonia."
+                    "Corte feito sob medida para realçar os traços e textura natural dos fios. "
+                    "Leveza, movimento e harmonia com escuta atenta no ateliê de Olinda."
                 ),
-                "fabric_composition": "Corte a Seco ou Molhado com Finalização Especial",
-                "care_instructions": "Finalizado com leave-in botânico e secagem respeitando a curvatura do fio.",
+                "fabric_composition": "Corte a Seco ou Molhado com Finalização",
+                "care_instructions": "Finalizado respeitando a curvatura do fio.",
+                "image_path": "products/corte_feminino_visagismo.jpg",
                 "is_featured": True,
                 "variants": [
                     {"size": "Curto / Pixie", "color": "Atelier", "stock": 99},
-                    {"size": "Médio / Long Bob", "color": "Atelier", "stock": 99},
+                    {"size": "Médio / Bob", "color": "Atelier", "stock": 99},
                     {"size": "Longo em Camadas", "color": "Atelier", "stock": 99},
                 ],
             },
             {
-                "title": "Ritual da Barba com Toalha Quente & Óleos Essenciais",
-                "brand": brand_objs["Ritual Barber & Spa"],
-                "category": cat_objs["Ritual da Barba com Toalha Quente"],
+                "title": "Corte Infantil & Juvenil com Acolhimento",
+                "brand": brand_objs["eduardo-cardoso-atelier"],
+                "category": cat_objs["cortes-infantis-juvenis"],
+                "gender": "U",
+                "price": 45.00,
+                "compare_at_price": 50.00,
+                "description": (
+                    "Paciência, carinho e respeito ao tempo da criança. O momento do corte transformado "
+                    "em uma experiência lúdica e leve no quintal de Olinda."
+                ),
+                "fabric_composition": "Ambiente Seguro, Afetivo e Pet Friendly",
+                "care_instructions": "Sem pressa, com diálogo e total cuidado.",
+                "image_path": "products/corte_infantil_juvenil.jpg",
+                "is_featured": False,
+                "variants": [
+                    {"size": "Infantil (até 12 anos)", "color": "Kids", "stock": 99},
+                ],
+            },
+            {
+                "title": "Ritual da Barba na Toalha Quente & Óleos",
+                "brand": brand_objs["vakaria-barbearia"],
+                "category": cat_objs["ritual-barba-toalha-quente"],
                 "gender": "M",
                 "price": 45.00,
                 "compare_at_price": 50.00,
                 "description": (
-                    "O ritual clássico elevado a outro nível. Aplicação de toalha quente com vapor aromático, "
-                    "massagem facial, alinhamento milimétrico com navalhete descartável e hidratação profunda da pele."
+                    "O ritual clássico de relaxamento. Aplicação de toalha quente no vapor aromático, "
+                    "massagem facial, alinhamento preciso na navalha e hidratação com óleo Da Lá D'eira."
                 ),
-                "fabric_composition": "Toalha Quente, Balm Artesanal & Navalha de Precisão",
-                "care_instructions": "Finalizado com pós-barba calmante e óleo para barba com fragrância amadeirada sutil.",
+                "fabric_composition": "Toalha Quente, Óleos Nobres & Navalhete",
+                "care_instructions": "Finalizado com pós-barba calmante refrescante.",
+                "image_path": "products/ritual_barba_toalha.jpg",
                 "is_featured": True,
                 "variants": [
-                    {"size": "Barba Completa", "color": "Barber Spa", "stock": 99},
-                    {"size": "Apenas Desenho", "color": "Barber Spa", "stock": 99},
+                    {"size": "Barba Completa", "color": "Ritual VIP", "stock": 99},
+                    {"size": "Desenho & Alinhamento", "color": "Ritual VIP", "stock": 99},
                 ],
             },
             {
                 "title": "Combo Completo: Corte Autoral + Ritual da Barba",
-                "brand": brand_objs["Eduardo Cardoso Atelier"],
-                "category": cat_objs["Ritual da Barba com Toalha Quente"],
+                "brand": brand_objs["vakaria-barbearia"],
+                "category": cat_objs["combo-cabelo-barba"],
                 "gender": "M",
-                "price": 95.00,
+                "price": 90.00,
                 "compare_at_price": 105.00,
                 "description": (
-                    "A experiência definitiva do laboratório. Uma pausa de puro relaxamento e renovação no Sítio "
-                    "Histórico de Olinda: corte completo alinhado ao seu perfil + ritual da barba com toalha quente."
+                    "A experiência completa do laboratório. Corte alinhado ao seu perfil + ritual da barba "
+                    "com toalha quente e café especial passado na hora."
                 ),
-                "fabric_composition": "Visagismo Completo + Ritual da Barba com Toalha Quente",
-                "care_instructions": "Duração média: 60 minutos de acolhimento e cuidado impecável.",
+                "fabric_composition": "Visagismo + Ritual da Barba Completo",
+                "care_instructions": "Duração média: 60 minutos de cuidado impecável.",
+                "image_path": "products/combo_corte_barba.jpg",
                 "is_featured": True,
                 "variants": [
                     {"size": "Sessão Completa", "color": "Olinda VIP", "stock": 99},
                 ],
             },
             {
-                "title": "Nevou Olindense — Descoloração Global de Alto Padrão",
-                "brand": brand_objs["Alquimia Capilar Olinda"],
-                "category": cat_objs["Nevou & Descoloração Global"],
+                "title": "O Autêntico Nevou Olindense — Descoloração Global",
+                "brand": brand_objs["alquimia-capilar-olinda"],
+                "category": cat_objs["nevou-olindense"],
                 "gender": "U",
-                "price": 130.00,
-                "compare_at_price": 150.00,
+                "price": 120.00,
+                "compare_at_price": 140.00,
                 "description": (
-                    "Celebrando o autêntico estilo 'nevou' como uma marca vibrante da nossa cultura urbana. "
-                    "Processo de descoloração seguro, com proteção prévia do couro cabeludo (Plex) e matização "
-                    "perolada ou platinada impecável."
+                    "Celebrando o autêntico estilo 'nevou' da nossa cultura urbana. Descoloração segura com "
+                    "proteção Plex anti-danos no couro cabeludo e matização platinada fria perfeita."
                 ),
-                "fabric_composition": "Descolorante Premium com Proteção Plex Anti-Danos",
-                "care_instructions": "Acompanha orientação para manutenção em casa e máscara de nutrição.",
+                "fabric_composition": "Descolorante Premium + Plex de Proteção",
+                "care_instructions": "Acompanha orientação para manutenção e máscara de nutrição.",
+                "image_path": "products/nevou_olindense.jpg",
                 "is_featured": True,
                 "variants": [
                     {"size": "Cabelo Curto", "color": "Platinado Gelo", "stock": 99},
@@ -182,27 +247,9 @@ class Command(BaseCommand):
                 ],
             },
             {
-                "title": "Corte Infantil & Juvenil com Acolhimento",
-                "brand": brand_objs["Eduardo Cardoso Atelier"],
-                "category": cat_objs["Cortes Infantis & Juvenis"],
-                "gender": "U",
-                "price": 45.00,
-                "compare_at_price": 50.00,
-                "description": (
-                    "Paciência, respeito ao tempo da criança e muita leveza. O momento do corte transformado "
-                    "em uma experiência divertida e agradável nas ladeiras de Olinda."
-                ),
-                "fabric_composition": "Ambiente Seguro e Lúdico",
-                "care_instructions": "Sem pressa, com diálogo e total cuidado com os pequenos.",
-                "is_featured": False,
-                "variants": [
-                    {"size": "Infantil (até 12 anos)", "color": "Kids", "stock": 99},
-                ],
-            },
-            {
                 "title": "Cronograma de Tratamento: Nutrição & Reconstrução",
-                "brand": brand_objs["Alquimia Capilar Olinda"],
-                "category": cat_objs["Tratamentos & Cronograma Capilar"],
+                "brand": brand_objs["alquimia-capilar-olinda"],
+                "category": cat_objs["cronograma-tratamentos-capilares"],
                 "gender": "U",
                 "price": 75.00,
                 "compare_at_price": 85.00,
@@ -210,21 +257,134 @@ class Command(BaseCommand):
                     "Alquimia pura para recuperar a saúde dos fios pós-sol, praia ou química. Terapia capilar "
                     "com massagem estimulante no couro cabeludo e óleos vegetais nobres."
                 ),
-                "fabric_composition": "Blend de Óleos Naturais, Queratina e Manteiga de Karité",
+                "fabric_composition": "Blend de Óleos Naturais & Manteiga de Karité",
                 "care_instructions": "Devolve o brilho, maciez e vitalidade imediata aos fios.",
+                "image_path": "products/tratamento_cronograma_capilar.png",
                 "is_featured": False,
                 "variants": [
                     {"size": "Sessão Intensiva", "color": "Spa Capilar", "stock": 99},
                 ],
             },
+
+            # GRIFE DA LÁ D'EIRA 👕💈
+            {
+                "title": "Camiseta Oversized Da Lá D'eira — Olinda Preta",
+                "brand": brand_objs["da-la-deira"],
+                "category": cat_objs["camisetas-streetwear-olinda"],
+                "gender": "U",
+                "price": 129.00,
+                "compare_at_price": 149.00,
+                "description": (
+                    "A essência das ladeiras de Olinda em corte streetwear contemporâneo. 100% algodão pesado "
+                    "penteado com estampa vintage 'Da Lá D'eira Olinda'. Gola canelada e caimento impecável."
+                ),
+                "fabric_composition": "100% Algodão Premium Heavyweight 240g",
+                "care_instructions": "Lavar à mão ou ciclo delicado. Secar à sombra.",
+                "image_path": "products/product_tshirt_daladeira.jpg",
+                "is_featured": True,
+                "variants": [
+                    {"size": "P", "color": "Preto Vintage", "stock": 15},
+                    {"size": "M", "color": "Preto Vintage", "stock": 25},
+                    {"size": "G", "color": "Preto Vintage", "stock": 20},
+                    {"size": "GG", "color": "Preto Vintage", "stock": 10},
+                ],
+            },
+            {
+                "title": "Boné Dad Hat Bordado Da Lá D'eira — Vintage Charcoal",
+                "brand": brand_objs["da-la-deira"],
+                "category": cat_objs["acessorios-das-ladeiras"],
+                "gender": "U",
+                "price": 89.00,
+                "compare_at_price": 99.00,
+                "description": (
+                    "Boné Dad Hat em sarja de algodão estonado com bordado de alta definição 'Da Lá D'eira'. "
+                    "Fecho em fivela de latão envelhecido, aba curva e acabamento rústico com estética atemporal."
+                ),
+                "fabric_composition": "100% Sarja de Algodão Estonado com Bordado 3D",
+                "care_instructions": "Limpeza suave com pano úmido.",
+                "image_path": "products/product_bone_daladeira.jpg",
+                "is_featured": True,
+                "variants": [
+                    {"size": "Ajustável", "color": "Charcoal Estonado", "stock": 30},
+                ],
+            },
+            {
+                "title": "Pomada Modeladora Efeito Matte Da Lá D'eira (100ml)",
+                "brand": brand_objs["da-la-deira"],
+                "category": cat_objs["pomadas-cuidados-barber"],
+                "gender": "U",
+                "price": 55.00,
+                "compare_at_price": 65.00,
+                "description": (
+                    "Fixação forte com acabamento 100% fosco (sem brilho). Ideal para penteados texturizados, "
+                    "cortes autorais e finalização diária. À base de água, sai facilmente no banho sem deixar resíduos."
+                ),
+                "fabric_composition": "Argila Branca, Cera de Candelila & Extrato de Alecrim",
+                "care_instructions": "Espalhe uma pequena quantidade nas mãos e aplique nos fios secos ou levemente úmidos.",
+                "image_path": "products/product_pomada_matte.jpg",
+                "is_featured": True,
+                "variants": [
+                    {"size": "100ml", "color": "Matte Finish", "stock": 45},
+                ],
+            },
+            {
+                "title": "Óleo Hidratante para Barba Aromas de Olinda (30ml)",
+                "brand": brand_objs["da-la-deira"],
+                "category": cat_objs["pomadas-cuidados-barber"],
+                "gender": "M",
+                "price": 48.00,
+                "compare_at_price": 55.00,
+                "description": (
+                    "Fórmula exclusiva com óleos vegetais de jojoba, argan e castanha-do-pará. Hidrata a barba, "
+                    "elimina o frizz e perfuma com notas sutis de cravo, canela e cedro das ladeiras."
+                ),
+                "fabric_composition": "Blend 100% Vegetal Puro com Conta-Gotas",
+                "care_instructions": "Aplique 3 a 5 gotas na palma das mãos e massageie da raiz às pontas da barba.",
+                "image_path": "products/product_oleo_barba.jpg",
+                "is_featured": True,
+                "variants": [
+                    {"size": "30ml", "color": "Âmbar", "stock": 50},
+                ],
+            },
+            {
+                "title": "Balm Pós-Barba Refrescante & Hidratante Facial (80g)",
+                "brand": brand_objs["da-la-deira"],
+                "category": cat_objs["pomadas-cuidados-barber"],
+                "gender": "U",
+                "price": 45.00,
+                "compare_at_price": 52.00,
+                "description": (
+                    "Acalma a pele imediatamente após o barbear. Fórmula leve com aloe vera, hortelã e camomila, "
+                    "fechando os poros, combatendo a irritação e proporcionando frescor prolongado."
+                ),
+                "fabric_composition": "Lata de Alumínio Retrô com Aloe Vera & Mentol Natural",
+                "care_instructions": "Aplique sobre o rosto e pescoço massageando suavemente após o barbear.",
+                "image_path": "products/product_balm_posbarba.jpg",
+                "is_featured": True,
+                "variants": [
+                    {"size": "80g", "color": "Refrescante", "stock": 40},
+                ],
+            },
         ]
 
-        # Limpar produtos antigos de moda que foram importados de teste
+        # Resetar produtos
         Product.objects.all().delete()
 
-        for s_data in services_data:
-            variants = s_data.pop("variants")
-            prod = Product.objects.create(drop=drop_olinda, is_active=True, **s_data)
+        for p_data in products_data:
+            variants = p_data.pop("variants")
+            image_path = p_data.pop("image_path")
+            prod = Product.objects.create(drop=drop_olinda, is_active=True, **p_data)
+            
+            # Criar Imagem Principal
+            ProductImage.objects.create(
+                product=prod,
+                image=image_path,
+                alt_text=prod.title,
+                is_cover=True,
+                order=1,
+            )
+
+            # Criar Variantes
             for v_data in variants:
                 ProductVariant.objects.create(
                     product=prod,
@@ -233,26 +393,26 @@ class Command(BaseCommand):
                     stock_quantity=v_data["stock"],
                 )
 
-        self.stdout.write(self.style.SUCCESS(f"✅ {len(services_data)} Serviços autorais cadastrados"))
+        self.stdout.write(self.style.SUCCESS(f"✅ {len(products_data)} Produtos e Serviços com imagens cadastrados com sucesso!"))
 
         # 6. Slides de Carrossel (Hero Principal)
         CarouselSlide.objects.all().delete()
         CarouselSlide.objects.create(
-            title="Cabeleireiro Eduardo Cardoso",
-            subtitle="Laboratório Artístico e Ecossistema de Beleza no Sítio Histórico de Olinda.",
-            badge_text="📍 Sítio Histórico de Olinda • Arte & Cultura",
-            button_text="Conhecer Serviços & Agendar",
-            button_url="/produtos/",
+            title="A Arte do Cuidado nas Ladeiras de Olinda",
+            subtitle="Espaço acolhedor, cortes autorais e respeito à sua essência em pleno Sítio Histórico.",
+            badge_text="💈 Cabeleireiro Eduardo Cardoso",
+            button_text="Agendar Horário",
+            button_url="/pedidos/carrinho/",
             slide_type="hero",
             order=1,
             overlay_darkness="medium",
         )
         CarouselSlide.objects.create(
-            title="A Tesoura Não Tem Gênero",
-            subtitle="Cortes personalizados para todas as gerações. Foco em traduzir a sua identidade com escuta atenta e respeito.",
-            badge_text="✂️ Cortes Masculinos, Femininos & Infantis",
-            button_text="Ver Catálogo de Cortes",
-            button_url="/produtos/?category=cortes-personalizados",
+            title="Cortes Autorais & Visagismo Humanizado",
+            subtitle="A tesoura não tem gênero. Cuidado sob medida para quem busca expressar sua verdadeira identidade.",
+            badge_text="✂️ Cortes de Todas as Gerações",
+            button_text="Explorar Serviços",
+            button_url="/produtos/?category=cortes-visagismo",
             slide_type="hero",
             order=2,
             overlay_darkness="medium",
@@ -269,7 +429,7 @@ class Command(BaseCommand):
         )
         self.stdout.write(self.style.SUCCESS("✅ 3 Banners Hero criados com a identidade de Olinda"))
 
-        # 7. Depoimentos de Clientes (Prova Social Olindense)
+        # 7. Depoimentos
         CustomerReview.objects.all().delete()
         reviews = [
             {
@@ -292,14 +452,14 @@ class Command(BaseCommand):
                 "name": "Lucas Alencar",
                 "location": "Recife - PE",
                 "rating": 5,
-                "comment": "O ritual da barba com toalha quente é uma pausa necessária na semana. E o 'nevou' que ele faz é diferenciado demais, cabelo super hidratado e com cor impecável.",
+                "comment": "O ritual da barba com toalha quente é uma pausa necessária na semana. E a pomada Da Lá D'eira é surreal de boa, fixa sem brilho nenhum.",
                 "source": "whatsapp",
                 "order": 3,
             },
         ]
         for r in reviews:
             CustomerReview.objects.create(is_active=True, **r)
-        self.stdout.write(self.style.SUCCESS("✅ Depoimentos olindenses configurados"))
+        self.stdout.write(self.style.SUCCESS("✅ Depoimentos configurados"))
 
         # 8. Configuração Centralizada da Home (HomePageConfig)
         conf, _ = HomePageConfig.objects.get_or_create(id=1)
@@ -312,54 +472,25 @@ class Command(BaseCommand):
         conf.women_card_badge = "✂️ Todas as Gerações"
         conf.women_card_title = "Cortes Personalizados"
         conf.women_card_subtitle = "A tesoura não tem gênero. Cortes masculinos, femininos e infantis traduzindo a sua essência."
-        conf.women_card_url = "/produtos/?category=cortes-personalizados"
+        conf.women_card_url = "/produtos/?category=cortes-visagismo"
         conf.women_card_btn_text = "Explorar Cortes"
 
         conf.men_card_badge = "🔥 Barba & Alquimia"
         conf.men_card_title = "Barba na Toalha Quente & Nevou"
         conf.men_card_subtitle = "Alinhamento preciso com toalha quente, tratamentos para a pele e o autêntico nevou da cultura urbana."
-        conf.men_card_url = "/produtos/?category=barba-bigode-cuidados-faciais"
+        conf.men_card_url = "/produtos/?category=barba-rituais"
         conf.men_card_btn_text = "Ver Rituais & Cores"
 
-        # Seção Sobre / O Laboratório
         conf.store_badge = "📍 Sítio Histórico de Olinda"
         conf.store_title = "Cabeleireiro Eduardo Cardoso: Laboratório Artístico"
         conf.store_description = (
-            "Muito mais que um salão ou uma barbearia tradicional, o espaço do Cabeleireiro Eduardo Cardoso "
-            "é um autêntico laboratório artístico fincado nas ladeiras de Olinda. Construído com um propósito claro, "
-            "o local funde um ecossistema completo de beleza com um ambiente de efervescência cultural. "
-            "Aqui, a arte do cuidado pessoal se encontra com a riqueza da cultura popular pernambucana."
+            "Muito mais que um salão ou barbearia convencional: um laboratório artístico e humano nas ladeiras de Olinda. "
+            "Aqui a tesoura não tem gênero, o atendimento é acolhedor e a sua identidade é tratada como arte."
         )
         conf.store_address = "Sítio Histórico de Olinda, Olinda - PE, Brasil"
         conf.store_phone = "+55 81 8398-3355"
         conf.store_instagram_handle = "@eduardo_vaka_"
-        conf.store_maps_url = "https://maps.google.com/?q=Sitio+Historico+de+Olinda+PE"
-        conf.store_hours_text = "Terça a Sábado: 09h às 19h • Agendamentos pelo WhatsApp"
-
-        # 4 Diferenciais
-        conf.benefit1_icon = "solar:cup-star-bold-duotone"
-        conf.benefit1_title = "Acolhimento & Cultura"
-        conf.benefit1_subtitle = "Refúgio seguro, humano e radicalmente inclusivo nas ladeiras de Olinda"
-
-        conf.benefit2_icon = "solar:users-group-rounded-bold-duotone"
-        conf.benefit2_title = "Atendimento Humanizado"
-        conf.benefit2_subtitle = "Escuta atenta e respeito absoluto à individualidade de cada história"
-
-        conf.benefit3_icon = "solar:scissors-square-bold-duotone"
-        conf.benefit3_title = "A Tesoura Não Tem Gênero"
-        conf.benefit3_subtitle = "Cortes masculinos, femininos e infantis para todas as gerações"
-
-        conf.benefit4_icon = "solar:fire-bold-duotone"
-        conf.benefit4_title = "Alquimia & Nevou"
-        conf.benefit4_subtitle = "Barba na toalha quente, cor, química segura e expressão urbana"
-
-        # Depoimentos & Compartilhamento
-        conf.reviews_active = True
-        conf.reviews_title = "O que Dizem Nossos Clientes"
-        conf.reviews_subtitle = "Sua identidade cuidada com arte, respeito e alma olindense."
-        conf.og_share_title = "Cabeleireiro Eduardo Cardoso | Laboratório Artístico e Ecossistema de Beleza (Olinda - PE)"
-
+        conf.store_hours_text = "Terça a Sábado: 09h às 19h (Com agendamento prévio)"
         conf.save()
-        self.stdout.write(self.style.SUCCESS("✅ Configurações da Página Inicial salvas com sucesso!"))
 
-        self.stdout.write(self.style.SUCCESS("\n🎉 Ecossistema de Eduardo Cardoso inicializado com sucesso total!"))
+        self.stdout.write(self.style.SUCCESS("🚀 Seed da Vakaria & Grife Da Lá D'eira concluído com total sucesso!"))

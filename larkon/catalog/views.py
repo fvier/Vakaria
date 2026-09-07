@@ -101,9 +101,9 @@ class ProductGridView(ListView):
         context = super().get_context_data(**kwargs)
         all_parents = Category.objects.filter(is_active=True, parent__isnull=True).prefetch_related("children").order_by("order", "name")
         
-        # Segmentação Masculino / Feminino (Use Luiza Fit)
-        context["men_categories"] = [c for c in all_parents if c.slug != "luiza-fit" and (c.gender_target in ["M", "U", ""] or c.order < 20)]
-        context["women_categories"] = [c for c in all_parents if c.slug == "luiza-fit" or c.gender_target == "F" or c.order >= 20]
+        # Categorias da Barbearia & Categorias da Grife Da Lá D'eira
+        context["barber_categories"] = [c for c in all_parents if c.slug != "grife-da-la-deira"]
+        context["grife_categories"] = [c for c in all_parents if c.slug == "grife-da-la-deira"]
         context["all_parent_categories"] = all_parents
         context["parent_categories"] = all_parents
         context["brands"] = Brand.objects.filter(is_active=True)
@@ -124,17 +124,6 @@ class ProductGridView(ListView):
                     selected_parent = selected_category
                     chips_subcategories = list(selected_category.children.filter(is_active=True).order_by("order", "name"))
 
-        is_luiza_fit = bool(
-            (selected_parent and selected_parent.slug == "luiza-fit") or
-            (selected_category and (selected_category.slug == "luiza-fit" or (selected_category.parent and selected_category.parent.slug == "luiza-fit"))) or
-            (category_slug == "luiza-fit" or category_slug.startswith("luiza-fit")) or
-            (self.request.GET.get("gender") == "F")
-        )
-        is_masculine_context = bool(
-            (self.request.GET.get("gender") == "M") or
-            (selected_parent and selected_parent.slug != "luiza-fit" and selected_parent.gender_target in ["M", "U"])
-        )
-
         context["selected_category"] = selected_category
         context["selected_parent"] = selected_parent
         context["chips_subcategories"] = chips_subcategories
@@ -143,8 +132,8 @@ class ProductGridView(ListView):
         context["active_brand"] = self.request.GET.get("brand", "")
         context["active_drop"] = self.request.GET.get("drop", "")
         context["search_query"] = self.request.GET.get("q", "")
-        context["is_luiza_fit"] = is_luiza_fit
-        context["is_masculine_context"] = is_masculine_context
+        context["is_luiza_fit"] = False
+        context["is_masculine_context"] = False
         
         categories_data = []
         for parent in all_parents:

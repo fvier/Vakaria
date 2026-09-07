@@ -54,11 +54,6 @@
   .chips-scroll-container::-webkit-scrollbar-thumb {
     background: #ced4da;
     border-radius: 4px;
-  }
-  .luiza-fit-card {
-    background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
   .product-img-wrap {
     height: 220px;
     overflow: hidden;
@@ -301,24 +296,19 @@
                         <button class="btn btn-primary" type="submit"><i class="bx bx-search-alt"></i></button>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- MENU DE CATEGORIAS: VAKARIA (MASCULINO & GERAL) -->
-        {% if not is_luiza_fit %}
+                   <!-- MENU DE CATEGORIAS: MINIMALISTA & DIRETO -->
         <div class="card mb-3 shadow-sm border-0">
             <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-2">
-                <span class="fs-14 fw-bold text-uppercase letter-spacing-1"><i class="bx bx-grid-alt me-1 text-warning"></i> Vakaria • Categorias de Serviços</span>
+                <span class="fs-13 fw-bold text-uppercase letter-spacing-1">Categorias</span>
             </div>
             <div class="card-body p-2">
-                <!-- Botão Ver Todos os Serviços -->
-                <a href="{% url 'catalog:product_grid' %}" class="category-subitem mb-2 fw-semibold {% if not active_category and not active_gender and not active_brand %}active{% endif %}">
-                    <span>✨ Todos os Serviços</span>
+                <a href="{% url 'catalog:product_grid' %}" class="category-subitem mb-2 fw-semibold {% if not active_category and not active_brand %}active{% endif %}">
+                    <span>Todos</span>
                     <i class="bx bx-chevron-right fs-14"></i>
                 </a>
 
                 <div class="accordion accordion-flush" id="accordionVakaria">
-                    {% for parent in men_categories %}
+                    {% for parent in all_parent_categories %}
                     <div class="accordion-item border-0 mb-1">
                         <h2 class="accordion-header" id="heading-{{ parent.id }}">
                             <button class="category-toggle btn btn-sm w-100 text-start d-flex justify-content-between align-items-center p-2 {% if selected_parent.id != parent.id %}collapsed{% endif %}" 
@@ -328,7 +318,7 @@
                                     aria-expanded="{% if selected_parent.id == parent.id %}true{% else %}false{% endif %}" 
                                     aria-controls="collapse-{{ parent.id }}">
                                 <span class="fw-semibold text-dark fs-13">
-                                    <i class="bx bx-folder me-1 text-primary"></i> {{ parent.name }}
+                                    {{ parent.name }}
                                 </span>
                                 <i class="bx bx-chevron-down chevron-icon text-muted fs-16"></i>
                             </button>
@@ -338,12 +328,10 @@
                              aria-labelledby="heading-{{ parent.id }}" 
                              data-bs-parent="#accordionVakaria">
                             <div class="accordion-body p-1 ps-3 bg-light-subtle rounded-2 my-1">
-                                <!-- Opção TODAS da Categoria Pai -->
                                 <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
                                    class="category-subitem fw-semibold {% if active_category == parent.slug %}active{% endif %}">
-                                    <span>• TODAS ({{ parent.name }})</span>
+                                    <span>• Todas ({{ parent.name }})</span>
                                 </a>
-                                <!-- Lista de Subcategorias -->
                                 {% for child in parent.children.all %}
                                     {% if child.is_active %}
                                     <a href="{% url 'catalog:product_grid' %}?category={{ child.slug }}" 
@@ -359,47 +347,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
-
-        <!-- MENU DE CATEGORIAS: LUIZA FIT (FEMININO PREMIUM) -->
-        {% if is_luiza_fit or not is_masculine_context %}
-        {% for parent in women_categories %}
-        <div class="card mb-3 shadow-sm border-0">
-            <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
-                <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" height="28" style="object-fit: contain;">
-                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-11 px-2 py-0.5 fw-semibold">Feminino</span>
-            </div>
-            <div class="card-body p-2">
-                <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" 
-                   class="category-subitem mb-2 fw-semibold {% if active_category == 'luiza-fit' or active_category == parent.slug %}active{% endif %}"
-                   style="background-color: {% if active_category == 'luiza-fit' or active_category == parent.slug %}#dc2626 !important; color: #fff !important;{% endif %}">
-                    <span>✨ Todas as Peças Luiza Fit</span>
-                    <i class="bx bx-chevron-right fs-14"></i>
-                </a>
-
-                <div class="d-flex flex-column gap-1">
-                    {% for child in parent.children.all %}
-                        {% if child.is_active %}
-                        <a href="{% url 'catalog:product_grid' %}?category={{ child.slug }}" 
-                           class="category-subitem {% if active_category == child.slug %}active{% endif %}">
-                            <span>• {{ child.name }}</span>
-                            <i class="bx bx-chevron-right fs-12 text-muted"></i>
-                        </a>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-
-                {% if is_luiza_fit %}
-                <div class="border-top pt-2 mt-2 text-center">
-                    <a href="{% url 'catalog:product_grid' %}" class="btn btn-sm btn-outline-dark w-100 fs-12">
-                        ← Ver Moda Masculina / Geral
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-        {% endif %}
 
         <!-- Marcas Multimarcas -->
         {% if brands %}
@@ -446,23 +393,18 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-md-7">
                         <div class="d-flex align-items-center gap-3">
-                            {% if selected_parent.slug == 'luiza-fit' or selected_category.slug == 'luiza-fit' or active_category == 'luiza-fit' %}
-                            <img src="{% static 'images/logoluiza.png' %}" alt="Luiza Fit" height="46" style="object-fit: contain;">
-                            {% endif %}
                             <div>
                                 <h4 class="fs-18 fw-bold text-dark mb-1">
-                                    {% if selected_category and selected_category.slug != 'luiza-fit' %}
-                                        <i class="bx bx-cut text-warning me-1"></i> {{ selected_category.name }}
-                                    {% elif selected_category %}
+                                    {% if selected_category %}
                                         {{ selected_category.name }}
-                                    {% elif active_gender == 'F' %}✂️ Cortes &amp; Visagismo
-                                    {% elif active_gender == 'M' %}💈 Rituais de Barba &amp; Cortes
-                                    {% elif active_brand %}🏷️ {{ active_brand|title }}
-                                    {% else %}✨ Todos os Serviços &amp; Rituais
+                                    {% elif active_brand %}
+                                        {{ active_brand|title }}
+                                    {% else %}
+                                        Vitrine
                                     {% endif %}
                                 </h4>
                                 <p class="mb-0 text-muted fs-13">
-                                    Mostrando {{ products|length }} {% if products|length == 1 %}serviço disponível{% else %}serviços e procedimentos disponíveis{% endif %}
+                                    {{ products|length }} {% if products|length == 1 %}item disponível{% else %}itens disponíveis{% endif %}
                                 </p>
                             </div>
                         </div>
@@ -471,7 +413,7 @@
                         <div class="d-inline-flex gap-2">
                             {% if request.user.is_authenticated and request.user.is_staff %}
                             <button type="button" class="btn btn-success btn-sm px-3 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#quickProductModal">
-                                <i class="bx bx-plus-circle me-1 fs-16"></i> Cadastrar Serviço
+                                <i class="bx bx-plus-circle me-1 fs-16"></i> Cadastrar Item
                             </button>
                             {% endif %}
                             <a href="{% url 'orders:cart' %}" class="btn btn-dark btn-sm px-3 fw-semibold">
@@ -481,126 +423,67 @@
                     </div>
                 </div>
 
-                <!-- Barra Rápida de Categorias & Subcategorias (Chips Horizontais Deslizantes) -->
+                <!-- Barra Rápida de Categorias (Chips Minimalistas & Diretos) -->
                 <div class="pt-3 border-top mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="fs-11 fw-bold text-muted text-uppercase letter-spacing-1">
                             {% if selected_parent %}
-                                📂 Subcategorias de {{ selected_parent.name }}:
-                            {% elif active_gender == 'M' %}
-                                👔 Departamentos Masculinos:
-                            {% elif active_gender == 'F' or active_category == 'luiza-fit' %}
-                                👗 Linha Feminina (Luiza Fit):
+                                Subcategorias:
                             {% else %}
-                                ✨ Departamentos &amp; Categorias:
+                                Categorias:
                             {% endif %}
                         </span>
-                        {% if selected_parent or active_category or active_gender or active_brand %}
-                        <a href="{% url 'catalog:product_grid' %}" class="fs-11 fw-semibold text-danger text-decoration-none">Ver Todas as Peças ✕</a>
+                        {% if selected_parent or active_category or active_brand %}
+                        <a href="{% url 'catalog:product_grid' %}" class="fs-11 fw-semibold text-danger text-decoration-none">Limpar Filtros ✕</a>
                         {% endif %}
                     </div>
 
                     <div class="chips-scroll-container pb-1">
                         {% if selected_parent %}
-                            <!-- 1. Categoria Pai Selecionada: Opção "TODAS (Pai)" + Subcategorias Filhas -->
                             <a href="{% url 'catalog:product_grid' %}?category={{ selected_parent.slug }}" 
                                class="btn btn-sm {% if active_category == selected_parent.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                • Todas ({{ selected_parent.name }})
+                                Todas ({{ selected_parent.name }})
                             </a>
                             {% for sub in chips_subcategories %}
                             <a href="{% url 'catalog:product_grid' %}?category={{ sub.slug }}" 
-                               class="btn btn-sm {% if active_category == sub.slug %}btn-primary text-white fw-bold shadow-sm{% else %}btn-outline-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                               class="btn btn-sm {% if active_category == sub.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
                                 {{ sub.name }}
                             </a>
                             {% endfor %}
-
-                        {% elif active_gender == 'M' %}
-                            <!-- 2. Filtro Masculino Ativo: Chip Todas Masculinas + Todas as Categorias Masculinas -->
-                            <a href="{% url 'catalog:product_grid' %}?gender=M" 
-                               class="btn btn-sm {% if not active_category %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                ✨ Todas Masculinas
-                            </a>
-                            {% for parent in men_categories %}
-                                {% if parent.children.exists or parent.products.exists %}
-                                <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
-                                   class="btn btn-sm {% if active_category == parent.slug %}btn-primary text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                    {{ parent.name }}
-                                </a>
-                                {% endif %}
-                            {% endfor %}
-
-                        {% elif active_gender == 'F' or active_category == 'luiza-fit' %}
-                            <!-- 3. Filtro Luiza Fit / Feminino Ativo -->
-                            <a href="{% url 'catalog:product_grid' %}?category=luiza-fit" 
-                               class="btn btn-sm {% if active_category == 'luiza-fit' or not active_category %}btn-danger text-white fw-bold shadow-sm{% else %}btn-outline-danger{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                ✨ Todas Luiza Fit
-                            </a>
-                            {% for parent in women_categories %}
-                                {% for sub in parent.children.all %}
-                                <a href="{% url 'catalog:product_grid' %}?category={{ sub.slug }}" 
-                                   class="btn btn-sm {% if active_category == sub.slug %}btn-danger text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                    {{ sub.name }}
-                                </a>
-                                {% endfor %}
-                            {% endfor %}
-
                         {% else %}
-                            <!-- 4. Vitrine Geral: Todos os Departamentos Principais -->
                             <a href="{% url 'catalog:product_grid' %}" 
-                               class="btn btn-sm {% if not active_category and not active_gender and not active_brand %}btn-dark text-white fw-bold shadow-sm{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                ✨ Todas as Peças
+                               class="btn btn-sm {% if not active_category and not active_brand %}btn-dark text-white fw-bold shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                Todos
                             </a>
                             {% for parent in all_parent_categories %}
-                                {% if parent.children.exists %}
-                                <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
-                                   class="btn btn-sm {% if active_category == parent.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-light border text-dark fw-semibold{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
-                                    {{ parent.name }}
-                                </a>
-                                {% endif %}
+                            <a href="{% url 'catalog:product_grid' %}?category={{ parent.slug }}" 
+                               class="btn btn-sm {% if active_category == parent.slug %}btn-dark text-white fw-bold shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                                {{ parent.name }}
+                            </a>
                             {% endfor %}
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- Barra Rápida de Marcas com Logos Oficiais (Mobile & Desktop) -->
+                <!-- Barra Rápida de Marcas -->
+                {% if brands %}
                 <div class="pt-3 border-top mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1.5">
-                        <span class="fs-11 fw-bold text-muted text-uppercase letter-spacing-1">Marcas Parceiras:</span>
-                        <a href="{% url 'catalog:brand_list' %}" class="fs-11 fw-semibold text-primary text-decoration-none">Ver Showroom de Marcas →</a>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fs-11 fw-bold text-muted text-uppercase letter-spacing-1">Marcas:</span>
                     </div>
                     <div class="chips-scroll-container pb-1">
-                        <a href="{% url 'catalog:product_grid' %}" class="btn btn-sm {% if not active_brand %}btn-dark text-white fw-bold{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-1 fs-12 d-flex align-items-center gap-1">
-                            <span>Todas</span>
+                        <a href="{% url 'catalog:product_grid' %}{% if active_category %}?category={{ active_category }}{% endif %}" class="btn btn-sm {% if not active_brand %}btn-dark text-white fw-bold{% else %}btn-light border text-dark{% endif %} rounded-pill px-3 py-1 fs-12">
+                            Todas
                         </a>
                         {% for b in brands %}
-                        <a href="{% url 'catalog:product_grid' %}?brand={{ b.slug }}" 
-                           class="btn btn-sm {% if active_brand == b.slug %}btn-dark text-white fw-bold border-dark shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-2.5 py-1 fs-12 d-flex align-items-center gap-1.5 flex-shrink-0">
-                            {% if b.slug == 'lacoste' %}
-                            <img src="{% static 'images/brands/lacoste.png' %}" height="13" alt="Lacoste">
-                            {% elif b.slug == 'nike' %}
-                            <img src="{% static 'images/brands/nike.png' %}" height="12" alt="Nike">
-                            {% elif b.slug == 'adidas' %}
-                            <img src="{% static 'images/brands/adidas.png' %}" height="13" alt="Adidas">
-                            {% elif b.slug == 'puma' %}
-                            <img src="{% static 'images/brands/puma.png' %}" height="12" alt="Puma">
-                            {% elif b.slug == 'jordan' %}
-                            <img src="{% static 'images/brands/jordan.png' %}" height="13" alt="Jordan">
-                            {% elif b.slug == 'oakley' %}
-                            <img src="{% static 'images/brands/oakley.png' %}" height="12" alt="Oakley">
-                            {% elif b.slug == 'calvin-klein' %}
-                            <img src="{% static 'images/brands/calvin-klein.png' %}" height="11" alt="Calvin Klein">
-                            {% elif b.slug == 'tommy-hilfiger' %}
-                            <img src="{% static 'images/brands/tommy-hilfiger.png' %}" height="12" alt="Tommy Hilfiger">
-                            {% elif b.slug == 'caunt-jeans' %}
-                            <img src="{% static 'images/brands/caunt-jeans.png' %}" height="11" alt="Caunt Jeans">
-                            {% elif b.slug == 'luiza-fit' %}
-                            <img src="{% static 'images/logoluiza.png' %}" height="13" alt="Luiza Fit">
-                            {% endif %}
-                            <span>{{ b.name }}</span>
+                        <a href="{% url 'catalog:product_grid' %}?brand={{ b.slug }}{% if active_category %}&category={{ active_category }}{% endif %}" 
+                           class="btn btn-sm {% if active_brand == b.slug %}btn-dark text-white fw-bold border-dark shadow-sm{% else %}btn-light border text-dark{% endif %} rounded-pill px-3 py-1 fs-12 flex-shrink-0">
+                            {{ b.name }}
                         </a>
                         {% endfor %}
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -847,7 +730,7 @@
                                     <label class="btn btn-outline-primary btn-sm py-1.5" for="quickGenderM"><i class="bx bx-male me-1"></i>Masculino</label>
 
                                     <input type="radio" class="btn-check" name="gender" id="quickGenderF" value="F">
-                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="quickGenderF"><i class="bx bx-female me-1"></i>Feminino (Luiza Fit)</label>
+                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="quickGenderF"><i class="bx bx-female me-1"></i>Feminino</label>
 
                                     <input type="radio" class="btn-check" name="gender" id="quickGenderU" value="U">
                                     <label class="btn btn-outline-secondary btn-sm py-1.5" for="quickGenderU">Unissex</label>
@@ -1043,7 +926,7 @@
                                     <label class="btn btn-outline-primary btn-sm py-1.5" for="editGenderM"><i class="bx bx-male me-1"></i>Masculino</label>
 
                                     <input type="radio" class="btn-check" name="gender" id="editGenderF" value="F">
-                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="editGenderF"><i class="bx bx-female me-1"></i>Feminino (Luiza Fit)</label>
+                                    <label class="btn btn-outline-danger btn-sm py-1.5" for="editGenderF"><i class="bx bx-female me-1"></i>Feminino</label>
 
                                     <input type="radio" class="btn-check" name="gender" id="editGenderU" value="U">
                                     <label class="btn btn-outline-secondary btn-sm py-1.5" for="editGenderU">Unissex</label>
@@ -1412,8 +1295,8 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold fs-13 py-2 text-danger" id="pills-women-fit-tab" data-bs-toggle="pill" data-bs-target="#pills-women-fit" type="button" role="tab">
-                            👗 Linha Luiza Fit
+                        <button class="nav-link fw-bold fs-13 py-2 text-dark" id="pills-women-fit-tab" data-bs-toggle="pill" data-bs-target="#pills-women-fit" type="button" role="tab">
+                            👕 Grife Da Lá D'eira
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -1471,23 +1354,24 @@
                         </div>
                     </div>
 
-                    <!-- 3. Luiza Fit -->
+                    <!-- 3. Grife Da Lá D'eira -->
                     <div class="tab-pane fade" id="pills-women-fit" role="tabpanel">
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered text-center align-middle fs-13 mb-0 bg-white">
                                 <thead class="table-dark fs-12">
                                     <tr>
                                         <th>Tamanho</th>
-                                        <th>Veste Manequim</th>
-                                        <th>Busto</th>
-                                        <th>Cintura</th>
-                                        <th>Quadril</th>
+                                        <th>Modelagem</th>
+                                        <th>Tórax</th>
+                                        <th>Comprimento</th>
+                                        <th>Manga</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td><strong class="text-danger">P / M</strong></td><td>36 ao 40</td><td>82 - 92 cm</td><td>64 - 74 cm</td><td>90 - 100 cm</td></tr>
-                                    <tr><td><strong class="text-danger">G / GG</strong></td><td>42 ao 46</td><td>94 - 106 cm</td><td>76 - 88 cm</td><td>102 - 114 cm</td></tr>
-                                    <tr><td><strong class="text-danger">Tamanho Único</strong></td><td>36 ao 42</td><td>Tecido com alta elasticidade e compressão</td><td>Modela o corpo</td><td>Adaptação anatômica</td></tr>
+                                    <tr><td><strong class="text-dark">P</strong></td><td>Oversized Streetwear</td><td>108 cm</td><td>72 cm</td><td>22 cm</td></tr>
+                                    <tr><td><strong class="text-dark">M</strong></td><td>Oversized Streetwear</td><td>114 cm</td><td>74 cm</td><td>23 cm</td></tr>
+                                    <tr><td><strong class="text-dark">G</strong></td><td>Oversized Streetwear</td><td>120 cm</td><td>76 cm</td><td>24 cm</td></tr>
+                                    <tr><td><strong class="text-dark">GG</strong></td><td>Oversized Streetwear</td><td>126 cm</td><td>78 cm</td><td>25 cm</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2026,7 +1910,7 @@
                     <div class="btn-group btn-group-sm">
                         <button type="button" class="btn btn-xs btn-outline-dark py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'PMG')">P/M/G/GG</button>
                         <button type="button" class="btn btn-xs btn-outline-dark py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'NUM')">38 ao 44</button>
-                        <button type="button" class="btn btn-xs btn-outline-danger py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'LUIZA')">Luiza Fit</button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'UNICO')">Único</button>
                         <button type="button" class="btn btn-xs btn-outline-secondary py-0.5 px-2 fs-10" onclick="applyMatrixPreset('${modalType}', '${escapedColor}', 'CLEAR')">Limpar</button>
                     </div>
                 </div>
@@ -2112,8 +1996,8 @@
             state.colorSizes[colorName] = ['P', 'M', 'G', 'GG'];
         } else if (preset === 'NUM') {
             state.colorSizes[colorName] = ['38', '40', '42', '44'];
-        } else if (preset === 'LUIZA') {
-            state.colorSizes[colorName] = ['P/M', 'G/GG', 'Tamanho Único'];
+        } else if (preset === 'UNICO') {
+            state.colorSizes[colorName] = ['Tamanho Único'];
         } else if (preset === 'CLEAR') {
             state.colorSizes[colorName] = [];
         }
@@ -2256,44 +2140,8 @@
         });
     }
 
-    // Atualização Dinâmica do Modal por Gênero (Masculino vs Feminino Luiza Fit vs Unissex)
+    // Atualização do Modal por Gênero
     function updateModalByGender(modalType, gender) {
-        const parentSelect = document.getElementById(`${modalType}ParentCategorySelect`);
-        const childSelect = document.getElementById(`${modalType}ChildCategorySelect`);
-        const brandSelect = modalType === 'quick' 
-            ? document.querySelector('#quickProductModal select[name="brand"]') 
-            : document.getElementById('editBrandSelect');
-
-        if (gender === 'F') {
-            // 1. Categoria Principal: Luiza Fit
-            const luizaParent = categoriesData.find(c => c.slug === 'luiza-fit' || c.gender === 'F');
-            if (luizaParent && parentSelect) {
-                parentSelect.value = luizaParent.id;
-                populateChildCategories(luizaParent.id, childSelect);
-            }
-            // 2. Marca: Seleciona Luiza Fit se existir no select
-            if (brandSelect) {
-                for (let i = 0; i < brandSelect.options.length; i++) {
-                    if (brandSelect.options[i].text.toLowerCase().includes('luiza')) {
-                        brandSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        } else if (gender === 'M') {
-            // 1. Categoria Principal: se estiver em Luiza Fit, troca para primeira categoria masculina
-            if (parentSelect) {
-                const currentSelected = categoriesData.find(c => c.id === parseInt(parentSelect.value));
-                if (!currentSelected || currentSelected.slug === 'luiza-fit' || currentSelected.gender === 'F') {
-                    const firstMenParent = categoriesData.find(c => c.slug !== 'luiza-fit' && c.gender !== 'F');
-                    if (firstMenParent) {
-                        parentSelect.value = firstMenParent.id;
-                        populateChildCategories(firstMenParent.id, childSelect);
-                    }
-                }
-            }
-        }
-
         renderColorSizeMatrix(modalType);
     }
 
@@ -2425,7 +2273,7 @@
         // Inicializa Swatches de Cores no Modal de Cadastro
         renderColorSwatches('quick');
 
-        // Ouvintes de clique nos seletores de Gênero (Masculino / Feminino Luiza Fit / Unissex)
+        // Ouvintes de clique nos seletores de Gênero (Masculino / Feminino / Unissex)
         document.querySelectorAll('input[name="gender"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 const modalType = this.id.startsWith('edit') ? 'edit' : 'quick';
@@ -2433,16 +2281,8 @@
             });
         });
 
-        // Inicializa o modal de cadastro no gênero adequado da página
-        const urlParams = new URLSearchParams(window.location.search);
-        const isFeminineUrl = urlParams.get('category') === 'luiza-fit' || urlParams.get('gender') === 'F';
-        if (isFeminineUrl) {
-            const qgF = document.getElementById('quickGenderF');
-            if (qgF) qgF.checked = true;
-            updateModalByGender('quick', 'F');
-        } else {
-            updateModalByGender('quick', 'M');
-        }
+        // Inicializa o modal de cadastro
+        updateModalByGender('quick', 'U');
 
         // 1. Preview da Imagem no Cadastro
         if (coverInput) {
@@ -2485,16 +2325,6 @@
         if (parentSelect && childSelect) {
             parentSelect.addEventListener('change', function() {
                 populateChildCategories(this.value, childSelect);
-                const parent = categoriesData.find(c => c.id === parseInt(this.value));
-                if (parent) {
-                    const gF = document.getElementById('quickGenderF');
-                    const gM = document.getElementById('quickGenderM');
-                    if (parent.slug === 'luiza-fit' || parent.gender === 'F') {
-                        if (gF) { gF.checked = true; updateModalByGender('quick', 'F'); }
-                    } else if (parent.gender === 'M') {
-                        if (gM) { gM.checked = true; updateModalByGender('quick', 'M'); }
-                    }
-                }
             });
         }
 
@@ -2502,16 +2332,6 @@
         if (editParentSelect && editChildSelect) {
             editParentSelect.addEventListener('change', function() {
                 populateChildCategories(this.value, editChildSelect);
-                const parent = categoriesData.find(c => c.id === parseInt(this.value));
-                if (parent) {
-                    const egF = document.getElementById('editGenderF');
-                    const egM = document.getElementById('editGenderM');
-                    if (parent.slug === 'luiza-fit' || parent.gender === 'F') {
-                        if (egF) { egF.checked = true; updateModalByGender('edit', 'F'); }
-                    } else if (parent.gender === 'M') {
-                        if (egM) { egM.checked = true; updateModalByGender('edit', 'M'); }
-                    }
-                }
             });
         }
 
