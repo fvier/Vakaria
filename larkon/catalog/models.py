@@ -604,7 +604,7 @@ class HomePageConfig(models.Model):
     # 10. Botão de Grupo VIP / WhatsApp
     whatsapp_group_active = models.BooleanField(_("Exibir Botão de Grupo VIP"), default=True)
     whatsapp_group_text = models.CharField(_("Texto do Botão VIP"), max_length=100, default="Grupo VIP Lançamentos", blank=True)
-    whatsapp_group_url = models.CharField(_("Link do Grupo VIP (WhatsApp)"), max_length=255, default="https://chat.whatsapp.com/exemplo", blank=True)
+    whatsapp_group_url = models.CharField(_("Link do Grupo VIP (WhatsApp)"), max_length=255, default="https://chat.whatsapp.com/KGajWAKyE5V9MUExVulj6N?s=sh&p=i&mlu=4&ilr=4", blank=True)
 
     # 11. Compartilhamento Social & OpenGraph
     og_share_image = models.ImageField(_("Foto de Prévia no WhatsApp (OpenGraph)"), upload_to="cms/og/", blank=True, null=True)

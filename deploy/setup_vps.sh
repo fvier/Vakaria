@@ -97,7 +97,7 @@ if not LinktreeItem.objects.exists():
     LinktreeItem.objects.create(
         title="🔥 Grupo VIP de Promoções & Drops",
         subtitle="Receba lançamentos exclusivos e promoções no WhatsApp",
-        url="https://chat.whatsapp.com/EoQm1858BrK36Uvjs6dYRG?mode=gi_t",
+        url="https://chat.whatsapp.com/KGajWAKyE5V9MUExVulj6N?s=sh&p=i&mlu=4&ilr=4",
         icon="bx bxs-flame",
         style="dark",
         order=3,

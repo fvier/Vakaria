@@ -10,7 +10,7 @@ def store_info(request):
         "STORE_PHONE": info.get("PHONE", "+55 81 8398-3355"),
         "STORE_WHATSAPP_NUMBER": "558183983355",
         "STORE_WHATSAPP_URL": info.get("WHATSAPP_URL", "https://wa.me/558183983355"),
-        "STORE_WHATSAPP_GROUP_URL": info.get("WHATSAPP_GROUP_URL", "https://chat.whatsapp.com/EoQm1858BrK36Uvjs6dYRG"),
+        "STORE_WHATSAPP_GROUP_URL": info.get("WHATSAPP_GROUP_URL", "https://chat.whatsapp.com/KGajWAKyE5V9MUExVulj6N?s=sh&p=i&mlu=4&ilr=4"),
         "STORE_INSTAGRAM_URL": info.get("INSTAGRAM_URL", "https://www.instagram.com/eduardo_vaka_/"),
         "STORE_INSTAGRAM_HANDLE": info.get("INSTAGRAM_HANDLE", "@eduardo_vaka_"),
     }

@@ -319,7 +319,7 @@ VAKARIA_INFO = {
     "PHONE": env("STORE_PHONE", default="+55 81 8398-3355"),
     "WHATSAPP_NUMBER": "558183983355",
     "WHATSAPP_URL": env("STORE_WHATSAPP_URL", default="https://wa.me/558183983355"),
-    "WHATSAPP_GROUP_URL": env("STORE_WHATSAPP_GROUP_URL", default="https://chat.whatsapp.com/EoQm1858BrK36Uvjs6dYRG"),
+    "WHATSAPP_GROUP_URL": env("STORE_WHATSAPP_GROUP_URL", default="https://chat.whatsapp.com/KGajWAKyE5V9MUExVulj6N?s=sh&p=i&mlu=4&ilr=4"),
     "INSTAGRAM_URL": env("STORE_INSTAGRAM_URL", default="https://www.instagram.com/eduardo_vaka_/"),
     "INSTAGRAM_HANDLE": env("STORE_INSTAGRAM_HANDLE", default="@eduardo_vaka_"),
 }
