@@ -402,10 +402,11 @@ class Command(BaseCommand):
             subtitle="Espaço acolhedor, cortes autorais e respeito à sua essência em pleno Sítio Histórico.",
             badge_text="💈 Cabeleireiro Eduardo Cardoso",
             button_text="Agendar Horário",
-            button_url="/pedidos/carrinho/",
+            button_url="/agenda/",
             slide_type="hero",
             order=1,
             overlay_darkness="medium",
+            image_url="/static/images/vaka_hero_olinda.jpg",
         )
         CarouselSlide.objects.create(
             title="Cortes Autorais & Visagismo Humanizado",
@@ -416,16 +417,18 @@ class Command(BaseCommand):
             slide_type="hero",
             order=2,
             overlay_darkness="medium",
+            image_url="/static/images/hero_cut_inclusive.jpg",
         )
         CarouselSlide.objects.create(
             title="Ritual da Barba & O Autêntico Nevou",
             subtitle="Alinhamento na toalha quente, cuidados faciais e a celebração da estética urbana olindense.",
             badge_text="🔥 Ritual da Barba & Alquimia Capilar",
             button_text="Agendar Procedimento",
-            button_url="/pedidos/carrinho/",
+            button_url="/agenda/",
             slide_type="hero",
             order=3,
             overlay_darkness="medium",
+            image_url="/static/images/hero_barber_towel.jpg",
         )
         self.stdout.write(self.style.SUCCESS("✅ 3 Banners Hero criados com a identidade de Olinda"))
 

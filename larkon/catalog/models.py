@@ -410,7 +410,7 @@ class CarouselSlide(models.Model):
             return self.image.url
         if self.image_url:
             return self.image_url
-        return "/static/images/atelie_olinda_frontal.png"
+        return "/static/images/vaka_hero_olinda.jpg"
 
     @property
     def final_mobile_image_url(self):
